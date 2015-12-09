@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html >
+  <head>
+    <meta charset="UTF-8">
+    <title>A Small Island</title>
+    
+    
+    
+    
+        <link rel="stylesheet" href="css/style.css">
+
+    
+    
+    
+  </head>
+
+  <body>
+
+    <div id="menu">  
+  <div onclick="build()" class='button red center'>Generate new</div>
+  
+  <input checked type="checkbox" id="chkTrees" />
+<label for="chkTrees">Trees</label>
+  
+    <input checked type="checkbox" id="chkMountains" />
+<label for="chkMountains">Mountains</label>
+  
+   <input checked type="checkbox" id="chkClouds" />
+<label class="wskLabel" for="chkClouds">Clouds</label>
+  
+  
+  
+</div>
+<div id="world"></div>
+    <script src='http://cdnjs.cloudflare.com/ajax/libs/three.js/r70/three.min.js'></script>
+<script src='https://s3-us-west-2.amazonaws.com/s.cdpn.io/264161/OrbitControls.js'></script>
+<script src='http://cdnjs.cloudflare.com/ajax/libs/gsap/1.16.1/TweenMax.min.js'></script>
+
+        <script src="js/index.js"></script>
+
+    
+    
+    
+  </body>
+</html>
