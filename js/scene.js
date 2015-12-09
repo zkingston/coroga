@@ -84,12 +84,8 @@ function createEnvironment( width, height, depth ) {
     var sand = createSand( width, height );
     var base = createBase( width, height, depth );
 
-    var rock = rockFactory( 1, 1, depth );
-    rock.position.z += 2;
-
     scene.add( sand );
     scene.add( base );
-    scene.add( rock );
 
 }
 
