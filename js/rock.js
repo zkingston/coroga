@@ -61,24 +61,23 @@ function basicRockFactory( width, height, depth, attributes ) {
 }
 
 function SpireRockFactory( width, height, depth, attributes ) {
-
+    var depth  =  depth
     var bRadius = width / 2.0;
-    var tRadius = Math.random() * (width/4.0);
-    var faces = incRandInt(3,6);
-    var stories = depth * incRandInt(3,4);
+    var tRadius = Math.random() * (width/3.0);
+    var faces = incRandInt(4,6);
+    var stories = Math.floor(depth + 1) * incRandInt(3,7);
 
-    var geometry = new THREE.CylinderGeometry( tRadius, bRadius, depth,
-      faces, stories, false, 0, 2.01*Math.PI);
 
-    var numInternalVectors = incRandInt(faces, faces + 3)
+    // var geometry = new THREE.CylinderGeometry( tRadius, bRadius, depth,
+    //   faces, stories, false, 0, 2.01*Math.PI);
+    var geometry = new THREE.CylinderGeometry( tRadius, bRadius, depth,faces, stories, false, 0, 2.01*Math.PI);
+    var numInternalVectors = faces
     var axisVectors =[];
 
     for (var v = 0; v < numInternalVectors; v++){
       axisVectors[v] = new THREE.Vector3(
         rand()*bRadius, rand()*bRadius, rand()*depth)
-        console.log(axisVectors[v])
     }
-
 
     for (var i = 0; i < geometry.vertices.length; i++ ) {
         var vertex = geometry.vertices[i];
@@ -86,17 +85,24 @@ function SpireRockFactory( width, height, depth, attributes ) {
 
         internal = closest(axisVectors, vertex)
 
-        vertex.x = perturb( vertex.x, 0.1 );
-        vertex.y = perturb( vertex.y, 0.1 );
-        vertex.z = perturb( vertex.z, 0.1 );
+        var vectorMag =0.3
+        console.log(vectorMag * (internal.x))
 
-        // if ( vertex.z >= 0.005 ) {
-        //     vertex.z = perturb( ( maxDist - vertex.distanceTo( axis ) ) * 3 * depth / 4, depth / 4 );
-        // }
+
+         vertex.x  = vertex.x - vectorMag * (internal.x);
+         vertex.y  = vertex.y - vectorMag * (internal.y );
+         vertex.z  = vertex.z - vectorMag * (internal.z  );
+        // vertex.x = perturb( vertex.x, 0.1 );
+        // vertex.y = perturb( vertex.y, 0.1 );
+        // vertex.z = perturb( vertex.z, 0.1 );
+
 
     }
     geometry.computeFaceNormals();
     geometry.computeVertexNormals();
+
+     geometry.rotateX(90* Math.PI / 180)
+    // geometry.rotateZ(90* Math.PI / 180)
 
     var material = new THREE.MeshPhongMaterial( { color : 0x202020,
                                                   shading : THREE.FlatShading,
