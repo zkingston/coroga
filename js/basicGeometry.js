@@ -3,6 +3,10 @@ function mergeMeshGeometry( meshes ) {
     var combined = new THREE.Geometry();
 
     for ( var i = 0; i < meshes.length; i++ ) {
+        if ( !meshes[i] ) {
+            continue;
+        }
+
         meshes[i].updateMatrix();
 
         combined.merge(meshes[i].geometry, meshes[i].matrix);

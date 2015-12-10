@@ -1,9 +1,11 @@
+var lanternIntensity = 0.5;
+
 function updateLanterns() {
     var lanterns = environment.lanternLights;
 
     for ( var i = 0; i < lanterns.length; i++ ) {
         var light = lanterns[i];
-        light.intensity += 0.02 * Math.sin( ( light.wave + tick + Math.random() * 150 ) * 0.15 );
+        light.intensity = lanternIntensity + 0.03 * Math.sin( ( light.wave + tick + Math.random() * 150 ) * 0.15 );
     }
 
 }
@@ -73,7 +75,7 @@ function lanternFactory( width, height, depth ) {
     var lightHolder = new THREE.Mesh( lightGeo, lightMaterial );
 
 
-    var light = new THREE.PointLight( 0xff9900, 0.4, 50 );
+    var light = new THREE.PointLight( 0xff9900, lanternIntensity, 50 );
     light.wave = Math.random() * 100;
 
     lantern.add( light );
