@@ -45,6 +45,9 @@ function rippleSand( diameter, object ) {
 
     var radius = center.distanceTo( bbMax );
 
+    center.x += object.position.x;
+    center.y += object.position.y;
+
     for ( var i = 0; i < sand.geometry.vertices.length; i++ ) {
         var vertex = sand.geometry.vertices[i];
         var dist = center.distanceTo( vertex );

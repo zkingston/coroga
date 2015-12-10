@@ -17,7 +17,7 @@ function init() {
                                           1,
                                           1000 );
 
-    camera.position.set( 0, -30, 20 );
+    camera.position.set( 0, -40, 40 );
     camera.lookAt( scene.position );
 
     renderer = new THREE.WebGLRenderer( { alpha: true,
@@ -74,7 +74,6 @@ function initializeLights() {
     var lamp = new THREE.DirectionalLight( 0xdddddd, 0.5 );
     lamp.position.set( 0, 10, 30 );
     lamp.castShadow = true;
-    lamp.shadowDarkness = .5;
 
     scene.add( sceneLight );
     scene.add( lamp );
@@ -86,17 +85,23 @@ function createEnvironment( width, height, depth ) {
     createSand( width, height );
     createBase( width, height, depth );
 
-    var rock = basicRockFactory( 3, 2, 2 );
-    rock.position.z -= depth / 2;
-
+    var rock = basicRockFactory( 3, 3, Math.random() * 3 + 1 );
+    rock.position.x = peturb( rock.position.x, width - 3 );
+    rock.position.y = peturb( rock.position.y, height - 3 );
     rippleSand( 3, rock );
+    scene.add( rock );
+
+    rock = basicRockFactory( 2, 2, Math.random() * 3 + 1 );
+    rock.position.x = peturb( rock.position.x, width - 2 );
+    rock.position.y = peturb( rock.position.y, height - 2 );
+    rippleSand( 3, rock );
+    scene.add( rock );
 
     var lantern = lanternFactory( 3, 3, 3 );
-    lantern.position.x = peturb( lantern.position.x, width );
-    lantern.position.y = peturb( lantern.position.y, width );
+    lantern.position.x = peturb( lantern.position.x, width - 1 );
+    lantern.position.y = peturb( lantern.position.y, height - 1 );
     lantern.position.z += 4;
 
-    scene.add( rock );
     scene.add( lantern );
 
 }

@@ -26,8 +26,6 @@ function lanternFactory( width, height, depth ) {
                                        emissive : 0xff9900
                                      } );
 
-
-
     var lightBase = boxFactory( 3 * width / 4,
                                 3 * height / 4,
                                 depth / 8 );
@@ -76,11 +74,6 @@ function lanternFactory( width, height, depth ) {
     light.wave = Math.random() * 100;
 
     lanternLights.push( light );
-
-
-
-
-
 
     lantern.add( light );
     lantern.add( lightHolder );
