@@ -1,6 +1,4 @@
-var rockClusters = [];
 var perturb = peturb
-
 
 function incRandInt(low, high){
   //Inclusive RandInt
@@ -43,18 +41,14 @@ function basicRockFactory( width, height, depth, attributes ) {
             vertex.z = perturb( ( maxDist - vertex.distanceTo( axis ) ) * 3 * depth / 4, depth / 4 );
         }
     }
-    geometry.computeFaceNormals();
-    geometry.computeVertexNormals();
 
-    var material = new THREE.MeshPhongMaterial( { color : 0x202020,
+    var material = new THREE.MeshPhongMaterial( { color : 0x505050,
                                                   shading : THREE.FlatShading,
                                                   shininess : 20,
                                                   refractionRatio : 0.1 } );
     var mesh = new THREE.Mesh( geometry, material );
     mesh.receiveShadow = true;
     mesh.castShadow = true;
-
-    rockClusters.push( mesh );
 
     return mesh;
 
@@ -105,8 +99,6 @@ function SpireRockFactory( width, height, depth, attributes ) {
     var mesh = new THREE.Mesh( geometry, material );
     mesh.receiveShadow = true;
     mesh.castShadow = true;
-
-    rockClusters.push( mesh );
 
     return mesh;
 

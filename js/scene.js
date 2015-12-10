@@ -10,14 +10,14 @@ animate();
 function init() {
 
     scene = new THREE.Scene();
-    scene.fog = new THREE.FogExp2( 0xccccff, 0.008 );
+    scene.fog = new THREE.FogExp2( 0xaaccff, 0.01 );
 
     camera = new THREE.PerspectiveCamera( 45,
                                           window.innerWidth / window.innerHeight,
                                           1,
                                           1000 );
 
-    camera.position.set( 0, -40, 40 );
+    camera.position.set( 0, -50, 20 );
     camera.lookAt( scene.position );
 
     renderer = new THREE.WebGLRenderer( { alpha: true,
@@ -41,7 +41,6 @@ function init() {
 
     window.addEventListener( 'resize', onWindowResize, false );
 
-    initializeLights();
     createEnvironment( 30, 30, 2 );
 }
 
@@ -85,33 +84,49 @@ function initializeLights() {
     scene.add( sceneLight );
     scene.add( lamp );
 
+    environment.hemiLight = sceneLight;
+    environment.lamp = lamp;
+
+}
+
+function generateRock() {
+    var width = environment.width;
+    var height = environment.height;
+
+    var x = Math.round( Math.random() * 3 + 1 );
+    var y = Math.round( Math.random() * 3 + 1 );
+    var z = Math.round( Math.random() * environment.depth + 1 );
+
+    var rock = basicRockFactory( x, y, z );
+
+    rock.position.x = peturb( rock.position.x, width - 2 * x );
+    rock.position.y = peturb( rock.position.y, height - 2 * y );
+    rock.position.z += z / 2;
+    rippleSand( Math.sqrt( x * x + y * y ), rock );
+    scene.add( rock );
 }
 
 function createEnvironment( width, height, depth ) {
 
+    environment.width = width;
+    environment.height = height;
+    environment.depth = depth;
+
+    initializeLights();
+
+
     createSand( width, height );
     createBase( width, height, depth );
 
-    var z = Math.random() * 2 + 1;
-    var rock = basicRockFactory( 3, 3, z );
-    rock.position.x = peturb( rock.position.x, width - 3 );
-    rock.position.y = peturb( rock.position.y, height - 3 );
-    rock.position.z += z / 2;
-    rippleSand( 3, rock );
-    scene.add( rock );
+    for ( var i = 0; i < Math.random() * 4 + 1; i++ ) {
+        generateRock();
+    }
 
-    z = Math.random() * 2 + 1;
-    rock = basicRockFactory( 2, 2, z );
-    rock.position.x = peturb( rock.position.x, width - 2 );
-    rock.position.y = peturb( rock.position.y, height - 2 );
-    rock.position.z += z / 2;
-    rippleSand( 3, rock );
-    scene.add( rock );
-
-    var lantern = lanternFactory( 5, 5, 3 );
+    var dim = Math.random() * 2 + 3;
+    var lantern = lanternFactory( dim, dim, Math.random() * 2 + depth * 2 );
     lantern.position.x = peturb( lantern.position.x, width - 1 );
     lantern.position.y = peturb( lantern.position.y, height - 1 );
-    lantern.position.z += 4;
+    lantern.position.z += depth * 2;
 
     scene.add( lantern );
 

@@ -1,16 +1,19 @@
-var lanternLights = [];
-
 function updateLanterns() {
+    var lanterns = environment.lanternLights;
 
-    for ( var i = 0; i < lanternLights.length; i++ ) {
-        var light = lanternLights[i];
-        light.intensity += 0.01 * Math.sin( ( light.wave + tick + Math.random() * 100 ) * 0.1 );
-        console.log( light.intensity );
+    for ( var i = 0; i < lanterns.length; i++ ) {
+        var light = lanterns[i];
+        light.intensity += 0.02 * Math.sin( ( light.wave + tick + Math.random() * 150 ) * 0.15 );
     }
 
 }
 
 function lanternFactory( width, height, depth ) {
+
+    if ( !environment.lanterns ) {
+        environment.lanterns = []
+        environment.lanternLights = []
+    }
 
     var lantern = new THREE.Group();
 
@@ -73,8 +76,6 @@ function lanternFactory( width, height, depth ) {
     var light = new THREE.PointLight( 0xff9900, 0.4, 50 );
     light.wave = Math.random() * 100;
 
-    lanternLights.push( light );
-
     lantern.add( light );
     lantern.add( lightHolder );
     lantern.add( lightContainer );
@@ -87,6 +88,9 @@ function lanternFactory( width, height, depth ) {
         }
 
     } );
+
+    environment.lanterns.push( lantern );
+    environment.lanternLights.push( light );
 
     return lantern;
 

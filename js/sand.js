@@ -1,5 +1,3 @@
-var sand, base;
-
 var rakeModifier = 4;
 var rakeHeight = 0.125;
 
@@ -23,12 +21,13 @@ function createSand( width, height ) {
     geometry.computeFaceNormals();
     geometry.computeVertexNormals();
 
-    sand = new THREE.Mesh( geometry, material );
+    var sand = new THREE.Mesh( geometry, material );
     sand.receiveShadow = true;
     sand.castShadow = true;
 
     scene.add( sand );
 
+    environment.sand = sand;
 }
 
 function rippleSand( diameter, object ) {
@@ -47,6 +46,8 @@ function rippleSand( diameter, object ) {
 
     center.x += object.position.x;
     center.y += object.position.y;
+
+    var sand = environment.sand;
 
     for ( var i = 0; i < sand.geometry.vertices.length; i++ ) {
         var vertex = sand.geometry.vertices[i];
@@ -119,5 +120,8 @@ function createBase( width, height, depth ) {
 
     scene.add( floor );
     scene.add( base );
+
+    environment.floor = floor;
+    environment.base = base;
 
 }
