@@ -53,6 +53,9 @@ function animate() {
 
     render();
     tick++;
+
+    updateLanterns( tick );
+
     controls.update();
     requestAnimationFrame( animate );
 
@@ -66,21 +69,15 @@ function render() {
 
 function initializeLights() {
 
-    var sceneLight = new THREE.HemisphereLight(0xdddddd, 0x202020, .1);
+    var sceneLight = new THREE.HemisphereLight( 0xdddddd, 0x202020, .1 );
 
-    var lamp = new THREE.DirectionalLight(0xdddddd, 1);
-    lamp.position.set(0, 10, 30);
+    var lamp = new THREE.DirectionalLight( 0xdddddd, 0.5 );
+    lamp.position.set( 0, 10, 30 );
     lamp.castShadow = true;
     lamp.shadowDarkness = .5;
 
-    var light = new THREE.DirectionalLight(0xdddddd, 1);
-    light.position.set(-10, -10, 0);
-    light.castShadow = true;
-    light.shadowDarkness = .5;
-
     scene.add( sceneLight );
     scene.add( lamp );
-    scene.add( light );
 
 }
 
@@ -94,8 +91,10 @@ function createEnvironment( width, height, depth ) {
 
     rippleSand( 3, rock );
 
-    var lantern = lanternFactory( 3, 3, 3, 3 );
-    lantern.position.z += 5;
+    var lantern = lanternFactory( 3, 3, 3 );
+    lantern.position.x = peturb( lantern.position.x, width );
+    lantern.position.y = peturb( lantern.position.y, width );
+    lantern.position.z += 4;
 
     scene.add( rock );
     scene.add( lantern );
