@@ -98,7 +98,7 @@ function SpireRockFactory( width, height, depth, attributes ) {
      geometry.rotateX(90* Math.PI / 180)
     // geometry.rotateZ(90* Math.PI / 180)
 
-    var material = new THREE.MeshPhongMaterial( { color : 0x202020,
+    var material = new THREE.MeshPhongMaterial( { color : 0x505050,
                                                   shading : THREE.FlatShading,
                                                   shininess : 20,
                                                   refractionRatio : 0.1 } );

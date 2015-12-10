@@ -93,11 +93,11 @@ function generateRock() {
     var width = environment.width;
     var height = environment.height;
 
-    var x = Math.round( Math.random() * 3 + 1 );
-    var y = Math.round( Math.random() * 3 + 1 );
-    var z = Math.round( Math.random() * environment.depth + 1 );
+    var x = Math.round( Math.random() * 3 + 2 );
+    var y = Math.round( Math.random() * 3 + 2 );
+    var z = Math.round( Math.random() * environment.depth + 2 );
 
-    var rock = basicRockFactory( x, y, z );
+    var rock = SpireRockFactory( x, y, z );
 
     rock.position.x = peturb( rock.position.x, width - 2 * x );
     rock.position.y = peturb( rock.position.y, height - 2 * y );
