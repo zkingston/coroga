@@ -1,7 +1,9 @@
 var camera, controls, scene, renderer;
 
 var tick = 0;
-var lamp;
+var lamp, water;
+
+var rockClusters = [];
 
 init();
 render();
@@ -15,7 +17,7 @@ function init() {
 
     camera = new THREE.PerspectiveCamera( 45,
                                           window.innerWidth / window.innerHeight,
-                                          0.1,
+                                          1,
                                           1000 );
 
     camera.position.set( 0, -30, 20 );
@@ -23,8 +25,10 @@ function init() {
 
     renderer = new THREE.WebGLRenderer( { alpha: true,
                                           antialias: false } );
+ 	renderer.setPixelRatio( window.devicePixelRatio );
     renderer.setClearColor( scene.fog.color, 1 );
     renderer.setSize( window.innerWidth, window.innerHeight );
+	renderer.sortObjects = false;
 
     controls = new THREE.OrbitControls( camera );
     controls.addEventListener( 'change', render );
@@ -49,14 +53,12 @@ function onWindowResize() {
 }
 
 function animate() {
+
     render();
     tick++;
-
     controls.update();
-
-    lamp.position.x += Math.sin(tick * 0.01) * 0.1;
-
     requestAnimationFrame( animate );
+
 }
 
 function render() {
@@ -90,7 +92,7 @@ function createEnvironment( width, height, depth ) {
     var sand = createSand( width, height );
     var base = createBase( width, height, depth );
 
-    var rock = basicRockFactory( 5, 3, 3 );
+    var rock = basicRockFactory( 3, 2, 2 );
     rock.position.z -= depth / 2;
 
     scene.add( sand );
@@ -203,6 +205,8 @@ function basicRockFactory( width, height, depth, attributes ) {
     var mesh = new THREE.Mesh( geometry, material );
     mesh.receiveShadow = true;
     mesh.castShadow = true;
+
+    rockClusters.push( mesh );
 
     return mesh;
 
