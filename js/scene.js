@@ -95,9 +95,13 @@ function createEnvironment( width, height, depth ) {
     var rock = basicRockFactory( 3, 2, 2 );
     rock.position.z -= depth / 2;
 
+    var lantern = lanternFactory( 3, 3, 3, 3 );
+    lantern.position.z += 5;
+
     scene.add( sand );
     scene.add( base );
     scene.add( rock );
+    scene.add( lantern );
 
 }
 
@@ -168,10 +172,33 @@ function createBase( width, height, depth ) {
     return mesh;
 }
 
+function lanternFactory( width, height, depth, postDepth ) {
+
+    var lantern = new THREE.Group();
+
+    var lightContainer = boxFactory( width / 2,
+                                     height / 2,
+                                     depth / 2,
+                                     {
+                                     } );
+
+    lantern.traverse( function( object ) {
+
+        if ( object instanceof THREE.Mesh ) {
+            object.castShadow = true;
+            object.receiveShadow = true;
+        }
+
+    } );
+
+    return lantern;
+
+}
+
 function boxFactory( width, height, depth, attributes ) {
 
     var geometry = new THREE.BoxGeometry( width, height, depth );
-    var material = new THREE.MeshBasicMaterial( attributes );
+    var material = new THREE.MeshPhongMaterial( attributes );
 
     var mesh = new THREE.Mesh( geometry, material );
 
