@@ -35,7 +35,7 @@ function init() {
     window.addEventListener( 'resize', onWindowResize, false );
 
     initializeLights();
-    createEnvironment( Math.random() * 20 + 10, Math.random() * 30 + 10, 2 );
+    createEnvironment( 30, 30, 2 );
 }
 
 function onWindowResize() {
@@ -86,17 +86,17 @@ function initializeLights() {
 
 function createEnvironment( width, height, depth ) {
 
-    var sand = createSand( width, height );
-    var base = createBase( width, height, depth );
+    createSand( width, height );
+    createBase( width, height, depth );
 
     var rock = basicRockFactory( 3, 2, 2 );
     rock.position.z -= depth / 2;
 
+    rippleSand( 3, rock );
+
     var lantern = lanternFactory( 3, 3, 3, 3 );
     lantern.position.z += 5;
 
-    scene.add( sand );
-    scene.add( base );
     scene.add( rock );
     scene.add( lantern );
 

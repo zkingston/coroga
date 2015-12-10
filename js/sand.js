@@ -1,6 +1,13 @@
+var sand, base;
+
+var rakeModifier = 4;
+var rakeHeight = 0.125;
+
+var sandRandom = 0.125;
+
 function createSand( width, height ) {
 
-    var geometry = new THREE.PlaneGeometry( width, height, width, height );
+    var geometry = new THREE.PlaneGeometry( width, height, width * 2, height * 2 );
 
     // var texture = THREE.ImageUtils.loadTexture('img/sand.png');
     var material = new THREE.MeshPhongMaterial( { color : 0xfcfbdf,
@@ -10,17 +17,42 @@ function createSand( width, height ) {
 
     for ( var i = 0; i < geometry.vertices.length; i++ ) {
         var vertex = geometry.vertices[i];
-        vertex.z = peturb( vertex.z, .25 );
+        vertex.z = peturb( Math.sin( vertex.y * rakeModifier ) * rakeHeight, sandRandom );
     }
 
     geometry.computeFaceNormals();
     geometry.computeVertexNormals();
 
-    var mesh = new THREE.Mesh( geometry, material );
-    mesh.receiveShadow = true;
-    mesh.castShadow = true;
+    sand = new THREE.Mesh( geometry, material );
+    sand.receiveShadow = true;
+    sand.castShadow = true;
 
-    return mesh;
+    scene.add( sand );
+
+}
+
+function rippleSand( diameter, object ) {
+
+    if ( !object.geometry.boundingBox ) {
+        object.geometry.computeBoundingBox();
+    }
+
+    var bbMax = object.geometry.boundingBox.max;
+    bbMax = new THREE.Vector2( bbMax.x, bbMax.y );
+
+    var center = object.geometry.center();
+    center = new THREE.Vector2( center.x, center.y );
+
+    var radius = center.distanceTo( bbMax );
+
+    for ( var i = 0; i < sand.geometry.vertices.length; i++ ) {
+        var vertex = sand.geometry.vertices[i];
+        var dist = center.distanceTo( vertex );
+
+        if ( dist <= diameter + radius ) {
+            vertex.z = peturb( Math.cos( dist * rakeModifier ) * rakeHeight, sandRandom );
+        }
+    }
 
 }
 
@@ -58,9 +90,10 @@ function createBase( width, height, depth ) {
                                                   shininess : 5,
                                                   refractionRatio : 0.1 } );
 
-    var mesh = new THREE.Mesh( geometry, material );
-    mesh.receiveShadow = true;
-    mesh.castShadow = true;
+    base = new THREE.Mesh( geometry, material );
+    base.receiveShadow = true;
+    base.castShadow = true;
 
-    return mesh;
+    scene.add( base );
+
 }
