@@ -85,19 +85,23 @@ function createEnvironment( width, height, depth ) {
     createSand( width, height );
     createBase( width, height, depth );
 
-    var rock = basicRockFactory( 3, 3, Math.random() * 3 + 1 );
+    var z = Math.random() * 2 + 1;
+    var rock = basicRockFactory( 3, 3, z );
     rock.position.x = peturb( rock.position.x, width - 3 );
     rock.position.y = peturb( rock.position.y, height - 3 );
+    rock.position.z += z / 2;
     rippleSand( 3, rock );
     scene.add( rock );
 
-    rock = basicRockFactory( 2, 2, Math.random() * 3 + 1 );
+    z = Math.random() * 2 + 1;
+    rock = basicRockFactory( 2, 2, z );
     rock.position.x = peturb( rock.position.x, width - 2 );
     rock.position.y = peturb( rock.position.y, height - 2 );
+    rock.position.z += z / 2;
     rippleSand( 3, rock );
     scene.add( rock );
 
-    var lantern = lanternFactory( 3, 3, 3 );
+    var lantern = lanternFactory( 5, 5, 3 );
     lantern.position.x = peturb( lantern.position.x, width - 1 );
     lantern.position.y = peturb( lantern.position.y, height - 1 );
     lantern.position.z += 4;
