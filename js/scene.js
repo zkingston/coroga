@@ -13,7 +13,7 @@ function init() {
     // scene.fog = new THREE.FogExp2( 0xcccccc, 0.002 );
     scene.fog = new THREE.Fog(0xece9ca, 500, 2000);
 
-    camera = new THREE.PerspectiveCamera( 75,
+    camera = new THREE.PerspectiveCamera( 45,
                                           window.innerWidth / window.innerHeight,
                                           0.1,
                                           1000 );
@@ -34,7 +34,7 @@ function init() {
     window.addEventListener( 'resize', onWindowResize, false );
 
     initializeLights();
-    createEnvironment( 30, 22, 2 );
+    createEnvironment( Math.random() * 20 + 10, Math.random() * 30 + 10, 2 );
 }
 
 function onWindowResize() {
@@ -74,8 +74,14 @@ function initializeLights() {
     lamp.castShadow = true;
     lamp.shadowDarkness = .5;
 
+    var light = new THREE.DirectionalLight(0xdddddd, 1);
+    light.position.set(-10, -10, 0);
+    light.castShadow = true;
+    light.shadowDarkness = .5;
+
     scene.add( sceneLight );
     scene.add( lamp );
+    scene.add( light );
 
 }
 
@@ -84,17 +90,24 @@ function createEnvironment( width, height, depth ) {
     var sand = createSand( width, height );
     var base = createBase( width, height, depth );
 
+    var rock = basicRockFactory( 5, 3, 3 );
+    rock.position.z -= depth / 2;
+
     scene.add( sand );
     scene.add( base );
+    scene.add( rock );
 
 }
 
 function createSand( width, height ) {
 
     var geometry = new THREE.PlaneGeometry( width, height, width, height );
-    var material = new THREE.MeshLambertMaterial( { color : 0xfcfbdf } )
+
     // var texture = THREE.ImageUtils.loadTexture('img/sand.png');
-    // var material = new THREE.MeshPhongMaterial( { map: texture } )
+    var material = new THREE.MeshPhongMaterial( { color : 0xfcfbdf,
+                                                  shading : THREE.FlatShading,
+                                                  shininess : 10,
+                                                  refractionRatio : 0.5 } );
 
     for ( var i = 0; i < geometry.vertices.length; i++ ) {
         var vertex = geometry.vertices[i];
@@ -115,27 +128,23 @@ function createSand( width, height ) {
 function createBase( width, height, depth ) {
 
     var offset = 1;
-    var baseFloor = cubeFactory( width + offset, height + offset, offset );
+    var baseFloor = boxFactory( width + offset, height + offset, offset );
     baseFloor.position.z = -depth;
 
-    var baseNorth = cubeFactory( width, offset, depth );
-    baseNorth.position.x = offset / 2;
+    var baseNorth = boxFactory( width + offset, offset, depth );
     baseNorth.position.y = height / 2;
     baseNorth.position.z = -depth / 2 + offset / 2;
 
-    var baseSouth = cubeFactory( width, offset, depth );
-    baseSouth.position.x = -offset / 2;
+    var baseSouth = boxFactory( width + offset, offset, depth );
     baseSouth.position.y = -height / 2;
     baseSouth.position.z = -depth / 2 + offset / 2;
 
-    var baseEast = cubeFactory( offset, height, depth );
+    var baseEast = boxFactory( offset, height - offset, depth );
     baseEast.position.x = width / 2;
-    baseEast.position.y = -offset / 2;
     baseEast.position.z = -depth / 2 + offset / 2;
 
-    var baseWest = cubeFactory( offset, height, depth );
+    var baseWest = boxFactory( offset, height - offset, depth );
     baseWest.position.x = -width / 2;
-    baseWest.position.y = offset / 2;
     baseWest.position.z = -depth / 2 + offset / 2;
 
     var geometry = mergeMeshGeometry( [ baseFloor,
@@ -145,14 +154,19 @@ function createBase( width, height, depth ) {
                                         baseWest ] );
     geometry.computeFaceNormals();
     geometry.computeVertexNormals();
-    var material = new THREE.MeshLambertMaterial( { color : 0x663333 } )
+    var material = new THREE.MeshPhongMaterial( { color : 0x996633,
+                                                  shading : THREE.FlatShading,
+                                                  shininess : 5,
+                                                  refractionRatio : 0.1 } );
 
-    var base = new THREE.Mesh( geometry, material );
+    var mesh = new THREE.Mesh( geometry, material );
+    mesh.receiveShadow = true;
+    mesh.castShadow = true;
 
-    return base;
+    return mesh;
 }
 
-function cubeFactory( width, height, depth, attributes ) {
+function boxFactory( width, height, depth, attributes ) {
 
     var geometry = new THREE.BoxGeometry( width, height, depth );
     var material = new THREE.MeshBasicMaterial( attributes );
@@ -163,9 +177,40 @@ function cubeFactory( width, height, depth, attributes ) {
 
 }
 
+function basicRockFactory( width, height, depth, attributes ) {
+
+    var geometry = new THREE.BoxGeometry( width, height, 0.01, width * 2, height * 2, 10 );
+
+    var axis = new THREE.Vector3( peturb( 0, width ), peturb( 0, height ), 0 );
+    var maxDist = Math.sqrt( width * width + height * height );
+
+    for ( var i = 0; i < geometry.vertices.length; i++ ) {
+        var vertex = geometry.vertices[i];
+        vertex.x = peturb( vertex.x, 0.1 );
+        vertex.y = peturb( vertex.y, 0.1 );
+
+        if ( vertex.z == 0.005 ) {
+            vertex.z = peturb( ( maxDist - vertex.distanceTo( axis ) ) * 3 * depth / 4, depth / 4 );
+        }
+    }
+    geometry.computeFaceNormals();
+    geometry.computeVertexNormals();
+
+    var material = new THREE.MeshPhongMaterial( { color : 0x202020,
+                                                  shading : THREE.FlatShading,
+                                                  shininess : 20,
+                                                  refractionRatio : 0.1 } );
+    var mesh = new THREE.Mesh( geometry, material );
+    mesh.receiveShadow = true;
+    mesh.castShadow = true;
+
+    return mesh;
+
+}
+
 function peturb( value, range ) {
 
-    return value + Math.random() * range - range / 2;
+    return value + ( Math.random() * range ) - ( range / 2 ) ;
 
 }
 
