@@ -1,6 +1,6 @@
 var lanternLights = [];
 
-function updateLanterns( tick ) {
+function updateLanterns() {
 
     for ( var i = 0; i < lanternLights.length; i++ ) {
         var light = lanternLights[i];

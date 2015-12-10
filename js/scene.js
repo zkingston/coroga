@@ -1,5 +1,6 @@
 var camera, controls, scene, renderer;
 
+var environment = {};
 var tick = 0;
 
 init();
@@ -9,8 +10,7 @@ animate();
 function init() {
 
     scene = new THREE.Scene();
-    // scene.fog = new THREE.FogExp2( 0xcccccc, 0.002 );
-    scene.fog = new THREE.Fog(0xece9ca, 500, 2000);
+    scene.fog = new THREE.FogExp2( 0xccccff, 0.008 );
 
     camera = new THREE.PerspectiveCamera( 45,
                                           window.innerWidth / window.innerHeight,
@@ -28,8 +28,15 @@ function init() {
 	renderer.sortObjects = false;
 
     controls = new THREE.OrbitControls( camera );
-    controls.addEventListener( 'change', render );
+    var angleOffset = Math.PI / 32;
+    controls.minDistance = 5;
+    controls.maxDistance = 100;
+    controls.minPolarAngle = 0 + angleOffset;
+    controls.maxPolarAngle = Math.PI - angleOffset;
+    controls.minAzimuthAngle = -Math.PI / 2 + angleOffset;
+    controls.maxAzimuthAngle = Math.PI / 2 - angleOffset;
 
+    controls.addEventListener( 'change', render );
     document.body.appendChild( renderer.domElement );
 
     window.addEventListener( 'resize', onWindowResize, false );
@@ -54,7 +61,7 @@ function animate() {
     render();
     tick++;
 
-    updateLanterns( tick );
+    updateLanterns();
 
     controls.update();
     requestAnimationFrame( animate );

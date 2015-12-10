@@ -81,13 +81,26 @@ function createBase( width, height, depth ) {
     baseWest.position.x = -width / 2;
     baseWest.position.z = -depth / 2 + offset / 2;
 
+    var nub1 = boxFactory( offset, offset, offset );
+    nub1.position.x = -width / 2;
+    nub1.position.y = -height / 2;
+    nub1.position.z = -depth - offset;
+
+    var nub2 = nub1.clone();
+    nub2.position.x += width;
+
+    var nub3 = nub1.clone();
+    nub3.position.y += height;
+
+    var nub4 = nub2.clone();
+    nub4.position.y += height;
+
     var geometry = mergeMeshGeometry( [ baseFloor,
                                         baseNorth,
                                         baseSouth,
                                         baseEast,
-                                        baseWest ] );
-    geometry.computeFaceNormals();
-    geometry.computeVertexNormals();
+                                        baseWest,
+                                        nub1, nub2, nub3, nub4 ] );
     var material = new THREE.MeshPhongMaterial( { color : 0x996633,
                                                   shading : THREE.FlatShading,
                                                   shininess : 5,
@@ -97,6 +110,14 @@ function createBase( width, height, depth ) {
     base.receiveShadow = true;
     base.castShadow = true;
 
+    var floorGeo = new THREE.PlaneGeometry( 1000, 1000 );
+    var floorMat = new THREE.MeshPhongMaterial( { color : 0xede2cb,
+                                                  shading : THREE.FlatShading,
+                                                  shininess : 0 } );
+    var floor = new THREE.Mesh( floorGeo, floorMat );
+    floor.position.z = -depth - 2 * offset;
+
+    scene.add( floor );
     scene.add( base );
 
 }
