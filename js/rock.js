@@ -5,6 +5,10 @@ function incRandInt(low, high){
   return Math.floor(Math.random()* ((high+1) -low)) + low
 }
 
+function randRange(low, high){
+  return Math.random()*(high -low) + low
+}
+
 function rand() {
   return Math.random()
 }
@@ -54,12 +58,12 @@ function basicRockFactory( width, height, depth, attributes ) {
 
 }
 
-function SpireRockFactory( width, height, depth, attributes ) {
+function SpireRockFactory( width, height, depth) {
     var depth  =  depth
     var bRadius = width / 2.0;
-    var tRadius = Math.random() * (width/3.0);
+    var tRadius = randRange(0.6,0.85) * (width/2.0);
     var faces = incRandInt(4,6);
-    var stories = Math.floor(depth + 1) * incRandInt(3,7);
+    var stories = Math.floor(depth + 1) * incRandInt(1,4);
 
 
     // var geometry = new THREE.CylinderGeometry( tRadius, bRadius, depth,
@@ -75,28 +79,32 @@ function SpireRockFactory( width, height, depth, attributes ) {
 
     for (var i = 0; i < geometry.vertices.length; i++ ) {
         var vertex = geometry.vertices[i];
-        // find closest internal vector
 
         internal = closest(axisVectors, vertex)
 
         var vectorMag =0.3
-        console.log(vectorMag * (internal.x))
-
-
          vertex.x  = vertex.x - vectorMag * (internal.x);
-         vertex.y  = vertex.y - vectorMag * (internal.y );
-         vertex.z  = vertex.z - vectorMag * (internal.z  );
-        // vertex.x = perturb( vertex.x, 0.1 );
-        // vertex.y = perturb( vertex.y, 0.1 );
-        // vertex.z = perturb( vertex.z, 0.1 );
+         vertex.y  = vertex.y - vectorMag * (internal.y);
+         vertex.z  = vertex.z - vectorMag * (internal.z);
+    }
 
+
+    // Make top slanted
+
+
+    for (var i = 0; i < geometry.vertices.length; i++ ) {
+        var vertex = geometry.vertices[i];
+        if ((vertex.z < depth + 0.1)&&(vertex.z > depth - 0.1))
+          console.log(vertex.z, depth)
+          vertex.z = perturb(vertex.z, 0.2)
 
     }
+
+
     geometry.computeFaceNormals();
     geometry.computeVertexNormals();
 
      geometry.rotateX(90* Math.PI / 180)
-    // geometry.rotateZ(90* Math.PI / 180)
 
     var material = new THREE.MeshPhongMaterial( { color : 0x505050,
                                                   shading : THREE.FlatShading,
