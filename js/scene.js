@@ -95,14 +95,38 @@ function generateRock() {
 
     var x = Math.round( Math.random() * 3 + 2 );
     var y = Math.round( Math.random() * 3 + 2 );
-    var z = Math.round( Math.random() * environment.depth + 2 );
+    var z = Math.round( Math.random() * environment.depth + 3 );
 
-    var rock = SpireRockFactory( x, y, z );
+    var rock1, rock2, rock3;
+
+    rock1 = SpireRockFactory( x, y, z );
+
+    if ( Math.random() > 0.5 ) {
+        rock2 = SpireRockFactory( x - 1, y - 1, z - 1 );
+        rock2.position.x = peturb( 0, x );
+        rock2.position.y = peturb( 0, y );
+        rock2.position.z -= 1;
+
+        if ( Math.random() > 0.5 ) {
+            rock3 = SpireRockFactory( x - 2, y - 2, z - 2 );
+            rock3.position.x = peturb( 0, x );
+            rock3.position.y = peturb( 0, y );
+            rock3.position.z -= 2;
+        }
+    }
+
+    var rockGeo = mergeMeshGeometry( [ rock1, rock2, rock3 ] );
+    var rockMat = new THREE.MeshPhongMaterial( { color : 0x505050,
+                                                  shading : THREE.FlatShading,
+                                                  shininess : 20,
+                                                 refractionRatio : 0.1 } );
+
+    var rock = new THREE.Mesh( rockGeo, rockMat );
 
     rock.position.x = peturb( rock.position.x, width - 2 * x );
     rock.position.y = peturb( rock.position.y, height - 2 * y );
     rock.position.z += z / 2;
-    rippleSand( Math.sqrt( x * x + y * y ), rock );
+    rippleSand( 3 * Math.sqrt( x * x + y * y ) / 4, rock );
     scene.add( rock );
 }
 
@@ -118,7 +142,7 @@ function createEnvironment( width, height, depth ) {
     createSand( width, height );
     createBase( width, height, depth );
 
-    for ( var i = 0; i < Math.random() * 4 + 1; i++ ) {
+    for ( var i = 0; i < Math.random() * 3 + 1; i++ ) {
         generateRock();
     }
 
