@@ -9,8 +9,10 @@ animate();
 
 function init() {
 
+    var clock = new THREE.Clock();
+
     scene = new THREE.Scene();
-    scene.fog = new THREE.FogExp2( 0xaaccff, 0.01 );
+    scene.fog = new THREE.FogExp2( 0xaaccff, 0.015 );
 
     camera = new THREE.PerspectiveCamera( 45,
                                           window.innerWidth / window.innerHeight,
@@ -35,13 +37,15 @@ function init() {
     controls.maxPolarAngle = Math.PI - angleOffset;
     controls.minAzimuthAngle = -Math.PI / 2 + angleOffset;
     controls.maxAzimuthAngle = Math.PI / 2 - angleOffset;
-
     controls.addEventListener( 'change', render );
+
+    // controls = new THREE.TrackballControls( camera, renderer.domElement );
+
     document.body.appendChild( renderer.domElement );
 
     window.addEventListener( 'resize', onWindowResize, false );
 
-    createEnvironment( 30, 30, 2 );
+    createEnvironment( 50, 50, 2 );
 }
 
 function onWindowResize() {
@@ -57,14 +61,16 @@ function onWindowResize() {
 
 function animate() {
 
-    render();
+    var delta = clock.getDelta();
+
+    requestAnimationFrame( animate );
     tick++;
 
     updateLanterns();
 
     controls.update();
-    requestAnimationFrame( animate );
 
+    render();
 }
 
 function render() {
