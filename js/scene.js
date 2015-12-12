@@ -1,4 +1,4 @@
-var camera, controls, scene, renderer;
+var camera, controls, scene, renderer, clock;
 
 var environment = {};
 var tick = 0;
@@ -9,7 +9,7 @@ animate();
 
 function init() {
 
-    var clock = new THREE.Clock();
+    clock = new THREE.Clock();
 
     scene = new THREE.Scene();
     scene.fog = new THREE.FogExp2( 0xaaccff, 0.015 );
@@ -62,15 +62,16 @@ function onWindowResize() {
 function animate() {
 
     var delta = clock.getDelta();
+    render();
 
-    requestAnimationFrame( animate );
     tick++;
 
     updateLanterns();
 
     controls.update();
 
-    render();
+    requestAnimationFrame( animate );
+
 }
 
 function render() {
@@ -99,40 +100,18 @@ function generateRock() {
     var width = environment.width;
     var height = environment.height;
 
-    var x = Math.round( Math.random() * 3 + 2 );
-    var y = Math.round( Math.random() * 3 + 2 );
-    var z = Math.round( Math.random() * environment.depth + 3 );
+    var x = Math.floor( Math.random() * 6 + 3 );
+    var y = Math.floor( Math.random() * 6 + 3 );
+    var z = Math.floor( Math.random() * 6 + 1 );
 
-    var rock1, rock2, rock3;
 
-    rock1 = SpireRockFactory( x, y, z );
-
-    if ( Math.random() > 0.5 ) {
-        rock2 = SpireRockFactory( x - 1, y - 1, z - 1 );
-        rock2.position.x = peturb( 0, x );
-        rock2.position.y = peturb( 0, y );
-        rock2.position.z -= 1;
-
-        if ( Math.random() > 0.5 ) {
-            rock3 = SpireRockFactory( x - 2, y - 2, z - 2 );
-            rock3.position.x = peturb( 0, x );
-            rock3.position.y = peturb( 0, y );
-            rock3.position.z -= 2;
-        }
-    }
-
-    var rockGeo = mergeMeshGeometry( [ rock1, rock2, rock3 ] );
-    var rockMat = new THREE.MeshPhongMaterial( { color : 0x505050,
-                                                  shading : THREE.FlatShading,
-                                                  shininess : 20,
-                                                 refractionRatio : 0.1 } );
-
-    var rock = new THREE.Mesh( rockGeo, rockMat );
+    var rock = ClusterFactory( SpireRockFactory, x, y, z );
 
     rock.position.x = peturb( rock.position.x, width - 2 * x );
     rock.position.y = peturb( rock.position.y, height - 2 * y );
-    rock.position.z += z / 2;
+    rock.position.z += z / 2 - 0.5;
     rippleSand( 3 * Math.sqrt( x * x + y * y ) / 4, rock );
+
     scene.add( rock );
 }
 
@@ -148,16 +127,23 @@ function createEnvironment( width, height, depth ) {
     createSand( width, height );
     createBase( width, height, depth );
 
-    for ( var i = 0; i < Math.random() * 3 + 1; i++ ) {
+    generateRock();
+
+    while ( Math.random() > 0.3 ) {
         generateRock();
     }
 
-    var dim = Math.random() * 2 + 3;
-    var lantern = lanternFactory( dim, dim, Math.random() * 2 + depth * 2 );
-    lantern.position.x = peturb( lantern.position.x, width - 1 );
-    lantern.position.y = peturb( lantern.position.y, height - 1 );
-    lantern.position.z += depth * 2;
+    var chance = 0;
+    while ( Math.random() > chance ) {
+        var dim = 3;
+        var lantern = lanternFactory( dim, dim, 3 );
+        lantern.position.x = peturb( lantern.position.x, width - 1 );
+        lantern.position.y = peturb( lantern.position.y, height - 1 );
+        lantern.position.z += depth * 2;
 
-    scene.add( lantern );
+        scene.add( lantern );
+
+        chance += 0.5;
+    }
 
 }
