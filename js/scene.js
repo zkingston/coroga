@@ -12,13 +12,14 @@ function init() {
     clock = new THREE.Clock();
 
     scene = new THREE.Scene();
-    scene.fog = new THREE.FogExp2( 0xaaccff, 0.015 );
+    scene.fog = new THREE.FogExp2( 0xaaccff, 0.005 );
 
     camera = new THREE.PerspectiveCamera( 45,
                                           window.innerWidth / window.innerHeight,
                                           1,
                                           1000 );
 
+    camera.up = new THREE.Vector3( 0, 0, 1 );
     camera.position.set( 0, -50, 20 );
     camera.lookAt( scene.position );
 
@@ -35,17 +36,13 @@ function init() {
     controls.maxDistance = 100;
     controls.minPolarAngle = 0 + angleOffset;
     controls.maxPolarAngle = Math.PI - angleOffset;
-    controls.minAzimuthAngle = -Math.PI / 2 + angleOffset;
-    controls.maxAzimuthAngle = Math.PI / 2 - angleOffset;
     controls.addEventListener( 'change', render );
-
-    // controls = new THREE.TrackballControls( camera, renderer.domElement );
 
     document.body.appendChild( renderer.domElement );
 
     window.addEventListener( 'resize', onWindowResize, false );
 
-    createEnvironment( 50, 50, 2 );
+    createEnvironment( 70, 50, 2 );
 }
 
 function onWindowResize() {
@@ -107,9 +104,12 @@ function generateRock() {
 
     var rock = ClusterFactory( SpireRockFactory, x, y, z );
 
-    rock.position.x = peturb( rock.position.x, width - 2 * x );
-    rock.position.y = peturb( rock.position.y, height - 2 * y );
+    rock.position.x = peturb( rock.position.x, width - 3 * x );
+    rock.position.y = peturb( rock.position.y, height - 3 * y );
     rock.position.z += z / 2 - 0.5;
+
+    var base = ClusterBaseFactory( rock );
+
     rippleSand( 3 * Math.sqrt( x * x + y * y ) / 4, rock );
 
     scene.add( rock );
@@ -133,17 +133,17 @@ function createEnvironment( width, height, depth ) {
         generateRock();
     }
 
-    var chance = 0;
-    while ( Math.random() > chance ) {
-        var dim = 3;
-        var lantern = lanternFactory( dim, dim, 3 );
-        lantern.position.x = peturb( lantern.position.x, width - 1 );
-        lantern.position.y = peturb( lantern.position.y, height - 1 );
-        lantern.position.z += depth * 2;
+    // var chance = 0;
+    // while ( Math.random() > chance ) {
+    //     var dim = 3;
+    //     var lantern = lanternFactory( dim, dim, 3 );
+    //     lantern.position.x = peturb( lantern.position.x, width - 1 );
+    //     lantern.position.y = peturb( lantern.position.y, height - 1 );
+    //     lantern.position.z += depth * 2;
 
-        scene.add( lantern );
+    //     scene.add( lantern );
 
-        chance += 0.5;
-    }
+    //     chance += 0.5;
+    // }
 
 }

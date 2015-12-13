@@ -1,7 +1,9 @@
-var rakeModifier = 4;
+var rakeModifier = 6;
 var rakeHeight = 0.125;
 
 var sandRandom = 0.125;
+
+var sideRakeBuffer = 10;
 
 function createSand( width, height ) {
 
@@ -15,7 +17,12 @@ function createSand( width, height ) {
 
     for ( var i = 0; i < geometry.vertices.length; i++ ) {
         var vertex = geometry.vertices[i];
-        vertex.z = peturb( Math.sin( vertex.y * rakeModifier ) * rakeHeight, sandRandom );
+
+        if ( Math.abs( vertex.x ) > width / 2 - sideRakeBuffer ) {
+            vertex.z = peturb( Math.cos( vertex.x * rakeModifier ) * rakeHeight, sandRandom );
+        } else {
+            vertex.z = peturb( Math.sin( vertex.y * rakeModifier ) * rakeHeight, sandRandom );
+        }
     }
 
     geometry.computeFaceNormals();
