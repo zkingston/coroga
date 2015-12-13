@@ -25,19 +25,20 @@ function peturb( value, range ) {
 function boxFactory( width, height, depth, attributes ) {
 
     var geometry = new THREE.BoxGeometry( width, height, depth );
-    var material = new THREE.MeshPhongMaterial( attributes );
-
-    var mesh = new THREE.Mesh( geometry, material );
-
-    return mesh;
+    return meshWrap( geometry, attributes );
 
 }
 
 function sphereFactory( radius, attributes ) {
 
     var geometry = new THREE.SphereGeometry( radius );
-    var material = new THREE.MeshPhongMaterial( attributes );
+    return meshWrap( geometry, attributes );
 
+}
+
+function meshWrap( geometry, attributes ) {
+
+    var material = new THREE.MeshPhongMaterial( attributes );
     var mesh = new THREE.Mesh( geometry, material );
 
     return mesh;

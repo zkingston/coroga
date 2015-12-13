@@ -20,7 +20,7 @@ function init() {
                                           1000 );
 
     camera.up = new THREE.Vector3( 0, 0, 1 );
-    camera.position.set( 0, -50, 20 );
+    camera.position.set( -30, -60, 20 );
     camera.lookAt( scene.position );
 
     renderer = new THREE.WebGLRenderer( { alpha: true,
@@ -35,7 +35,7 @@ function init() {
     controls.minDistance = 5;
     controls.maxDistance = 100;
     controls.minPolarAngle = 0 + angleOffset;
-    controls.maxPolarAngle = Math.PI - angleOffset;
+    controls.maxPolarAngle = Math.PI / 2 - angleOffset;
     controls.addEventListener( 'change', render );
 
     document.body.appendChild( renderer.domElement );
@@ -63,8 +63,8 @@ function animate() {
 
     tick++;
 
-    updateLanterns();
-    updateMoths();
+    // updateLanterns();
+    // updateMoths();
 
     controls.update();
 
@@ -102,7 +102,6 @@ function generateRock() {
     var y = Math.floor( Math.random() * 6 + 3 );
     var z = Math.floor( Math.random() * 6 + 1 );
 
-
     var rock = ClusterFactory( SpireRockFactory, x, y, z );
 
     rock.position.x = peturb( rock.position.x, width - 3 * x );
@@ -128,26 +127,37 @@ function createEnvironment( width, height, depth ) {
     createSand( width, height );
     createBase( width, height, depth );
 
-    generateRock();
+    var wall = createWall( width, 5, 10, width / 4 );
+    wall.position.y += height / 2;
+    wall.position.z += 5;
+    scene.add( wall );
 
-    while ( Math.random() > 0.3 ) {
-        generateRock();
-    }
+    var wall = createWall( height, 5, 10, height / 4 );
+    wall.rotation.z += Math.PI / 2;
+    wall.position.x += width / 2;
+    wall.position.z += 5;
+    scene.add( wall );
 
-    var chance = 0;
-    while ( Math.random() > chance ) {
-        var dim = 3;
-        var lantern = lanternFactory( dim, dim, 3 );
-        lantern.position.x = peturb( lantern.position.x, width - 1 );
-        lantern.position.y = peturb( lantern.position.y, height - 1 );
-        lantern.position.z += depth * 2;
+    // generateRock();
 
-        var moth = mothFactory( lantern );
+    // while ( Math.random() > 0.3 ) {
+    //     generateRock();
+    // }
 
-        scene.add( lantern );
-        scene.add( moth );
+    // var chance = 0;
+    // while ( Math.random() > chance ) {
+    //     var dim = 3;
+    //     var lantern = lanternFactory( dim, dim, 3 );
+    //     lantern.position.x = peturb( lantern.position.x, width - 1 );
+    //     lantern.position.y = peturb( lantern.position.y, height - 1 );
+    //     lantern.position.z += depth * 2;
 
-        chance += 0.5;
-    }
+    //     var moth = mothFactory( lantern );
+
+    //     scene.add( lantern );
+    //     scene.add( moth );
+
+    //     chance += 0.5;
+    // }
 
 }
