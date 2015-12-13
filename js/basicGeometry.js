@@ -32,3 +32,14 @@ function boxFactory( width, height, depth, attributes ) {
     return mesh;
 
 }
+
+function sphereFactory( radius, attributes ) {
+
+    var geometry = new THREE.SphereGeometry( radius );
+    var material = new THREE.MeshPhongMaterial( attributes );
+
+    var mesh = new THREE.Mesh( geometry, material );
+
+    return mesh;
+
+}

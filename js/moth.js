@@ -1,7 +1,9 @@
+cos = Math.cos;
+sin = Math.sin;
 
 var mothProperties = {size: 0.15,
                       flightRadius: 1.5,
-                      velocity: 0.1
+                      velocity: 0.05
                     };
 
 
@@ -14,12 +16,12 @@ function updateMoths() {
         var moth = moths[i];
         var origin = origins[i];
 
-        x = tick * m.velocity
+        x = (moth.wave + tick) * m.velocity;
 
         // Triple Cardiod/Rose Curve
-        moth.position.x = (1.5 * cos(x) - cos(4 * x)) * m.flightRadius + origin.x
-        moth.position.y = (1.5 * sin(x) - sin(4 * x)) * m.flightRadius + origin.y
-        moth.position.z = sin(x) *m.flightRadius + origin.z
+        moth.position.x = (1.5 * cos(x) - cos(4 * x)) * m.flightRadius + origin.x;
+        moth.position.y = (1.5 * sin(x) - sin(4 * x)) * m.flightRadius + origin.y;
+        moth.position.z = sin(x) *m.flightRadius + origin.z;
 
     }
 }
@@ -47,7 +49,9 @@ function mothFactory(lantern) {
     moth.position.y = lantern.position.y;
     moth.position.z = lantern.position.z;
 
-    origin = new THREE.Vector3(moth.position.x, moth.position.y,moth.position.z)
+    moth.wave = Math.random() * 100;
+
+    origin = new THREE.Vector3(moth.position.x, moth.position.y, moth.position.z)
 
     environment.moths.push( moth );
     environment.mothVector.push(origin);

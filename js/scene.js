@@ -64,6 +64,7 @@ function animate() {
     tick++;
 
     updateLanterns();
+    updateMoths();
 
     controls.update();
 
@@ -133,17 +134,20 @@ function createEnvironment( width, height, depth ) {
         generateRock();
     }
 
-    // var chance = 0;
-    // while ( Math.random() > chance ) {
-    //     var dim = 3;
-    //     var lantern = lanternFactory( dim, dim, 3 );
-    //     lantern.position.x = peturb( lantern.position.x, width - 1 );
-    //     lantern.position.y = peturb( lantern.position.y, height - 1 );
-    //     lantern.position.z += depth * 2;
+    var chance = 0;
+    while ( Math.random() > chance ) {
+        var dim = 3;
+        var lantern = lanternFactory( dim, dim, 3 );
+        lantern.position.x = peturb( lantern.position.x, width - 1 );
+        lantern.position.y = peturb( lantern.position.y, height - 1 );
+        lantern.position.z += depth * 2;
 
-    //     scene.add( lantern );
+        var moth = mothFactory( lantern );
 
-    //     chance += 0.5;
-    // }
+        scene.add( lantern );
+        scene.add( moth );
+
+        chance += 0.5;
+    }
 
 }
