@@ -195,3 +195,7 @@ function SpireRockFactory( width, height, depth) {
     return mesh;
 
 }
+
+function ClusterBaseFactory( rock ) {
+
+}
