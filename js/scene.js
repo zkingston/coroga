@@ -12,7 +12,7 @@ function init() {
     clock = new THREE.Clock();
 
     scene = new THREE.Scene();
-    scene.fog = new THREE.FogExp2( 0xaaccff, 0.005 );
+    scene.fog = new THREE.FogExp2( 0xaaccff, 0.01 );
 
     camera = new THREE.PerspectiveCamera( 45,
                                           window.innerWidth / window.innerHeight,
@@ -20,7 +20,7 @@ function init() {
                                           1000 );
 
     camera.up = new THREE.Vector3( 0, 0, 1 );
-    camera.position.set( -30, -60, 20 );
+    camera.position.set( -60, -60, 30 );
     camera.lookAt( scene.position );
 
     renderer = new THREE.WebGLRenderer( { alpha: true,
@@ -43,6 +43,7 @@ function init() {
     window.addEventListener( 'resize', onWindowResize, false );
 
     createEnvironment( 70, 50, 2 );
+
 }
 
 function onWindowResize() {
@@ -121,6 +122,7 @@ function createEnvironment( width, height, depth ) {
     environment.width = width;
     environment.height = height;
     environment.depth = depth;
+    environment.radius = Math.sqrt( height * height / 4 + width * width / 4 );
 
     initializeLights();
 
