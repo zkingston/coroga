@@ -127,7 +127,7 @@ function createEnvironment( width, height, depth ) {
     initializeLights();
 
     createSand( width, height );
-    createWalls( width, height, 10 );
+    createWalls( width, height, 15 );
 
     generateRock();
 
