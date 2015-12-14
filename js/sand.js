@@ -157,14 +157,16 @@ function createWall( width, height, depth, numSeg ) {
         roofSegs[i].position.x += segWidth * i;
     }
 
+    var offset = -width / 2 + segWidth / 4;
     var wallGeo = mergeMeshGeometry( wallSegs );
+    wallGeo.translate( offset, 0, 0 );
     var roofGeo = mergeMeshGeometry( roofSegs );
+    roofGeo.translate( offset, 0, 0 );
 
     var wall = new THREE.Group();
 
     wall.add( meshWrap( wallGeo, wallAttr ) );
     wall.add( meshWrap( roofGeo, roofAttr ) ) ;
-    wall.position.x -= width / 2;
 
     return wall;
 
