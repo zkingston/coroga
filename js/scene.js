@@ -63,8 +63,9 @@ function animate() {
 
     tick++;
 
-    // updateLanterns();
-    // updateMoths();
+    updateLanterns();
+    updateMoths();
+    updateWalls();
 
     controls.update();
 
@@ -123,41 +124,28 @@ function createEnvironment( width, height, depth ) {
 
     initializeLights();
 
-
     createSand( width, height );
-    createBase( width, height, depth );
+    createWalls( width, height, 10 );
 
-    var wall = createWall( width, 5, 10, width / 4 );
-    wall.position.y += height / 2;
-    wall.position.z += 5;
-    scene.add( wall );
+    generateRock();
 
-    var wall = createWall( height, 5, 10, height / 4 );
-    wall.rotation.z += Math.PI / 2;
-    wall.position.x += width / 2;
-    wall.position.z += 5;
-    scene.add( wall );
+    while ( Math.random() > 0.3 ) {
+        generateRock();
+    }
 
-    // generateRock();
+    var lanterns = [ { x : width / 2 - 2, y : -height / 2 + 2 },
+                     { x : -width / 2 + 2, y : height / 2 - 2 } ];
+    for ( var i = 0; i < lanterns.length; i++ ) {
+        var dim = 3;
+        var lantern = lanternFactory( dim, dim, 3 );
+        lantern.position.x = lanterns[i].x;
+        lantern.position.y = lanterns[i].y;
+        lantern.position.z += depth * 2;
 
-    // while ( Math.random() > 0.3 ) {
-    //     generateRock();
-    // }
+        var moth = mothFactory( lantern );
 
-    // var chance = 0;
-    // while ( Math.random() > chance ) {
-    //     var dim = 3;
-    //     var lantern = lanternFactory( dim, dim, 3 );
-    //     lantern.position.x = peturb( lantern.position.x, width - 1 );
-    //     lantern.position.y = peturb( lantern.position.y, height - 1 );
-    //     lantern.position.z += depth * 2;
-
-    //     var moth = mothFactory( lantern );
-
-    //     scene.add( lantern );
-    //     scene.add( moth );
-
-    //     chance += 0.5;
-    // }
-
+        scene.add( lantern );
+        scene.add( moth );
+    }
+    
 }

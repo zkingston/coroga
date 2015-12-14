@@ -67,6 +67,66 @@ function rippleSand( diameter, object ) {
 
 }
 
+function updateWalls() {
+    if ( camera.position.z > 50 ) {
+	environment.wallN.visible = true;
+	environment.wallS.visible = true;
+	environment.wallE.visible = true;
+	environment.wallW.visible = true;
+
+	return;
+    }
+
+    if ( camera.position.x > 0 ) {
+	environment.wallE.visible = false;
+	environment.wallW.visible = true;
+    } else {
+	environment.wallE.visible = true;
+	environment.wallW.visible = false;
+    } 
+
+    if ( camera.position.y > 0 ) {
+	environment.wallN.visible = false;
+	environment.wallS.visible = true;
+    } else {
+	environment.wallN.visible = true;
+	environment.wallS.visible = false;
+    } 
+}
+
+function createWalls( width, height, wallHeight ) {
+    
+    var wallOffset = 10;
+
+    var wallN = createWall( width + wallOffset * 2, 5, wallHeight, width / 4 );
+    var wallS = wallN.clone();
+    wallN.position.y += height / 2 + wallOffset / 2;
+    wallN.position.z += 3;
+    scene.add( wallN );
+    
+    wallS.position.y -= height / 2 + wallOffset / 2;
+    wallS.position.z += 3;
+    scene.add( wallS );
+
+    environment.wallN = wallN;
+    environment.wallS = wallS;
+
+    var wallE = createWall( height + wallOffset * 2, 5, wallHeight, height / 4 );
+    var wallW = wallE.clone();
+    wallE.rotation.z += Math.PI / 2;
+    wallE.position.x += width / 2 + wallOffset / 2;
+    wallE.position.z += 3;
+    scene.add( wallE );
+
+    wallW.rotation.z += Math.PI / 2;
+    wallW.position.x -= width / 2 + wallOffset / 2;
+    wallW.position.z += 3;
+    scene.add( wallW );
+
+    environment.wallE = wallE;
+    environment.wallW = wallW;
+}
+
 function createBase( width, height, depth ) {
 
     var offset = 1;
@@ -144,6 +204,7 @@ function createWall( width, height, depth, numSeg ) {
                      shininess : 30,
                      refractionRatio : 0.5 }
 
+    numSeg = Math.floor( numSeg );
     var segWidth = width / numSeg;
 
     var wallSegs = [];
@@ -157,7 +218,7 @@ function createWall( width, height, depth, numSeg ) {
         roofSegs[i].position.x += segWidth * i;
     }
 
-    var offset = -width / 2 + segWidth / 4;
+    var offset = -(numSeg - 1) * segWidth / 2;
     var wallGeo = mergeMeshGeometry( wallSegs );
     wallGeo.translate( offset, 0, 0 );
     var roofGeo = mergeMeshGeometry( roofSegs );
@@ -181,7 +242,7 @@ function createWallSegment( width, height, depth ) {
     var wallGeo = mergeMeshGeometry( [ wall, wallTop ] );
     var wallMesh = meshWrap( wallGeo );
 
-    var roofTopGeo = new THREE.CylinderGeometry( height / 6, height / 6, width, 8, width );
+    var roofTopGeo = new THREE.CylinderGeometry( height / 6, height / 6, width, 8, Math.floor( width ) );
     var roofTop = meshWrap( roofTopGeo );
     roofTop.rotateX( Math.PI );
     roofTop.rotateZ( Math.PI / 2 );
@@ -223,3 +284,12 @@ function createWallSegment( width, height, depth ) {
 
     return { wall : wallMesh, roof : roof };
 }
+
+function createBrickLayer( width, height, depth, numBricks ) {
+
+}
+
+function createBrick( width, height, depth ) {
+
+}
+
