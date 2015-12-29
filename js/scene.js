@@ -149,5 +149,8 @@ function createEnvironment( width, height, depth ) {
         scene.add( lantern );
         scene.add( moth );
     }
-    
+
+  
+    tree = treeFactory();
+    scene.add(tree);
 }
