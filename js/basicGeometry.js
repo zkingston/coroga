@@ -30,11 +30,11 @@ function boxFactory( width, height, depth, attributes ) {
 }
 
 function sphereFactory( radius, attributes ) {
-
     var geometry = new THREE.SphereGeometry( radius );
     return meshWrap( geometry, attributes );
-
 }
+
+
 
 function meshWrap( geometry, attributes ) {
 

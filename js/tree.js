@@ -1,25 +1,83 @@
 // HEURISTICS
+
+
+// BRANCH HEURISTICS
+
 // What is the length of the branch segment given the joit number.
 function _lengthHeuristic(maxlen, maxjoint, curjoint){
   //return maxlen * curjoint/maxjoint - curjoint + randRange(1,4)
   return (curjoint < 2)? randRange(3,5): randRange(2,4)
 }
-
 // Probability a branch will spawn at fork
 // Always fork at least once.
 function _branchProb(joint){return (joint == 1)? 1.0:0.6};
-
 var _branchiness = 40 // How many degrees is the cone which new points are sampled
 var _length = 7 // What is the max possible length of a segment
 var _pointiness = .7 // How quickly does the radius taper
 var _segments = 5 // Number of segments a subBranch can have
+var _radiusCutoff = 1.0; // Radius at which to stop spawning off branches (surprisingly good for quality)
 
 
-var _radiusCutoff = 0.5; // Radius at which to stop spawning off branches
+// CASCADE HEURISTICS
+
+// Cascade of shrinking probability cones.
+var spreadAngle = 120; // Starting probability cones
+function degradation(){return randRange(0.1,1) * 10}; // How fast does it shrink
+var flowerSize = .4; // How big are the flowers.
+function flowerDist(){return randRange(flowerSize,2* flowerSize)}; // Space between parent and child
+function childPerDegree(angle){ // How many children based on how big the probability cone is
+    // Works closesly with degradation. degradation is how fast the angle drops
+    if (angle > (9/10) * spreadAngle){return Math.floor(randRange(1,4))}
+    if (angle > (4/5)*spreadAngle){return Math.floor(4 * angle/spreadAngle)}
+    if (angle == 0){return 0}
+    else{return 1}
+}
 
 
 acos = Math.acos
 tan = Math.tan
+function hedronFactory(radius, widthSegs, heightSegs, attributes){
+    var geometry = new THREE.SphereGeometry( radius, 3, 2,0,2.4,0,1.5 );
+    return meshWrap( geometry, attributes );
+}
+
+// function buttsFactory(attributes){
+//   var text = "butts",
+//
+//              height = 20,
+//              size = 70,
+//              hover = 30,
+//              curveSegments = 4,
+//              bevelThickness = 2,
+//              bevelSize = 1.5,
+//              bevelSegments = 3,
+//              bevelEnabled = true,
+//              font = "optimer", // helvetiker, optimer, gentilis, droid sans, droid serif
+//              weight = "bold", // normal bold
+//              style = "normal"; // normal italic
+//
+//
+//
+// var geometry
+//  = new THREE.TextGeometry(
+//    text, {
+//       size: size,
+//        height: height,
+//        curveSegments: curveSegments,
+//
+//        font: font,
+//        weight: weight,
+//        style: style,
+//
+//        bevelThickness: bevelThickness,
+//        bevelSize: bevelSize,
+//        bevelEnabled: bevelEnabled,
+//
+//             });
+//   return meshWrap( geometry, attributes );
+// }
+
+
 
 function chance(n){
     return  (Math.random() < n)? true : false
@@ -107,18 +165,18 @@ function burstGenerator(origin, vector){
 }
 
 function cascadeGenerator(origin){
-    var spreadAngle = 160;
-    function degradation(){return randRange(0.2,1) * 60};
-    var flowerSize = .2;
-    function flowerDist(){return randRange(1,2)};
-    var childPerDegree = 4/90;
+
+
+
+
+
 
     var properties = { transparent : true,
-      opacity : 0.7,
+      opacity : 1.0,
       color : 0xff69b4,
       side : THREE.DoubleSide,
       shading : THREE.FlatShading,
-      shininess : 100,
+      shininess : 0,
       emissive : 0xff69b4
     }
 
@@ -134,7 +192,9 @@ function cascadeGenerator(origin){
                               flowerVector,
                               flowerDist(),
                               spreadAngle)
-    var flower = sphereFactory(flowerSize ,properties);
+    //var flower = sphereFactory(flowerSize ,properties);
+    var flower = hedronFactory(flowerSize,3,4,properties);
+
     flower.position.x = position.x;
     flower.position.y = position.y;
     flower.position.z = position.z;
@@ -150,7 +210,7 @@ function cascadeGenerator(origin){
     while (buffer.length >= 1){
       var parent = buffer.pop()
       var location = parent.position
-      var numChildren = Math.floor(parent.angle * childPerDegree)
+      var numChildren = childPerDegree(parent.angle)
       var childAngle = Math.max(0,parent.angle - degradation());
 
       for (var i = 0; i < numChildren; i++){
@@ -159,7 +219,7 @@ function cascadeGenerator(origin){
                                     flowerVector,
                                     flowerDist(),
                                      childAngle)
-          var flower = sphereFactory(flowerSize ,properties);
+          var flower = hedronFactory(flowerSize,3,4 ,properties);
           flower.position.x = position.x;
           flower.position.y = position.y;
           flower.position.z = position.z;
@@ -177,7 +237,8 @@ function cascadeGenerator(origin){
     var cluster = new THREE.Group();
     cluster.add(new THREE.Mesh( flowerMeshGeo, flowerMat))
 
-    scene.add(cluster)
+    //scene.add(cluster)
+    return cluster
 }
 
 function branchGenerator(origin, vector, radius, numSegments){
@@ -305,6 +366,7 @@ function treeFactory(){
     // if you do, put branch on buffer. UNLESS starting radius is too small,
     // Then dont even bother.
     var allBranches = []
+    var tips = [];
     var buffer = [];
 
     var branch = branchGenerator(origin, vector,4, 4);
@@ -326,9 +388,12 @@ function treeFactory(){
                         var newBranch = branchGenerator(o,v,r,n)
                         buffer.push(newBranch)
                         allBranches.push(new THREE.Mesh( newBranch["geometry"], treeMat))
+
+
                     }
               }
         }
+        tips.push(cur)
     }
 
 
@@ -337,7 +402,19 @@ function treeFactory(){
     var tree = new THREE.Group();
     tree.add(new THREE.Mesh( treeMeshGeo, treeMat))
 
-    cascadeGenerator(new THREE.Vector3(10,10,10))
+    var pushup = new THREE.Vector3(0,0,3)
+
+    for (var iter = 0; iter < tips.length; iter++){
+      var cur = tips[iter]
+
+      // This is technically correct.
+      //var locus = new THREE.Vector3().addVectors(pushup,cur.bVec[cur.bVec.length - 1])
+
+      // hackfix for Weird ass bug where the last branch segment is poorly articulated, so it spawns blossoms unconnected
+      var locus = new THREE.Vector3().addVectors(pushup,cur.bVec[cur.bVec.length - 2])
+      locus.add(cur.offset)
+      tree.add(cascadeGenerator(locus))
+    }
 
     return tree;
 }
