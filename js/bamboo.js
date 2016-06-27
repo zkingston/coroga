@@ -23,7 +23,7 @@ function bambooFactory( radius, height, x, y) {
 
     //Create the "shoot", the plant without the joints
     var shootGeometry = new THREE.CylinderGeometry( radius, radius, height, 32, 1, true );
-    var shootMaterial = new THREE.MeshPhongMaterial( {color: shootColor} );
+    var shootMaterial = new THREE.MeshLambertMaterial( {color: shootColor} );
     shootMaterial.side = THREE.DoubleSide;
     var shootMesh = new THREE.Mesh( shootGeometry, shootMaterial );
     //Rotate shoot so that it is standing up
@@ -43,13 +43,13 @@ function bambooFactory( radius, height, x, y) {
     
         //Generate joint properties with shoot properties * modifiers
         var jointGeometry = new THREE.CylinderGeometry( radius * jointThickness, radius * jointThickness, height * jointHeight, 32, 5, false );
-        var jointMaterial = new THREE.MeshPhongMaterial( {color: jointColor} );
+        var jointMaterial = new THREE.MeshLambertMaterial( {color: jointColor} );
         var jointMesh = new THREE.Mesh( jointGeometry, jointMaterial );
         //Rotate joint so that it is upright
         jointMesh.rotation.x =  Math.PI / 2;
         jointMesh.position.x = x;
         jointMesh.position.y = y;
-        jointMesh.position.z = jointStart;
+        jointMesh.position.z = jointStart + (getRandom(-.25, .25) * jointSpacing);
 
         //Add it to the group
         stalk.add(shootMesh);

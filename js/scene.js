@@ -160,10 +160,12 @@ function createEnvironment( width, height, depth ) {
 
     bamboo.position.x = peturb( bamboo.position.x, environment.width - 3 * x );
     bamboo.position.y = peturb( bamboo.position.y, environment.height - 3 * y );
+    bamboo.matrixWorldNeedsUpdate = true;
     for (var i = 0; i < bamboo.children.length; i++) {
-        for (var j = 0; j < bamboo.children[i].children.length; j++) {
+        bamboo.children[i].matrixWorldNeedsUpdate = true;
+            for (var j = 0; j < bamboo.children[i].children.length; j++) {
 
-            bamboo.children[i].children[j].updateMatrixWorld(true);
+            bamboo.children[i].children[j].matrixWorldNeedsUpdate = true;
         }
     }
 
