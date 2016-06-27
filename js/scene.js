@@ -153,4 +153,26 @@ function createEnvironment( width, height, depth ) {
   
     tree = treeFactory();
     scene.add(tree);
+
+    var bamboo = generateBamboo( .25, 10);
+    var x = Math.floor( Math.random() * 6 + 3 );
+    var y = Math.floor( Math.random() * 6 + 3 );
+
+    bamboo.position.x = peturb( bamboo.position.x, environment.width - 3 * x );
+    bamboo.position.y = peturb( bamboo.position.y, environment.height - 3 * y );
+    for (var i = 0; i < bamboo.children.length; i++) {
+        for (var j = 0; j < bamboo.children[i].children.length; j++) {
+
+            bamboo.children[i].children[j].updateMatrixWorld(true);
+        }
+    }
+
+    rippleSand( 4 , bamboo.children[0].children[0] );
+
+/*
+    for (var i = 0; i < bamboo.children.length; i++) {
+        rippleSand( 4 , bamboo.children[i].children[0] );
+    }
+*/
+    scene.add(bamboo);
 }
