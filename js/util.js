@@ -25,3 +25,16 @@ function alertWarning( text ) {
 function alertError( text ) {
     document.getElementById( 'alerts' ).innerHTML += alert.format( 'danger', 'Error', text );
 }
+
+function displayFPS() {
+    var div = document.getElementById('stats');
+    var but = document.getElementById('fpstoggle');
+    if (div.style.display !== 'none') {
+        div.style.display = 'none';
+        but.innerHTML = 'Show FPS';
+    }
+    else {
+        div.style.display = 'block';
+        but.innerHTML = 'Hide FPS';
+    }
+}

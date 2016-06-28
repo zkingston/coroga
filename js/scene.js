@@ -1,5 +1,9 @@
 var camera, controls, scene, renderer, clock;
 
+var stats = new Stats();
+stats.showPanel( 0 ); // 0: fps, 1: ms, 2: mb, 3+: custom
+document.getElementById( 'stats' ).appendChild( stats.dom );
+
 var environment = {};
 var tick = 0;
 
@@ -64,6 +68,8 @@ function onWindowResize() {
 
 function animate() {
 
+    stats.begin();
+
     var delta = clock.getDelta();
     render();
 
@@ -74,6 +80,8 @@ function animate() {
     updateWalls();
 
     controls.update();
+
+    stats.end();
 
     requestAnimationFrame( animate );
 
@@ -126,7 +134,6 @@ function createEnvironment( width, height, depth ) {
     scene = new THREE.Scene();
     scene.fog = new THREE.FogExp2( 0xaaccff, 0.005 );
 
-
     environment.width = width;
     environment.height = height;
     environment.depth = depth;
@@ -160,4 +167,6 @@ function createEnvironment( width, height, depth ) {
 
     // tree = treeFactory();
     // scene.add(tree);
+
+    alertSuccess( 'Garden Created' );
 }

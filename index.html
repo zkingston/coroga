@@ -10,21 +10,29 @@
     <link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css">
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.2/jquery.min.js"></script>
     <script src="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"></script>
+
+    <script>
+    </script>
   </head>
 
   <body>
     <div class="container">
       <div id="alerts"> </div>
+      <div id="stats"></div>
 
       <div id="overlay" class="btn-group btn-group-justified" role="group" aria-label="...">
         <div class="btn-group btn-group-lg" role="group">
-          <button type="button" class="btn btn-default">Left</button>
+          <button type="button" class="btn btn-default" onclick="createEnvironment(70, 50, 2);">
+            Regenerate</button>
         </div>
-        <div class="btn-group btn-group-lg" role="group">
-          <button type="button" class="btn btn-default">Middle</button>
-        </div>
-        <div class="btn-group btn-group-lg" role="group">
-          <button type="button" class="btn btn-default">Right</button>
+        <div class="btn-group btn-group-lg dropup" role="group">
+          <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+            Tools
+            <span class="caret"></span>
+          </button>
+          <ul class="dropdown-menu">
+            <li><a href="#" id="fpstoggle" onclick="displayFPS();">Show FPS</a></li>
+          </ul>
         </div>
       </div>
 
@@ -32,6 +40,7 @@
     </div>
 
     <script src="js/three.min.js"></script>
+    <script src="js/stats.min.js"></script>
     <script src="js/util.js"></script>
     <script src="js/orbitcontrols.js"></script>
     <script src="js/ClosedCylinderGeometry.js"></script>
