@@ -1,6 +1,11 @@
+html {
+  text-align: center;
+}
+
 body {
     margin: 0;
     overflow: hidden;
+
 }
 
 #canvas {
@@ -20,8 +25,8 @@ body {
 
 #overlay {
     position: absolute;
-    left: 0px;
     bottom: 0px;
+    left: 0px;
     height: 30px;
     width: 100%;
     z-index: 1;
