@@ -165,8 +165,6 @@ function createEnvironment( width, height, depth ) {
         scene.add( moth );
     }
 
-    // tree = treeFactory();
-    // scene.add(tree);
-
-    alertSuccess( 'Garden Created' );
+    tree = treeFactory();
+    scene.add(tree);
 }
