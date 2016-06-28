@@ -1,8 +1,4 @@
-var camera, controls, scene, renderer, clock;
-
-var stats = new Stats();
-stats.showPanel( 0 ); // 0: fps, 1: ms, 2: mb, 3+: custom
-document.getElementById( 'stats' ).appendChild( stats.dom );
+var camera, controls, scene, renderer, clock, stats;
 
 var environment = {};
 var tick = 0;
@@ -18,6 +14,10 @@ catch ( err ) {
 }
 
 function init() {
+
+    stats = new Stats();
+    stats.showPanel( 0 );
+    document.getElementById( 'stats' ).appendChild( stats.dom );
 
     clock = new THREE.Clock();
 
