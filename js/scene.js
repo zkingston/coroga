@@ -33,12 +33,14 @@ function init() {
     controls = new THREE.OrbitControls( camera );
     var angleOffset = Math.PI / 32;
     controls.minDistance = 5;
-    controls.maxDistance = 100;
+    controls.maxDistance = 500;
     controls.minPolarAngle = 0 + angleOffset;
     controls.maxPolarAngle = Math.PI / 2 - angleOffset;
     controls.addEventListener( 'change', render );
 
-    document.body.appendChild( renderer.domElement );
+    container = document.getElementById( 'canvas' );
+    document.body.appendChild( container );
+    container.appendChild( renderer.domElement );
 
     window.addEventListener( 'resize', onWindowResize, false );
 
@@ -82,21 +84,20 @@ function render() {
 
 function initializeLights() {
 
-    var sceneLight = new THREE.HemisphereLight( 0xdddddd, 0x202020, .1 );
+    var sceneLight = new THREE.HemisphereLight( 0xc2c2dd, 0x40c2c2, .1 );
+    scene.add( sceneLight );
+    environment.hemiLight = sceneLight;
 
     var lamp = new THREE.DirectionalLight( 0xdddddd, 0.5 );
     lamp.position.set( 0, 10, 30 );
     lamp.castShadow = true;
-
-    scene.add( sceneLight );
     scene.add( lamp );
-
-    environment.hemiLight = sceneLight;
     environment.lamp = lamp;
 
 }
 
 function generateRock() {
+
     var width = environment.width;
     var height = environment.height;
 
