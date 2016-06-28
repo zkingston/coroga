@@ -3,16 +3,19 @@ var camera, controls, scene, renderer, clock;
 var environment = {};
 var tick = 0;
 
-init();
-render();
-animate();
+try {
+    init();
+    render();
+    animate();
+}
+catch ( err ) {
+    alertError( err.toString() );
+    animate();
+}
 
 function init() {
 
     clock = new THREE.Clock();
-
-    scene = new THREE.Scene();
-    scene.fog = new THREE.FogExp2( 0xaaccff, 0.01 );
 
     camera = new THREE.PerspectiveCamera( 45,
                                           window.innerWidth / window.innerHeight,
@@ -21,12 +24,12 @@ function init() {
 
     camera.up = new THREE.Vector3( 0, 0, 1 );
     camera.position.set( -60, -60, 30 );
-    camera.lookAt( scene.position );
+    camera.lookAt( 0, 0, 0 );
 
     renderer = new THREE.WebGLRenderer( { alpha: true,
                                           antialias: false } );
  	renderer.setPixelRatio( window.devicePixelRatio );
-    renderer.setClearColor( scene.fog.color, 1 );
+    renderer.setClearColor( 0xaaccff, 1 );
     renderer.setSize( window.innerWidth, window.innerHeight );
 	renderer.sortObjects = false;
 
@@ -120,6 +123,10 @@ function generateRock() {
 
 function createEnvironment( width, height, depth ) {
 
+    scene = new THREE.Scene();
+    scene.fog = new THREE.FogExp2( 0xaaccff, 0.005 );
+
+
     environment.width = width;
     environment.height = height;
     environment.depth = depth;
@@ -151,7 +158,6 @@ function createEnvironment( width, height, depth ) {
         scene.add( moth );
     }
 
-  
-    tree = treeFactory();
-    scene.add(tree);
+    // tree = treeFactory();
+    // scene.add(tree);
 }
