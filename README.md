@@ -1,2 +1,2 @@
-# dokuzatei
+# Coroga
 Computational Rock Gardening
