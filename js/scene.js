@@ -150,10 +150,6 @@ function createEnvironment( width, height, depth ) {
         scene.add( moth );
     }
 
-
     tree = treeFactory();
     scene.add(tree);
-
-    createBiomeMatrix();
-
 }
