@@ -57,12 +57,80 @@ Number.prototype.sign = function () {
     return n ? n < 0 ? -1 : 1: 0;
 };
 
-THREE.Geometry.prototype.mergeGeometry = function ( geometry ) {
-    var mesh = new THREE.Mesh( geometry );
-    mesh.updateMatrix();
-    this.merge( mesh.geometry, mesh.matrix );
+THREE.Vector3.prototype.l2 = function() {
+    return this.dot( this );
+}
+
+THREE.Vector3.prototype.abs = function() {
+    var v = this.clone();
+    v.x = Math.abs( this.x );
+    v.y = Math.abs( this.y );
+    v.z = Math.abs( this.z );
+
+    return v;
+};
+
+THREE.Geometry.prototype.mergeGeometry = function( geometries ) {
+    for ( var idx = 0; idx < geometries.length; idx++ ) {
+        var mesh = new THREE.Mesh( geometries[idx] );
+        mesh.updateMatrix();
+        this.merge( mesh.geometry, mesh.matrix );
+    }
 
     return this;
+};
+
+var rand = Math.random;
+
+function c_uniform ( a, b ) {
+    return a + ( b - a ) * rand();
+}
+
+function d_uniform ( a, b ) {
+    return Math.round( c_uniform( a, b ));
+}
+
+var normal = function () {
+    var alternate = 1;
+    var z0, z1;
+    var pi2 = Math.PI * 2;
+
+    return function ( mu, sigma ) {
+        alternate = !alternate;
+
+        if ( alternate ) {
+            return z1 * sigma + mu;
+        }
+
+        var u = rand();
+        var v = rand();
+
+        var tmp = Math.sqrt( -2 * Math.log( u ) );
+        z0 = tmp * Math.cos( pi2 * v );
+        z1 = tmp * Math.sin( pi2 * v );
+
+        return z0 * sigma + mu;
+    };
+}();
+
+function poisson ( lambda ) {
+    var x = 0;
+    var p = Math.pow( Math.E, -lambda );
+    var s = p;
+    var u = rand();
+
+    while ( u > s ) {
+        x += 1;
+        p *= lambda / x;
+        s += p;
+    }
+
+    return x;
+}
+
+function bernoulli ( phi ) {
+    var r = c_uniform( 0, 1 );
+    return ( phi < r ) ? 1 : -1;
 }
 
 /**

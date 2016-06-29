@@ -34,8 +34,8 @@ function ClusterFactory( RockFactory, width, height, depth ) {
     var y = height;
     var z = depth;
 
-    var rocks = [];
-    rocks.push( RockFactory( x, y, z ) );
+    var rocks = new THREE.Object3D();
+    rocks.addFeatureGeometry( 'rocks', RockFactory( x, y, z ) );
 
     var chance = 0.3;
 
@@ -46,29 +46,24 @@ function ClusterFactory( RockFactory, width, height, depth ) {
             z -= Math.random() * ( z - 1 );
 
             var newRock = RockFactory( x, y, z );
-            newRock.geometry.scale( Math.random() / 2 + 0.4, 1, 1 );
+            newRock.scale( Math.random() / 2 + 0.4, 1, 1 );
 
-            newRock.position.x = peturb( 0, 2 * width );
-            newRock.position.y = peturb( 0, 2 * height );
-            newRock.position.z -= ( depth - z ) / 2
+            newRock.translate( peturb( 0, 2 * width ),
+                               peturb( 0, 2 * height ),
+                               -( depth - z ) / 2 );
 
-            newRock.rotation.z += Math.random() * Math.PI;
-
-            rocks.push( newRock );
+            newRock.rotateZ( Math.random() * Math.PI );
+            rocks.addFeatureGeometry( 'rocks', newRock );
         }
 
         chance += 0.2;
     }
 
-    var rockGeo = mergeMeshGeometry( rocks );
-    var rockMat = new THREE.MeshPhongMaterial( { color : 0x505050,
-                                                 shading : THREE.FlatShading,
-                                                 shininess : 20,
-                                                 refractionRatio : 0.1 } );
-
-    var rock = new THREE.Mesh( rockGeo, rockMat );
-
-    return rock;
+    rocks.addFeatureMaterialP( 'rocks', { color : 0x505050,
+                                          shading : THREE.FlatShading,
+                                          refractionRatio : 0.1 } )
+    rocks.generateFeatures();
+    return rocks;
 
 }
 
@@ -147,9 +142,6 @@ function SpireRockFactory( width, height, depth) {
     var faces = incRandInt(4,7);
     var stories = Math.floor(depth + 1);
 
-
-    // var geometry = new THREE.CylinderGeometry( tRadius, bRadius, depth,
-    //   faces, stories, false, 0, 2.01*Math.PI);
     var geometry = new THREE.ClosedCylinderGeometry( tRadius, bRadius, depth,faces, stories, false, 0, 2.01*Math.PI);
     var numInternalVectors = faces
     var axisVectors =[];
@@ -170,10 +162,6 @@ function SpireRockFactory( width, height, depth) {
          vertex.z  = vertex.z - vectorMag * (internal.z);
     }
 
-
-    // Make top slanted
-
-
     for (var i = 0; i < geometry.vertices.length; i++ ) {
         var vertex = geometry.vertices[i];
         if ((vertex.z < depth + 0.1)&&(vertex.z > depth - 0.1))
@@ -181,19 +169,72 @@ function SpireRockFactory( width, height, depth) {
 
     }
 
+    geometry.rotateX(90* Math.PI / 180);
+    return geometry;
+}
 
-    geometry.rotateX(90* Math.PI / 180)
+function SpireRockFactory2 ( width, height, depth ) {
+    var cfg = { t_rad_range : { min : 0.4,
+                                max : 0.8 },
+                r_seg_range : { min : 5,
+                                max : 8 },
+                h_seg_range : { min : 5,
+                                max : 10 },
+                rotate      : { min : -Math.PI / 8,
+                                max : Math.PI / 8 },
+                vector_mag  : 0.3,
+                top_perturb : 0.5,
+                top_offset  : 0.3 };
 
-    var material = new THREE.MeshPhongMaterial( { color : 0x505050,
-                                                  shading : THREE.FlatShading,
-                                                  shininess : 20,
-                                                  refractionRatio : 0.1 } );
-    var mesh = new THREE.Mesh( geometry, material );
-    mesh.receiveShadow = true;
-    mesh.castShadow = true;
+    var diameter = Math.max( width, height );
+    var b_rad = diameter / 2;
+    var t_rad = c_uniform( cfg.t_rad_range.min,
+                           cfg.t_rad_range.max ) * b_rad;
 
-    return mesh;
+    var r_seg = d_uniform( cfg.r_seg_range.min,
+                           cfg.r_seg_range.max );
 
+    var h_seg = d_uniform( cfg.h_seg_range.min,
+                           cfg.h_seg_range.max );
+
+    var geometry = new THREE.ClosedCylinderGeometry(
+        t_rad, b_rad, depth, r_seg, h_seg ).rotateX( Math.PI / 2 );
+
+    var half_depth = depth / 2;
+    geometry.vertices.map( function ( vertex ) {
+        if ( Math.abs( vertex.z ) === half_depth ) {
+            var s = vertex.z.sign();
+            var r = c_uniform( 0, cfg.top_perturb );
+            if ( Math.abs( vertex.x ) < 0.001 && Math.abs( vertex.y ) < 0.001 ) {
+                vertex.z += s * ( r + cfg.top_offset );
+            } else {
+                vertex.z += s * r;
+            }
+        }
+    } );
+
+    var rotate = c_uniform( cfg.rotate.min, cfg.rotate.max );
+    geometry.rotateX( rotate );
+
+    var axis_vectors = [];
+    var num_vectors = h_seg;
+    for ( var v = 0; v < num_vectors; v++ ) {
+        var r = c_uniform( -1, 1 );
+        var ar = Math.abs( r );
+        axis_vectors.push( new THREE.Vector3( c_uniform( -ar, ar ) * b_rad,
+                                              c_uniform( -ar, ar ) * b_rad,
+                                              r * half_depth ) );
+    }
+
+    geometry.vertices.map( function ( vertex ) {
+        var internal = vertex.closest( axis_vectors ).clone();
+        vertex.sub( internal.multiplyScalar( cfg.vector_mag ) );
+    } );
+
+    geometry.scale( width / diameter, height / diameter, 1 );
+    geometry.rotateX( -rotate );
+
+    return geometry;
 }
 
 function ClusterBaseFactory( rock ) {

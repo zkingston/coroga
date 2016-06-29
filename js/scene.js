@@ -3,15 +3,9 @@ var camera, controls, scene, renderer, clock, stats;
 var environment = {};
 var tick = 0;
 
-try {
-    init();
-    render();
-    animate();
-}
-catch ( err ) {
-    alertError( err.toString() );
-    animate();
-}
+init();
+render();
+animate();
 
 function init() {
 
@@ -116,17 +110,13 @@ function generateRock() {
     var y = Math.floor( Math.random() * 6 + 3 );
     var z = Math.floor( Math.random() * 6 + 1 );
 
-    var rock = ClusterFactory( SpireRockFactory, x, y, z );
+    var rock = ClusterFactory( SpireRockFactory2, x, y, z );
+    rock.addToObject( scene, 
+                      peturb( rock.position.x, width - 3 * x ),
+                      peturb( rock.position.y, height - 3 * y ),
+                      rock.position.z + z / 2 - 0.5);
 
-    rock.position.x = peturb( rock.position.x, width - 3 * x );
-    rock.position.y = peturb( rock.position.y, height - 3 * y );
-    rock.position.z += z / 2 - 0.5;
-
-    var base = ClusterBaseFactory( rock );
-
-    rippleSand( 3 * Math.sqrt( x * x + y * y ) / 4, rock );
-
-    scene.add( rock );
+    rippleSand( 2, rock );
 }
 
 function createEnvironment( width, height, depth ) {
@@ -165,6 +155,6 @@ function createEnvironment( width, height, depth ) {
         scene.add( moth );
     }
 
-    tree = treeFactory();
-    scene.add(tree);
+    // tree = treeFactory();
+    // scene.add(tree);
 }
