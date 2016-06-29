@@ -1,22 +1,7 @@
-//Function that normalizes an array
-function normalize(a) {
-
-    //Use the reduce function to sum the array
-    var sum = a.reduce(add, 0);
-    function add(x, y) {
-        return x + y;
-    }
-
-    //Normalize
-    for (var i = 0; i < a.length; i++) {
-        a[i] = a[i] / sum;
-    }
-}
-
 //Function that normalizes each row of a matrix
 function normalizeMatrix(m){
     for (var i = 0; i < m.length; i++) {
-        normalize(m[i]);
+        m[i].normalize();
     }
 }
 

@@ -60,7 +60,7 @@ function displayFPS() {
     var but = document.getElementById('fpstoggle');
     if (div.style.display !== 'none') {
         tool.className ="col-xs-12 col-md-8";
-        div.className = '' 
+        div.className = ''
         div.style.display = 'none';
         but.innerHTML = 'Show FPS';
     }
@@ -72,3 +72,17 @@ function displayFPS() {
     }
 
 }
+
+/**
+ * Normalizes an array
+ */
+Array.prototype.normalize = function() {
+    var sum = this.reduce(add, 0);
+    function add(x, y) {
+        return x + y;
+    }
+
+    for (var i = 0; i < this.length; i++) {
+        this[i] = this[i] / sum;
+    }
+};
