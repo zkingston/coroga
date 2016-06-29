@@ -11,6 +11,17 @@ THREE.Object3D.prototype.getFeature = function( feature ) {
     return this.userData.features[ feature ];
 };
 
+THREE.Object3D.prototype.addFeatureGeometries = function( feature, geometries ) {
+    var f = this.getFeature( feature );
+
+    if ( typeof f.geometry === 'undefined' )
+        f.geometry = new THREE.Geometry();
+
+    f.geometry = f.geometry.mergeGeometry( geometries );
+
+    return this;
+}
+
 THREE.Object3D.prototype.addFeatureGeometry = function( feature, geometry ) {
     var f = this.getFeature( feature );
 
@@ -72,6 +83,17 @@ THREE.Object3D.prototype.generateFeatures = function() {
     }
 
     return this;
+}
+
+THREE.Object3D.prototype.addUpdateCallback = function( callback ) {
+    this.userData.update = callback;
+}
+
+THREE.Object3D.prototype.update = function() {
+    this.traverse( function ( obj ) {
+        if ( typeof obj.userData.update !== 'undefined' )
+            obj.userData.update( obj );
+    });
 }
 
 THREE.Object3D.prototype.addToObject = function( object, x, y, z ) {

@@ -69,8 +69,7 @@ function animate() {
 
     tick++;
 
-    updateLanterns();
-    updateMoths();
+    scene.update();
     updateWalls();
 
     controls.update();
@@ -145,14 +144,9 @@ function createEnvironment( width, height, depth ) {
     for ( var i = 0; i < lanterns.length; i++ ) {
         var dim = 3;
         var lantern = lanternFactory( dim, dim, 3 );
-        lantern.position.x = lanterns[i].x;
-        lantern.position.y = lanterns[i].y;
-        lantern.position.z += depth * 2;
-
         var moth = mothFactory( lantern );
 
-        scene.add( lantern );
-        scene.add( moth );
+        lantern.addToObject( scene, lanterns[i].x, lanterns[i].y, depth * 2 );
     }
 
     // tree = treeFactory();

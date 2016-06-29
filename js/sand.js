@@ -1,8 +1,6 @@
 var rakeModifier = 6;
 var rakeHeight = 0.125;
-
 var sandRandom = 0.125;
-
 var sideRakeBuffer = 10;
 
 function createSand( width, height ) {
