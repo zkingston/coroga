@@ -150,7 +150,7 @@ function SpireRockFactory( width, height, depth) {
 
     // var geometry = new THREE.CylinderGeometry( tRadius, bRadius, depth,
     //   faces, stories, false, 0, 2.01*Math.PI);
-    var geometry = new THREE.CylinderGeometry( tRadius, bRadius, depth,faces, stories, false, 0, 2.01*Math.PI);
+    var geometry = new THREE.ClosedCylinderGeometry( tRadius, bRadius, depth,faces, stories, false, 0, 2.01*Math.PI);
     var numInternalVectors = faces
     var axisVectors =[];
 

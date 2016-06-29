@@ -1,0 +1,45 @@
+html {
+  text-align: center;
+}
+
+body {
+    margin: 0;
+    overflow: hidden;
+
+}
+
+#canvas {
+    z-index: 3;
+}
+
+#alerts {
+    display: inline-block;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 30px;
+    width: 100%;
+    margin: auto;
+    z-index: 1;
+}
+
+.alert {
+    margin: 10px;
+}
+
+#toolbar {
+    position: absolute;
+    z-index: 1;
+    margin: 10px auto;
+    bottom: 0;
+    left: 0;
+}
+
+#stats {
+    display: none;
+    left: -20px;
+    bottom: 0;
+    margin: 0 auto;
+    vertical-align: bottom;
+}
