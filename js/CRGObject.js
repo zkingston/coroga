@@ -110,7 +110,7 @@ THREE.Object3D.prototype.traverseFeatureGeometry = function( callback ) {
     return this;
 }
 
-THREE.Object3D.prototype.boundingCircle = function( ) {
+THREE.Object3D.prototype.boundingCircle = function() {
     if ( typeof this.userData.boundingCircle !== 'undefined' )
         return this.userData.boudingCircle;
 
@@ -141,7 +141,7 @@ THREE.Object3D.prototype.boundingCircle = function( ) {
 
     var r = outer.abs().sub( center.abs() );
 
-    this.userData.boundingCenter = { center : center,
+    this.userData.boundingCircle = { center : center,
                                      radius : Math.sqrt( r.l2() ) };
 
     return this.userData.boundingCircle;

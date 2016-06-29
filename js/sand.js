@@ -11,11 +11,10 @@ function createSand( width, height ) {
     obj.addFeatureGeometry( 'sand',
                             new THREE.PlaneGeometry( width, height, width * 2, height * 2 ) );
 
-    obj.addFeatureMaterial( 'sand',
-                            new THREE.MeshPhongMaterial( { color : 0xfcfbdf,
-                                                           shading : THREE.FlatShading,
-                                                           shininess : 10,
-                                                           refractionRatio : 0.5 } ) );
+    obj.addFeatureMaterialP( 'sand', { color : 0xfcfbdf,
+                                       shading : THREE.FlatShading,
+                                       shininess : 10,
+                                       refractionRatio : 0.5 } );
 
     obj.traverseFeatureGeometry( function ( v ) {
         if ( Math.abs( v.x ) > width / 2 - sideRakeBuffer ) {
@@ -28,23 +27,25 @@ function createSand( width, height ) {
     obj.generateFeatures();
     obj.addToObject( scene );
 
-    environment.sand = sand;
+    obj.userData.width = width;
+    obj.userData.height = height;
+
+    environment.sand = obj;
 }
 
 function rippleSand( diameter, object ) {
-    var bound = object.boundingCirlce();
+    var bound = object.boundingCircle();
     var center = object.localToWorld( bound.center );
 
     var sand = environment.sand;
 
     sand.traverseFeatureGeometry( function ( v ) {
-
-        var dist = center.distanceTo( vertex );
+        var dist = center.distanceTo( v );
 
         if ( dist <= diameter + bound.radius ) {
-            vertex.z = peturb( Math.cos( dist * rakeModifier ) * rakeHeight, sandRandom );
+            if ( Math.abs( v.x ) < sand.userData.width / 2 - sideRakeBuffer )
+                v.z = peturb( Math.cos( dist * rakeModifier ) * rakeHeight, sandRandom );
         }
-
     } );
 }
 
