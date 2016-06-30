@@ -2,7 +2,7 @@ function createStars() {
     // create the particle variables
     var particleCount = 1800,
         particles = new THREE.Geometry(),
-        pMaterial = new THREE.ParticleBasicMaterial({
+        pMaterial = new THREE.PointsMaterial({
           color: 0xFFFFFF,
           size: 5,
           map: THREE.ImageUtils.loadTexture("images/particle.png"),
@@ -10,17 +10,18 @@ function createStars() {
           transparent: true
         });
 
+    var genDist = 2200;
+
     // now create the individual particles
     for (var p = 0; p < particleCount; p++) {
 
       // create a particle with random
-      // position values, -250 -> 250
-      var pX = Math.random() * 1000 - 500,
-          pY = Math.random() * 1000 - 500,
-          pZ = Math.random() * 1000 - 500,
+      var pX = Math.random() * genDist - genDist / 2,
+          pY = Math.random() * genDist - genDist / 2,
+          pZ = Math.abs(Math.random() * genDist - genDist / 2),
           particle = new THREE.Vector3(pX, pY, pZ);
 
-      if (pZ < 0 || Math.pow(pX, 2) + Math.pow(pY, 2) < 5000) {
+      if (Math.pow(pX, 2) + Math.pow(pY, 2) < 240000) {
         p--;
         continue;
       }
@@ -29,7 +30,7 @@ function createStars() {
     }
 
     // create the particle system
-    var particleSystem = new THREE.ParticleSystem(
+    var particleSystem = new THREE.Points(
         particles,
         pMaterial);
     return particleSystem;
