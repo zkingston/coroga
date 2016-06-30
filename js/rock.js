@@ -8,7 +8,7 @@ function RockClusterFactory( RockGeometry, width, height, depth ) {
 
     var chance = 0.3;
 
-    while ( Math.random() > chance && x > 3 && y > 3 ) {
+    while ( Math.random() > chance && x > 2 && y > 2 && z > 1 ) {
         for ( var i = 0; i < 2; i++ ) {
             x -= Math.random() * ( x - 1 );
             y -= Math.random() * ( y - 1 );

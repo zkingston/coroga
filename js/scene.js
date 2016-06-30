@@ -76,13 +76,10 @@ function animate() {
 }
 
 function render() {
-
     renderer.render( scene, camera );
-
 }
 
 function initializeLights() {
-
     var sceneLight = new THREE.HemisphereLight( 0xc2c2dd, 0x40c2c2, .1 );
     scene.add( sceneLight );
     environment.hemiLight = sceneLight;
@@ -92,7 +89,6 @@ function initializeLights() {
     lamp.castShadow = true;
     scene.add( lamp );
     environment.lamp = lamp;
-
 }
 
 function generateRock() {
@@ -100,7 +96,7 @@ function generateRock() {
     var height = environment.height;
 
     var x = Math.floor( rand() * 6 + 3 );
-    var y = Math.floor( rand() * 6 + 4 );
+    var y = Math.floor( rand() * 6 + 3 );
     var z = Math.floor( rand() * 6 + 2 );
 
     var rock = RockClusterFactory( SpireRockGeometry, x, y, z );
@@ -144,6 +140,7 @@ function createEnvironment( width, height, depth ) {
     generateRock();
     while ( Math.random() > 0.3 )
         generateRock();
+
     // tree = treeFactory();
-    // scene.add(tree);
+    // environment.sand.add(tree);
 }

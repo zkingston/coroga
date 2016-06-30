@@ -5,8 +5,8 @@
 
 // What is the length of the branch segment given the joit number.
 function _lengthHeuristic(maxlen, maxjoint, curjoint){
-  //return maxlen * curjoint/maxjoint - curjoint + randRange(1,4)
-  return (curjoint < 2)? randRange(3,5): randRange(2,4)
+  //return maxlen * curjoint/maxjoint - curjoint + continuousUniform(1,4)
+  return (curjoint < 2)? continuousUniform(3,5): continuousUniform(2,4)
 }
 // Probability a branch will spawn at fork
 // Always fork at least once.
@@ -22,12 +22,12 @@ var _radiusCutoff = 1.0; // Radius at which to stop spawning off branches (surpr
 
 // Cascade of shrinking probability cones.
 var spreadAngle = 120; // Starting probability cones
-function degradation(){return randRange(0.1,1) * 10}; // How fast does it shrink
+function degradation(){return continuousUniform(0.1,1) * 10}; // How fast does it shrink
 var flowerSize = .4; // How big are the flowers.
-function flowerDist(){return randRange(flowerSize,2* flowerSize)}; // Space between parent and child
+function flowerDist(){return continuousUniform(flowerSize,2* flowerSize)}; // Space between parent and child
 function childPerDegree(angle){ // How many children based on how big the probability cone is
     // Works closesly with degradation. degradation is how fast the angle drops
-    if (angle > (9/10) * spreadAngle){return Math.floor(randRange(1,4))}
+    if (angle > (9/10) * spreadAngle){return Math.floor(continuousUniform(1,4))}
     if (angle > (4/5)*spreadAngle){return Math.floor(4 * angle/spreadAngle)}
     if (angle == 0){return 0}
     else{return 1}
@@ -87,7 +87,7 @@ function conePoint(origin, vector, length, degreeLow, degreeHigh){
      degreeHigh = (!degreeHigh)? 1:degreeHigh;
     // Use axis
     vector.normalize()
-    //length = length * randRange(0,1)
+    //length = length * continuousUniform(0,1)
     var rl = (Math.PI/180) * degreeLow
     var rh = (Math.PI/180) * degreeHigh
     var a = vector
@@ -101,8 +101,8 @@ function conePoint(origin, vector, length, degreeLow, degreeHigh){
     v.crossVectors(a,u).normalize()
     //axis, u, v basis constructed
 
-    var theta = acos(randRange(cos(rl), cos(rh)))
-    var phi = randRange(0, 2*Math.PI)
+    var theta = acos(continuousUniform(cos(rl), cos(rh)))
+    var phi = continuousUniform(0, 2*Math.PI)
 
     var x = new THREE.Vector3(
       sin(theta)*(cos(phi) * u.x + sin(phi)* v.x) + cos(theta) *a.x,
@@ -383,7 +383,7 @@ function treeFactory(){
                     if (rad > _radiusCutoff){
                         var o = new THREE.Vector3().addVectors(cur["bVec"][joint], cur["offset"])
                         var v = new THREE.Vector3().subVectors(cur["bVec"][joint],cur["bVec"][joint-1])
-                        var r = rad * randRange(.6,.9)
+                        var r = rad * continuousUniform(.6,.9)
                         var n = cur["bVec"].length - joint + 1
                         var newBranch = branchGenerator(o,v,r,n)
                         buffer.push(newBranch)
