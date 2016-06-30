@@ -1,7 +1,7 @@
 var rakeModifier = 6;
 var rakeHeight = 0.125;
-var sandRandom = 0.125;
-var sideRakeBuffer = 10;
+var sandRandom = 0.08;
+var sideRakeBuffer = 5;
 
 function createSand( width, height ) {
     var obj = new THREE.Object3D();
@@ -16,9 +16,9 @@ function createSand( width, height ) {
 
     obj.traverseFeatureGeometry( function ( v ) {
         if ( Math.abs( v.x ) > width / 2 - sideRakeBuffer ) {
-            v.z = peturb( Math.cos( v.x * rakeModifier ) * rakeHeight, sandRandom );
+            v.z = perturb( Math.cos( v.x * rakeModifier ) * rakeHeight, sandRandom );
         } else {
-            v.z = peturb( Math.sin( v.y * rakeModifier ) * rakeHeight, sandRandom );
+            v.z = perturb( Math.sin( v.y * rakeModifier ) * rakeHeight, sandRandom );
         }
     } );
 
@@ -42,7 +42,7 @@ function rippleSand( diameter, object ) {
 
         if ( dist <= diameter + bound.radius ) {
             if ( Math.abs( v.x ) < sand.userData.width / 2 - sideRakeBuffer )
-                v.z = peturb( Math.cos( dist * rakeModifier ) * rakeHeight, sandRandom );
+                v.z = randOffset( Math.cos( dist * rakeModifier ) * rakeHeight * 1.2, sandRandom );
         }
     } );
 }

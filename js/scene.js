@@ -45,6 +45,7 @@ function init() {
 
     window.addEventListener( 'resize', onWindowResize, false );
 
+    createBase( 70, 50, 2 );
     createEnvironment( 70, 50, 2 );
 
 }
@@ -61,23 +62,17 @@ function onWindowResize() {
 }
 
 function animate() {
-
     stats.begin();
 
-    var delta = clock.getDelta();
     render();
 
     tick++;
-
     scene.update();
-    updateWalls();
-
     controls.update();
 
     stats.end();
 
     requestAnimationFrame( animate );
-
 }
 
 function render() {
@@ -101,25 +96,23 @@ function initializeLights() {
 }
 
 function generateRock() {
-
     var width = environment.width;
     var height = environment.height;
 
-    var x = Math.floor( Math.random() * 6 + 3 );
-    var y = Math.floor( Math.random() * 6 + 3 );
-    var z = Math.floor( Math.random() * 6 + 1 );
+    var x = Math.floor( rand() * 6 + 3 );
+    var y = Math.floor( rand() * 6 + 4 );
+    var z = Math.floor( rand() * 6 + 2 );
 
-    var rock = ClusterFactory( SpireRockFactory2, x, y, z );
-    rock.addToObject( scene, 
-                      peturb( rock.position.x, width - 3 * x ),
-                      peturb( rock.position.y, height - 3 * y ),
-                      rock.position.z + z / 2 - 0.5);
+    var rock = RockClusterFactory( SpireRockGeometry, x, y, z );
+    rock.addToObject( environment.sand, 
+                      randOffset( 0, width - 3 * x ),
+                      randOffset( 0, height - 4 * y ),
+                      z / 2 - 0.5);
 
     rippleSand( 2, rock );
 }
 
-function createEnvironment( width, height, depth ) {
-
+function createBase( width, height, depth ) {
     scene = new THREE.Scene();
     scene.fog = new THREE.FogExp2( 0xaaccff, 0.005 );
 
@@ -130,14 +123,7 @@ function createEnvironment( width, height, depth ) {
 
     initializeLights();
 
-    createSand( width, height );
     createWalls( width, height, 15 );
-
-    generateRock();
-
-    while ( Math.random() > 0.3 ) {
-        generateRock();
-    }
 
     var lanterns = [ { x : width / 2 - 2, y : -height / 2 + 2 },
                      { x : -width / 2 + 2, y : height / 2 - 2 } ];
@@ -148,7 +134,16 @@ function createEnvironment( width, height, depth ) {
 
         lantern.addToObject( scene, lanterns[i].x, lanterns[i].y, depth * 2 );
     }
+}
 
+function createEnvironment( width, height, depth ) {
+    if ( typeof environment.sand !== 'undefined' )
+        scene.remove( environment.sand );
+    createSand( width, height );
+
+    generateRock();
+    while ( Math.random() > 0.3 )
+        generateRock();
     // tree = treeFactory();
     // scene.add(tree);
 }

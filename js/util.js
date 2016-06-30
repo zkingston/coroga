@@ -29,12 +29,8 @@ THREE.Vector3.prototype.closest = function ( vector_list ) {
 };
 
 Array.prototype.choose = function () {
-    return this[ d_uniform( 0, this.length - 1 ) ];
+    return this[ discreteUniform( 0, this.length - 1 ) ];
 };
-
-function perturb( value, range ) {
-    return value + normal( 0, range );
-}
 
 Array.prototype.shuffle = function () {
     var tmp, rand_idx;
@@ -82,12 +78,12 @@ THREE.Geometry.prototype.mergeGeometry = function( geometries ) {
 
 var rand = Math.random;
 
-function c_uniform ( a, b ) {
+function continuousUniform ( a, b ) {
     return a + ( b - a ) * rand();
 }
 
-function d_uniform ( a, b ) {
-    return Math.round( c_uniform( a, b ));
+function discreteUniform ( a, b ) {
+    return Math.round( continuousUniform( a, b ));
 }
 
 var normal = function () {
@@ -113,6 +109,20 @@ var normal = function () {
     };
 }();
 
+function randOffset( value, range ) {
+    return value + ( Math.random() * range ) - ( range / 2 ) ;
+}
+
+function perturb( value, deviation ) {
+    return value + normal( 0, deviation );
+}
+
+THREE.Vector3.prototype.perturb = function( range ) {
+    this.x = perturb( this.x, range );
+    this.y = perturb( this.y, range );
+    this.z = perturb( this.z, range );
+}
+
 function poisson ( lambda ) {
     var x = 0;
     var p = Math.pow( Math.E, -lambda );
@@ -129,7 +139,7 @@ function poisson ( lambda ) {
 }
 
 function bernoulli ( phi ) {
-    var r = c_uniform( 0, 1 );
+    var r = continuousUniform( 0, 1 );
     return ( phi < r ) ? 1 : -1;
 }
 
@@ -137,40 +147,31 @@ function bernoulli ( phi ) {
  * Displays a success message at the top of the screen.
  */
 function alertSuccess( text ) {
-
     document.getElementById( 'alerts' ).innerHTML += alert.format( 'success', 'Success', text );
-
 }
 
 /**
  * Displays an info message at the top of the screen.
  */
 function alertInfo( text ) {
-
     document.getElementById( 'alerts' ).innerHTML += alert.format( 'info', 'Info', text );
-
 }
 
 /**
  * Displays a warning message at the top of the screen.
  */
 function alertWarning( text ) {
-
     document.getElementById( 'alerts' ).innerHTML += alert.format( 'warning', 'Warning', text );
-
 }
 
 /**
  * Displays an error message at the top of the screen.
  */
 function alertError( text ) {
-
     document.getElementById( 'alerts' ).innerHTML += alert.format( 'danger', 'Error', text );
-
 }
 
 function displayFPS() {
-
     var div = document.getElementById('stats');
     var tool = document.getElementById('buttons');
     var but = document.getElementById('fpstoggle');
@@ -186,5 +187,4 @@ function displayFPS() {
         div.style.display = 'block';
         but.innerHTML = 'Hide FPS';
     }
-
 }
