@@ -3,7 +3,11 @@ var camera, controls, scene, renderer, clock, stats;
 var environment = {};
 var tick = 0;
 
-var nightMode = true;
+var nightMode = false;
+
+function nightModeSet(value) {
+    nightMode = value;
+}
 
 try {
     init();
@@ -143,9 +147,17 @@ function generateRock() {
 
 function createEnvironment( width, height, depth ) {
 
+
+    if (nightMode) {
+        renderer.setClearColor( 0x001331, 1 );
+    }
+    else {
+        renderer.setClearColor( 0xaaccff, 1 );
+    }
+
     scene = new THREE.Scene();
     if (nightMode) {
-        scene.fog = new THREE.FogExp2( 0x001331, 0.005 );
+        scene.fog = new THREE.FogExp2( 0x001331, 0.0025 );
     }
     else {
         scene.fog = new THREE.FogExp2( 0xaaccff, 0.005 );
