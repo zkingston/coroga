@@ -125,7 +125,7 @@ function conePoint(origin, vector, length, degreeLow, degreeHigh){
 * @return {THREE.Points} Returns a particle system propagating from the origin
 *
 **/
-function cascadeGenerator(origin){
+function cascadeGenerator(origin, color){
 
     // flowers are the geometric object
     // nodes are their positional data.
@@ -134,8 +134,8 @@ function cascadeGenerator(origin){
     // Properties of each flower
 
     var flowerProperties = new THREE.PointsMaterial({
-        color : 0xff69b4,
-        size : .8
+        color : color,
+        size : .4
     });
 
     // Array of all flower points.
@@ -441,7 +441,9 @@ function treeFactory(x,y){
         locus.add(cur.offset)
 
         // Places a blossom cascade at the tree tip.
-        tree.add(cascadeGenerator(locus))
+        tree.add(cascadeGenerator(locus, 0xff69b4))
+        tree.add(cascadeGenerator(locus, 0xcd6889))
+        tree.add(cascadeGenerator(locus, 0xcd3278))
     }
 
     return tree;
