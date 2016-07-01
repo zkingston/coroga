@@ -85,6 +85,7 @@ function animate() {
 
     updateLanterns();
     updateMoths();
+    updateMotes();
     updateWalls();
 
     controls.update();
@@ -188,5 +189,7 @@ function createEnvironment( width, height, depth ) {
     if (nightMode) {
         stars = createStars();
         scene.add(stars);
+        motes = createMotes();
+        scene.add(motes);
     }
 }
