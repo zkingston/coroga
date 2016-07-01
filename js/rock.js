@@ -6,20 +6,26 @@ function RockClusterFactory( RockGeometry, width, height, depth ) {
     var rocks = new THREE.Object3D();
     rocks.addFeatureGeometry( 'rocks', RockGeometry( x, y, z ) );
 
+    rocks.addFeatureMaterialP( 'rocks', { color : 0x505050,
+                                          shading : THREE.FlatShading,
+                                          refractionRatio : 0.1 } )
+    rocks.generateFeatures();
+    return rocks;
+
     var chance = 0.3;
 
-    while ( Math.random() > chance && x > 2 && y > 2 && z > 1 ) {
+    while ( rand() > chance && x > 3 && y > 3 && z > 3 ) {
         for ( var i = 0; i < 2; i++ ) {
-            x -= Math.random() * ( x - 1 );
-            y -= Math.random() * ( y - 1 );
-            z -= Math.random() * ( z - 1 );
+            x -= rand();
+            y -= rand();
+            z -= rand();
 
             var newRock = RockGeometry( x, y, z );
             newRock.scale( Math.random() / 2 + 0.4, 1, 1 );
 
             newRock.translate( randOffset( 0, 2 * width ),
                                randOffset( 0, 2 * height ),
-                               -( depth - z ) / 2 );
+                               -z / 2 );
 
             newRock.rotateZ( Math.random() * Math.PI );
             rocks.addFeatureGeometry( 'rocks', newRock );
@@ -33,6 +39,71 @@ function RockClusterFactory( RockGeometry, width, height, depth ) {
                                           refractionRatio : 0.1 } )
     rocks.generateFeatures();
     return rocks;
+}
+
+function SpireRockGeometry( width, height, depth ) {
+    var cfg = { t_rad_range : { min : 0.4,
+                                max : 0.8 },
+                r_seg_range : { min : 5,
+                                max : 10 },
+                h_seg_range : { min : 5,
+                                max : 10 },
+                rotate      : { min : -Math.PI / 8,
+                                max : Math.PI / 8 },
+                vector_mag  : 0.3,
+                top_perturb : 0.2,
+                top_offset  : 0.3 };
+
+    depth = Math.ceil( depth );
+    var diameter = Math.max( width, height );
+    var b_rad = diameter / 2;
+    var t_rad = continuousUniform( cfg.t_rad_range.min,
+                                   cfg.t_rad_range.max ) * b_rad;
+
+    var r_seg = discreteUniform( cfg.r_seg_range.min,
+                                 cfg.r_seg_range.max ).even();
+
+    var h_seg = discreteUniform( cfg.h_seg_range.min,
+                                 cfg.h_seg_range.max ).even();
+
+    var geometry = new THREE.ClosedCylinderGeometry(
+        t_rad, b_rad, depth, r_seg, h_seg ).rotateX( Math.PI / 2 );
+
+    var half_depth = depth / 2;
+    geometry.vertices.map( function ( vertex ) {
+        if ( Math.abs( vertex.z ) === half_depth ) {
+            var s = vertex.z.sign();
+            var r = continuousUniform( 0, cfg.top_perturb );
+            if ( Math.abs( vertex.x ) < 0.001 && Math.abs( vertex.y ) < 0.001 ) {
+                vertex.z += s * ( r + cfg.top_offset );
+            } else {
+                vertex.z += s * r;
+            }
+        }
+    } );
+
+    var rotate = continuousUniform( cfg.rotate.min, cfg.rotate.max );
+    geometry.rotateX( rotate );
+
+    var axis_vectors = [];
+    var num_vectors = h_seg;
+    for ( var v = 0; v < num_vectors; v++ ) {
+        var r = continuousUniform( -0.7, 0.7 );
+        var ar = Math.abs( r ) + 0.3;
+        axis_vectors.push( new THREE.Vector3( continuousUniform( -ar, ar ) * b_rad,
+                                              continuousUniform( -ar, ar ) * b_rad,
+                                              r * half_depth ) );
+    }
+
+    geometry.vertices.map( function ( vertex ) {
+        var internal = vertex.closest( axis_vectors ).clone();
+        vertex.sub( internal.multiplyScalar( cfg.vector_mag ) );
+    } );
+
+    geometry.scale( width / diameter, height / diameter, 1 );
+    geometry.rotateX( -rotate );
+
+    return geometry;
 }
 
 function MossDecorator( rock, threshold ) {
@@ -73,68 +144,4 @@ function MossDecorator( rock, threshold ) {
 
     return mossyRock;
 
-}
-
-function SpireRockGeometry( width, height, depth ) {
-    var cfg = { t_rad_range : { min : 0.4,
-                                max : 0.8 },
-                r_seg_range : { min : 5,
-                                max : 8 },
-                h_seg_range : { min : 5,
-                                max : 10 },
-                rotate      : { min : -Math.PI / 8,
-                                max : Math.PI / 8 },
-                vector_mag  : 0.3,
-                top_perturb : 0.5,
-                top_offset  : 0.3 };
-
-    var diameter = Math.max( width, height );
-    var b_rad = diameter / 2;
-    var t_rad = continuousUniform( cfg.t_rad_range.min,
-                                   cfg.t_rad_range.max ) * b_rad;
-
-    var r_seg = discreteUniform( cfg.r_seg_range.min,
-                                 cfg.r_seg_range.max );
-
-    var h_seg = discreteUniform( cfg.h_seg_range.min,
-                                 cfg.h_seg_range.max );
-
-    var geometry = new THREE.ClosedCylinderGeometry(
-        t_rad, b_rad, depth, r_seg, h_seg ).rotateX( Math.PI / 2 );
-
-    var half_depth = depth / 2;
-    geometry.vertices.map( function ( vertex ) {
-        if ( Math.abs( vertex.z ) === half_depth ) {
-            var s = vertex.z.sign();
-            var r = continuousUniform( 0, cfg.top_perturb );
-            if ( Math.abs( vertex.x ) < 0.001 && Math.abs( vertex.y ) < 0.001 ) {
-                vertex.z += s * ( r + cfg.top_offset );
-            } else {
-                vertex.z += s * r;
-            }
-        }
-    } );
-
-    var rotate = continuousUniform( cfg.rotate.min, cfg.rotate.max );
-    geometry.rotateX( rotate );
-
-    var axis_vectors = [];
-    var num_vectors = h_seg;
-    for ( var v = 0; v < num_vectors; v++ ) {
-        var r = continuousUniform( -1, 1 );
-        var ar = Math.abs( r );
-        axis_vectors.push( new THREE.Vector3( continuousUniform( -ar, ar ) * b_rad,
-                                              continuousUniform( -ar, ar ) * b_rad,
-                                              r * half_depth ) );
-    }
-
-    geometry.vertices.map( function ( vertex ) {
-        var internal = vertex.closest( axis_vectors ).clone();
-        vertex.sub( internal.multiplyScalar( cfg.vector_mag ) );
-    } );
-
-    geometry.scale( width / diameter, height / diameter, 1 );
-    geometry.rotateX( -rotate );
-
-    return geometry;
 }
