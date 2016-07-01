@@ -1,7 +1,45 @@
+/**
+ * CRGObject.js - A set of extensions to the THREE.Object3D class to help with
+ * the construction of complex geometries and scene graph structures.
+ *
+ * The main addition is the notion of a 'feature', which is a pair of geometry
+ * and material associated with a name key. The actual mesh construction is
+ * abstracted away from the user for a feature, and is created and added with
+ * generateFeatures().
+ *
+ * Other utility functions are added to help with recursive traversal, such as
+ * scene update functions and vertex traversal.
+ *
+ * Standard workflow looks like this:
+ *
+ *     var o = new THREE.Object3D();
+ *     o.addFeatureGeometry( 'myFeature', new THREE.BoxGeometry( 1, 1, 1 ) );
+ *     o.addFeatureMaterialL( 'myFeature', { color : 0x000000 } );
+ *     o.generateFeatures();
+ *     o.addToObject( scene, 0, 0, 0 );
+ *
+ * Which creates a box under the 'myFeature' feature, generates the mesh, and
+ * adds it to the scene.
+ *
+ * For optimization purposes, o.bufferizeFeature( 'myFeature' ); could be done
+ * before generateFeatures() to transform the existing geometry into a
+ * THREE.BufferGeometry().
+ */
+
+/**
+ * Retrieves a feature object. Features are an object with a pair of keys
+ * 'geometry' and 'material'. By default these are 'undefined'.
+ * 
+ * @param  { string } feature The feature key to get
+ * 
+ * @return { Object } The feature under 'feature'
+ */
 THREE.Object3D.prototype.getFeature = function( feature ) {
+    // Check if we have already made the features container
     if ( typeof this.userData.features === 'undefined' )
         this.userData.features = {};
-
+ 
+    // Check if we have not already made this feature
     if ( !( feature in this.userData.features ) )
         this.userData.features[ feature ] = {
             geometry : undefined,
@@ -11,17 +49,16 @@ THREE.Object3D.prototype.getFeature = function( feature ) {
     return this.userData.features[ feature ];
 };
 
-THREE.Object3D.prototype.addFeatureGeometries = function( feature, geometries ) {
-    var f = this.getFeature( feature );
-
-    if ( typeof f.geometry === 'undefined' )
-        f.geometry = new THREE.Geometry();
-
-    f.geometry = f.geometry.mergeGeometry( geometries );
-
-    return this;
-}
-
+/**
+ * Adds a geometry object to a feature. If the feature has preexisting geometry,
+ * the union of the existing geometry and the new is taken and added to the
+ * feature.
+ * 
+ * @param { string }         feature  Feature to add geometry to
+ * @param { THREE.Geometry } geometry New geometry to add to feature
+ * 
+ * @return { THREE.Object3D } This
+ */
 THREE.Object3D.prototype.addFeatureGeometry = function( feature, geometry ) {
     var f = this.getFeature( feature );
 
@@ -33,23 +70,77 @@ THREE.Object3D.prototype.addFeatureGeometry = function( feature, geometry ) {
     return this;
 }
 
+/**
+* Takes the union of an array of geometries with the existing geometry of the
+* feature.
+*
+* @param { string }           feature    Feature to add geometries to
+* @param { THREE.Geometry[] } geometries An array of geometries to add
+* 
+* @return { THREE.Object3D } This
+*/
+THREE.Object3D.prototype.addFeatureGeometries = function( feature, geometries ) {
+    var f = this.getFeature( feature );
+
+    if ( typeof f.geometry === 'undefined' )
+        f.geometry = new THREE.Geometry();
+
+    f.geometry = f.geometry.mergeGeometry( geometries );
+
+    return this;
+}
+
+/**
+ * Transforms existing geometry of a feature into THREE.BufferGeometry for
+ * optimization purposes.
+ *
+ * @param { string } feature Feature to bufferize geometry
+ *
+ * @return { THREE.Object3D } This
+ */
 THREE.Object3D.prototype.bufferizeFeature = function( feature ) {
     var f = this.getFeature( feature );
     f.geometry = new THREE.BufferGeometry().fromGeometry( f.geometry );
-    f.buffered = true;
 
     return this;
 }
 
+/**
+ * Updates the geometry of the features contained recursively in the object.
+ *
+ * @return { THREE.Object3D } This
+ */
 THREE.Object3D.prototype.updateFeatures = function() {
-    for ( var f in this.userData.features ) {
-        f = this.userData.features[ f ];
-        f.geometry.computeFaceNormals();
-        f.geometry.computeVertexNormals();
-    }
+    // Recursively traverse the object
+    this.traverse( function ( o ) {
+        // Skip simple meshes - we have the reference already in the feature
+        if ( o.type === 'mesh' )
+            return;
+
+        // Iterate through features
+        for ( var f in o.userData.features ) {
+            g = o.userData.features[ f ].geometry;
+
+            // BufferGeometry is practically immutable - don't worry about it
+            if ( g.type !== 'BufferGeometry' ) {
+                g.verticesNeedUpdate = true;
+                g.computeFaceNormals();
+                g.computeVertexNormals();
+            }
+        }
+    });
+
     return this;
 }
 
+/**
+ * Adds a Lambert material to a feature with specified attributes.
+ *
+ * @param { string } feature    Feature to add material to
+ * @param { Object } attributes Attributes to initialize material with
+ *
+ * @return { THREE.Object3D } This
+ */
 THREE.Object3D.prototype.addFeatureMaterialL = function( feature, attributes ) {
     var f = this.getFeature( feature );
     f.material = new THREE.MeshLambertMaterial( attributes );
@@ -57,12 +148,26 @@ THREE.Object3D.prototype.addFeatureMaterialL = function( feature, attributes ) {
     return this;
 }
 
+/**
+ * Adds a Phonic material to a feature with specified attributes.
+ *
+ * @param { string } feature    Feature to add material to
+ * @param { Object } attributes Attributes to initialize material with
+ *
+ * @return { THREE.Object3D } This
+ */
 THREE.Object3D.prototype.addFeatureMaterialP = function( feature, attributes ) {
     var f = this.getFeature( feature );
     f.material = new THREE.MeshPhongMaterial( attributes );
     return this;
 }
 
+/**
+ * Generate the meshes for the features held by this object. Must be called
+ * or nothing will be displayed in the scene.
+ *
+ * @return { THREE.Object3D } This
+ */
 THREE.Object3D.prototype.generateFeatures = function() {
     for ( var c in this.children ) {
         if ( c.type == 'mesh' )
@@ -84,10 +189,22 @@ THREE.Object3D.prototype.generateFeatures = function() {
     return this;
 }
 
+/**
+ * Adds an update callback function that is called on every refresh of the scene,
+ * allowing for animation or updates on events.
+ *
+ * @param { function( THREE.Object3D ) } callback Callback function to add
+ *
+ * @return { THREE.Object3D } This
+ */
 THREE.Object3D.prototype.addUpdateCallback = function( callback ) {
     this.userData.update = callback;
+    return this;
 }
 
+/**
+ * Recursively calls the update callback added to an Object3D.
+ */
 THREE.Object3D.prototype.update = function() {
     this.traverse( function ( obj ) {
         if ( typeof obj.userData.update !== 'undefined' )
@@ -95,6 +212,16 @@ THREE.Object3D.prototype.update = function() {
     });
 }
 
+/**
+ * Adds this object to another object at a specified location.
+ *
+ * @param { THREE.Object3D } object The object to add this to
+ * @param { number }         x      Relative x coordinate
+ * @param { number }         y      Relative y coordinate
+ * @param { number }         z      Relative z coordinate
+ *
+ * @return { THREE.Object3D } This
+ */
 THREE.Object3D.prototype.addToObject = function( object, x, y, z ) {
     if ( typeof x !== 'undefined' )
         this.position.x = x;
@@ -114,31 +241,40 @@ THREE.Object3D.prototype.addToObject = function( object, x, y, z ) {
 
 /**
  * Traverses overall all vertices contained inside an object.
- * Callback accepts a Vector3.
+ *
+ * @param { function( THREE.Vector3 ) } Callback function called for every vertex
+ *
+ * @return { THREE.Object3D } This
  */
 THREE.Object3D.prototype.traverseFeatureGeometry = function( callback ) {
     this.traverseVisible( function ( obj ) {
         for ( var f in obj.userData.features ) {
             f = obj.userData.features[ f ];
-            if ( f.buffered ) // TODO: Handle BufferGeometry
-                continue;
-
-            for ( var i = 0, l = f.geometry.vertices.length; i < l; i++ )
-                callback( f.geometry.vertices[ i ] );
+            if ( f.geometry.type !== 'BufferGeometry' )
+                for ( var i = 0, l = f.geometry.vertices.length; i < l; i++ )
+                    callback( f.geometry.vertices[ i ] );
         }
     });
+
+    this.updateFeatures();
 
     return this;
 }
 
+/**
+ * Calculate the bounding circle for an Object3D at its greatest extent. Returns
+ * an object containing the center coordinate and radius of the bounding circle.
+ *
+ * @returns { Object }        bound        The bounding circle of the object
+ * @returns { THREE.Vector3 } bound.center The center of the bounding circle
+ * @returns { number }        bound.radius The radius of the bounding circle
+ */
 THREE.Object3D.prototype.boundingCircle = function() {
-    if ( typeof this.userData.boundingCircle !== 'undefined' )
-        return this.userData.boudingCircle;
-
     var center = new THREE.Vector3();
     var outer = new THREE.Vector3();
     var n = 0;
 
+    // Calculate centroid of object (average of all vertices)
     this.traverseFeatureGeometry( function ( v ) {
         center.add( v );
         n++;
@@ -148,6 +284,7 @@ THREE.Object3D.prototype.boundingCircle = function() {
     center.z = 0;
     var ca = center.abs();
 
+    // Find the point farthest from the centroid to determine radius
     var m = 0;
     this.traverseFeatureGeometry( function ( v ) {
         var t = v.clone();
@@ -162,14 +299,19 @@ THREE.Object3D.prototype.boundingCircle = function() {
 
     var r = outer.abs().sub( center.abs() );
 
-    this.userData.boundingCircle = { center : center,
-                                     radius : Math.sqrt( r.l2() ) };
-
-    return this.userData.boundingCircle;
+    return { center : center,
+             radius :r.l2() };
 }
 
+/**
+ * Creates a floating text label above the object.
+ * Adapted from https://bocoup.com/weblog/learning-three-js-with-real-world-challenges-that-have-already-been-solved
+ *
+ * @param { string } text The text to display in the label
+ * 
+ * @return { THREE.Object3D } This
+ */
 THREE.Object3D.prototype.setText = function ( text ) {
-    // https://bocoup.com/weblog/learning-three-js-with-real-world-challenges-that-have-already-been-solved
     if ( typeof this.userData.text !== 'undefined' )
         this.remove( this.userData.text );
 
@@ -202,4 +344,6 @@ THREE.Object3D.prototype.setText = function ( text ) {
 
     this.add( sprite );
     this.userData.text = sprite;
+
+    return this;
 }

@@ -1,7 +1,14 @@
-alert = '<div id="alert-content" class="alert alert-{0} fade in"><a href="#" style="padding-left: 10px" class="close" data-dismiss="alert" aria-label="close">&times;</a><strong style="padding-right: 10px">{1}</strong> {2} </div>'
-
 /**
  * String format function. Works similar to Python's string format.
+ * Does literal text replacement with argument order corresponding to
+ * format number.
+ *
+ * I.E. '{0} is {1}'.format( 'javascript', 'bad' ) will output
+ *      'javascript is bad'
+ *
+ * @param { ...string } varargs The replacement values
+ *
+ * @return { string } The string with fields replaced.
  */
 String.prototype.format = function() {
     var args = arguments;
@@ -13,6 +20,13 @@ String.prototype.format = function() {
     });
 };
 
+/**
+ * Returns the closest vector in a vector list to the value of this.
+ *
+ * @param { THREE.Vector3[] } vector_list The list of vectors to compare
+ *
+ * @return { THREE.Vector3 } The closest vector
+ */
 THREE.Vector3.prototype.closest = function ( vector_list ) {
     var that = this;
     var m_val, m_dist;
@@ -28,10 +42,20 @@ THREE.Vector3.prototype.closest = function ( vector_list ) {
     return m_val;
 };
 
+/**
+ * Randomly samples from this array.
+ *
+ * @return { Object } A random element from this 
+ */
 Array.prototype.choose = function () {
     return this[ discreteUniform( 0, this.length - 1 ) ];
 };
 
+/**
+ * Shuffles an array in place.
+ *
+ * @return { Array } This, but shuffled
+ */
 Array.prototype.shuffle = function () {
     var tmp, rand_idx;
     var cur_idx = this.length;
@@ -48,15 +72,30 @@ Array.prototype.shuffle = function () {
     return this;
 };
 
+/**
+ * Returns the sign of this number.
+ *
+ * @return { number } -1 if negative, 1 if positive, 0 if zero
+ */
 Number.prototype.sign = function () {
     var n = this.valueOf();
     return n ? n < 0 ? -1 : 1: 0;
 };
 
+/**
+ * Returns the L2-norm of this vector.
+ *
+ * @return { number } The L2-norm of this vector.
+ */
 THREE.Vector3.prototype.l2 = function() {
-    return this.dot( this );
+    return Math.sqrt( this.dot( this ) );
 }
 
+/**
+ * Takes and replaces all values in the vector with their absolute value.
+ *
+ * @return { THREE.Vector3 } This
+ */
 THREE.Vector3.prototype.abs = function() {
     var v = this.clone();
     v.x = Math.abs( this.x );
@@ -66,6 +105,13 @@ THREE.Vector3.prototype.abs = function() {
     return v;
 };
 
+/**
+ * Takes the union of this and geometries and merges them together.
+ *
+ * @param { THREE.Geometry[] } geometries List of geometries to merge
+ *
+ * @return { THREE.Geometry } This
+ */
 THREE.Geometry.prototype.mergeGeometry = function( geometries ) {
     for ( var idx = 0; idx < geometries.length; idx++ ) {
         var mesh = new THREE.Mesh( geometries[idx] );
@@ -78,14 +124,38 @@ THREE.Geometry.prototype.mergeGeometry = function( geometries ) {
 
 var rand = Math.random;
 
+/**
+ * Takes a uniform sample from a continuous range from 'a' to 'b'.
+ *
+ * @param { number } a Start of the range
+ * @param { number } b End of the range
+ *
+ * @return { number } Random sample
+ */
 function continuousUniform ( a, b ) {
     return a + ( b - a ) * rand();
 }
 
+/**
+ * Takes a uniform sample from a discrete range from 'a' to 'b'.
+ *
+ * @param { number } a Start of the range
+ * @param { number } b End of the range
+ *
+ * @return { number } Random sample
+ */
 function discreteUniform ( a, b ) {
     return Math.round( continuousUniform( a, b ));
 }
 
+/**
+ * Takes a sample from a normal distribution.
+ *
+ * @param { number } mu    Mean of distribution
+ * @param { number } sigma Standard deviation of distribution
+ *
+ * @return { number } Random sample
+ */
 var normal = function () {
     var alternate = 1;
     var z0, z1;
@@ -109,20 +179,53 @@ var normal = function () {
     };
 }();
 
+/**
+ * Randomly offsets a value by a value within a range, centered on the original
+ * value.
+ *
+ * @param { number } value Value to offset
+ * @param { number } range Range of offset
+ *
+ * @return { number } The offset value
+ */
 function randOffset( value, range ) {
     return value + ( Math.random() * range ) - ( range / 2 ) ;
 }
 
+/**
+ * Perturbs a value by a random sample from a normal distribution.
+ *
+ * @param { number } value     Value to perturb
+ * @param { number } deviation Deviation of distribution
+ *
+ * @return { number } Perturbed value
+ */
 function perturb( value, deviation ) {
     return value + normal( 0, deviation );
 }
 
-THREE.Vector3.prototype.perturb = function( range ) {
-    this.x = perturb( this.x, range );
-    this.y = perturb( this.y, range );
-    this.z = perturb( this.z, range );
+/**
+ * Perturbs a vector using perturb().
+ *
+ * @param { number } deviation Deviation of distribution
+ *
+ * @return { THREE.Vector3 } This
+ */
+THREE.Vector3.prototype.perturb = function( deviation ) {
+    this.x = perturb( this.x, deviation );
+    this.y = perturb( this.y, deviation );
+    this.z = perturb( this.z, deviation );
+
+    return this;
 }
 
+/**
+ * Takes a sample from a poisson distribution.
+ *
+ * @param { number } lambda Lambda parameter of distribution
+ *
+ * @return { number } Sample
+ */
 function poisson ( lambda ) {
     var x = 0;
     var p = Math.pow( Math.E, -lambda );
@@ -138,13 +241,24 @@ function poisson ( lambda ) {
     return x;
 }
 
+/**
+ * Takes a sample from a bernoulli distribution.
+ *
+ * @param { number } phi Parameter
+ *
+ * @return { number } Random sample
+ */
 function bernoulli ( phi ) {
     var r = continuousUniform( 0, 1 );
     return ( phi < r ) ? 1 : -1;
 }
 
+alert = '<div id="alert-content" class="alert alert-{0} fade in"><a href="#" style="padding-left: 10px" class="close" data-dismiss="alert" aria-label="close">&times;</a><strong style="padding-right: 10px">{1}</strong> {2} </div>'
+
 /**
  * Displays a success message at the top of the screen.
+ *
+ * @param { string } text Text to display
  */
 function alertSuccess( text ) {
     document.getElementById( 'alerts' ).innerHTML += alert.format( 'success', 'Success', text );
@@ -152,6 +266,8 @@ function alertSuccess( text ) {
 
 /**
  * Displays an info message at the top of the screen.
+ *
+ * @param { string } text Text to display
  */
 function alertInfo( text ) {
     document.getElementById( 'alerts' ).innerHTML += alert.format( 'info', 'Info', text );
@@ -159,6 +275,8 @@ function alertInfo( text ) {
 
 /**
  * Displays a warning message at the top of the screen.
+ *
+ * @param { string } text Text to display
  */
 function alertWarning( text ) {
     document.getElementById( 'alerts' ).innerHTML += alert.format( 'warning', 'Warning', text );
@@ -166,6 +284,8 @@ function alertWarning( text ) {
 
 /**
  * Displays an error message at the top of the screen.
+ *
+ * @param { string } text Text to display
  */
 function alertError( text ) {
     document.getElementById( 'alerts' ).innerHTML += alert.format( 'danger', 'Error', text );
