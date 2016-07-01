@@ -110,7 +110,7 @@ function createWalls( width, height, wallHeight ) {
                                          shininess : 60,
                                          refractionRatio : 0.8 } );
 
-    obj.traverseFeatureGeometry( function ( v ) { v.z = perturb( 0, 0.2 ) - 1; } );
+    obj.traverseGeometry( function ( v ) { v.z = perturb( 0, 0.2 ) - 1; } );
     obj.bufferizeFeature( 'gravel' );
 
     obj.addFeatureGeometry( 'floor', new THREE.PlaneGeometry( 1000, 1000 ) );

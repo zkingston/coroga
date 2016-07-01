@@ -14,7 +14,7 @@ function createSand( width, height ) {
                                        shininess : 10,
                                        refractionRatio : 0.5 } );
 
-    obj.traverseFeatureGeometry( function ( v ) {
+    obj.traverseGeometry( function ( v ) {
         if ( Math.abs( v.x ) > width / 2 - sideRakeBuffer ) {
             v.z = perturb( Math.cos( v.x * rakeModifier ) * rakeHeight, sandRandom );
         } else {
@@ -37,7 +37,7 @@ function rippleSand( diameter, object ) {
 
     var sand = environment.sand;
 
-    sand.traverseFeatureGeometry( function ( v ) {
+    sand.traverseFeatureGeometry( 'sand', function ( v ) {
         var dist = center.distanceTo( v );
 
         if ( dist <= diameter + bound.radius ) {

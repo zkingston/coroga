@@ -240,20 +240,35 @@ THREE.Object3D.prototype.addToObject = function( object, x, y, z ) {
 }
 
 /**
+ * Traverses overall all vertices contained inside an object's feature.
+ *
+ * @param { string }                    feature  Feature to traverse
+ * @param { function( THREE.Vector3 ) } callback Callback function
+ *
+ * @return { THREE.Object3D } This
+ */
+THREE.Object3D.prototype.traverseFeatureGeometry = function( feature, callback ) {
+    var f = this.getFeature( feature );
+    if ( f.geometry.type !== 'BufferGeometry' )
+        for ( var i = 0, l = f.geometry.vertices.length; i < l; i++ )
+            callback( f.geometry.vertices[ i ] );
+
+    this.updateFeatures();
+
+    return this;
+}
+
+/**
  * Traverses overall all vertices contained inside an object.
  *
  * @param { function( THREE.Vector3 ) } Callback function called for every vertex
  *
  * @return { THREE.Object3D } This
  */
-THREE.Object3D.prototype.traverseFeatureGeometry = function( callback ) {
+THREE.Object3D.prototype.traverseGeometry = function( callback ) {
     this.traverseVisible( function ( obj ) {
-        for ( var f in obj.userData.features ) {
-            f = obj.userData.features[ f ];
-            if ( f.geometry.type !== 'BufferGeometry' )
-                for ( var i = 0, l = f.geometry.vertices.length; i < l; i++ )
-                    callback( f.geometry.vertices[ i ] );
-        }
+        for ( var f in obj.userData.features )
+            obj.traverseFeatureGeometry( f, callback );
     });
 
     this.updateFeatures();
@@ -275,7 +290,7 @@ THREE.Object3D.prototype.boundingCircle = function() {
     var n = 0;
 
     // Calculate centroid of object (average of all vertices)
-    this.traverseFeatureGeometry( function ( v ) {
+    this.traverseGeometry( function ( v ) {
         center.add( v );
         n++;
     });
@@ -286,7 +301,7 @@ THREE.Object3D.prototype.boundingCircle = function() {
 
     // Find the point farthest from the centroid to determine radius
     var m = 0;
-    this.traverseFeatureGeometry( function ( v ) {
+    this.traverseGeometry( function ( v ) {
         var t = v.clone();
         t.z = 0;
 

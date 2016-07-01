@@ -6,12 +6,6 @@ function RockClusterFactory( RockGeometry, width, height, depth ) {
     var rocks = new THREE.Object3D();
     rocks.addFeatureGeometry( 'rocks', RockGeometry( x, y, z ) );
 
-    rocks.addFeatureMaterialP( 'rocks', { color : 0x505050,
-                                          shading : THREE.FlatShading,
-                                          refractionRatio : 0.1 } )
-    rocks.generateFeatures();
-    return rocks;
-
     var chance = 0.3;
 
     while ( rand() > chance && x > 3 && y > 3 && z > 3 ) {
@@ -51,9 +45,11 @@ function SpireRockGeometry( width, height, depth ) {
                 rotate      : { min : -Math.PI / 8,
                                 max : Math.PI / 8 },
                 vector_mag  : 0.3,
-                top_perturb : 0.2,
+                top_perturb : 0.5,
                 top_offset  : 0.3 };
 
+    width = Math.ceil( width );
+    height = Math.ceil( height );
     depth = Math.ceil( depth );
     var diameter = Math.max( width, height );
     var b_rad = diameter / 2;
