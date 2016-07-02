@@ -35,11 +35,3 @@ body {
     bottom: 0;
     left: 0;
 }
-
-#stats {
-    display: none;
-    left: -20px;
-    bottom: 0;
-    margin: 0 auto;
-    vertical-align: bottom;
-}

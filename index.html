@@ -19,32 +19,16 @@
     <div id="alerts"> </div>
     <div class="container-fluid">
       <div class="row" id="toolbar">
-        <div class="col-xs-12 col-md-2" id="console"></div>
-        <div class="col-xs-12 col-md-8" id="buttons">
+        <div class="col-xs-12 col-md-12" id="buttons">
           <div id="overlay" class="btn-group btn-group-justified" role="group" aria-label="...">
-            <div class="btn-group btn-group-md" role="group">
-              <button type="button" class="btn btn-default"
-                      onclick="createEnvironment(70, 50, 2);">
-                Regenerate</button>
-            </div>
-            <div class="btn-group btn-group-md dropup" role="group">
-              <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                Tools
-                <span class="caret"></span>
-              </button>
-              <ul class="dropdown-menu">
-                <li><a href="#" id="fpstoggle" onclick="displayFPS();">Show FPS</a></li>
-              </ul>
-            </div>
           </div>
         </div>
-        <div id="stats"></div>
       </div>
     </div>
     <div id="canvas"></div>
 
     <script src="js/three.min.js"></script>
-    <script src="js/stats.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/stats.js/r16/Stats.min.js"></script>
     <script src="js/util.js"></script>
     <script src="js/ui.js"></script>
     <script src="js/CRGObject.js"></script>

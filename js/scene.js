@@ -7,11 +7,41 @@ init();
 render();
 animate();
 
+function createUI() {
+    UIaddButton( new CRGButton( 'Regenerate', function () {
+        createEnvironment( 70, 50, 2 );
+    }));
+
+    var tools = new CRGDropdown( 'Tools' );
+    UIaddDropdown( tools );
+    tools.addElement( function () {
+        var b = new CRGDropdownButton( 'Show FPS' );
+        b.callback = function() {
+            var div = stats.domElement;
+            if (div.style.display === 'none') {
+                div.style.display = 'block';
+                b.setTextNode( 'Hide FPS' );
+            } else {
+                div.style.display = 'none';
+                b.setTextNode( 'Show FPS' );
+            }
+        }
+
+        return b;
+    }() );
+
+    UIgenerate();
+}
+
 function init() {
+
+    createUI();
 
     stats = new Stats();
     stats.showPanel( 0 );
-    document.getElementById( 'stats' ).appendChild( stats.dom );
+    stats.domElement.style.position = 'absolute';
+    stats.domElement.style.display = 'none';
+    document.body.appendChild( stats.domElement );
 
     clock = new THREE.Clock();
 
