@@ -2,22 +2,83 @@ alert = '<div id="alert-content" class="alert alert-{0} fade in"><a href="#" sty
 
 ui = []
 
+/**
+ * Creates an instance of a CRGButton, used to generate UI elements on the
+ * bottom toolbar.
+ *
+ * @constructor
+ * @this { CRGButton }
+ * @param { string }                text     Initial display text
+ * @param { function( CRGButton ) } callback Callback function called on click
+ */
 CRGButton = function( text, callback ) {
     this.type = 'Button';
     this.text = text;
-    this.callback = callback;
 
+    var that = this;
+    this.callback = function() {
+        callback( that );   
+    };
+
+    /**
+     * Sets the displayed text of the button after it has been created.
+     *
+     * @param { string } text New text to set
+     *
+     * @return { CRGButton } This
+     */
     this.setTextNode = function( text ) {
         this.text = text;
 
         if ( typeof this.btn !== 'undefined' ) {
             this.btn.removeChild( this.textNode );
 
-            this.textNode = document.createTextNode( this.text )
+            this.textNode = this.textGen();
             this.btn.appendChild( this.textNode );
         }
+
+        return this;
     }
 
+    /**
+     * Sets glyphicon to display to the left of the text of the button.
+     *
+     * @param { string } icon Name of the icon. See http://getbootstrap.com/components/
+     *                        for icon list
+     *
+     * @return { CRGButton } This
+     */
+    this.setGlyphicon = function( icon ) {
+        this.icon = icon;
+        return this;
+    }
+
+    this.textGen = function() {
+        var textNode = document.createTextNode( this.text );
+
+        if ( typeof this.icon !== 'undefined' ) {
+            var span = document.createElement( 'span' );
+            span.className = 'glypicon glyphicon-{0}'.format( this.icon );
+            span.innerHTML = '  ';
+
+            var att = document.createAttribute( 'aria-hidden' );
+            att.value = 'true';
+            span.setAttributeNode( att );
+
+            var t = textNode
+            span.appendChild( textNode );
+            textNode = span;
+        }
+
+        return textNode;
+    }
+
+    /**
+     * Generates and returns the document element corresponding to the
+     * constructed button.
+     *
+     * @return { Element } Document element for this button
+     */
     this.dom = function() {
         this.div = document.createElement( 'div' );
         this.div.className = 'btn-group btn-group-md';
@@ -27,7 +88,7 @@ CRGButton = function( text, callback ) {
         this.btn.className = 'btn btn-default';
         this.btn.onclick = this.callback;
 
-        this.textNode = document.createTextNode( this.text )
+        this.textNode = this.textGen();
         this.btn.appendChild( this.textNode );
 
         this.div.appendChild( this.btn );
@@ -42,11 +103,31 @@ CRGButton.prototype.clone = function () {
     return new CRGButton( this.text, this.callback );
 }
 
+/**
+ * Creates an instance of a CRGDropdownButton, used to generate UI elements
+ * inside of a CRGDropdown object.
+ *
+ * @constructor
+ * @this { CRGDropdownButton }
+ * @param { string }                        text     Initial display text
+ * @param { function( CRGDropdownButton ) } callback Callback function 
+ */
 CRGDropdownButton = function( text, callback ) {
     this.type = 'DropdownButton';
     this.text = text;
-    this.callback = callback;
 
+    var that = this;
+    this.callback = function() {
+        callback( that );
+    }
+
+    /**
+     * Sets the displayed text of the button after it has been created.
+     *
+     * @param { string } text New text to set
+     *
+     * @return { CRGDropdownButton } This
+     */
     this.setTextNode = function( text ) {
         this.text = text;
 
@@ -56,8 +137,16 @@ CRGDropdownButton = function( text, callback ) {
             this.textNode = document.createTextNode( this.text )
             this.a.appendChild( this.textNode );
         }
+
+        return this;
     }
 
+    /**
+     * Generates and returns the document element corresponding to the
+     * constructed dropdown button.
+     *
+     * @return { Element } Document element for this button
+     */
     this.dom = function() {
         this.a = document.createElement( 'a' );
         this.a.onclick = this.callback;
@@ -76,16 +165,35 @@ CRGDropdownButton.prototype.clone = function () {
     return new CRGDropdownButton( this.text, this.callback );
 }
 
+/**
+ * Creates an instance of a CRGDropdown, a dropdown menu that can be added to
+ * the bottom toolbar.
+ *
+ * @constructor
+ * @this { CRGDropdown }
+ * @param { string } text Display text
+ */
 CRGDropdown = function( text ) {
     this.type = 'Dropdown';
     this.text = text;
 
     this.elements = [];
 
+    /**
+     * Adds a new CRGDropdownButton element to the dropdown list.
+     *
+     * @param { CRGDropdownButton } element New element to add
+     */
     this.addElement = function( element ) {
         this.elements.push( element );
     }
 
+    /**
+     * Generates and returns the document element corresponding to the
+     * constructed dropdown list.
+     *
+     * @return { Element } Document element for this dropdown 
+     */
     this.dom = function() {
         this.div = document.createElement( 'div' );
         this.div.className = 'btn-group btn-group-md dropup';
@@ -106,7 +214,6 @@ CRGDropdown = function( text ) {
         att = document.createAttribute( 'aria-expanded' );
         att.value = 'false';
         this.btn.setAttributeNode( att );
-
         this.btn.innerHTML = '{0} <span class="caret"></span>'.format( this.text );
 
         this.div.appendChild( this.btn );
@@ -136,14 +243,18 @@ CRGDropdown.prototype.clone = function () {
     return d;
 }
 
-function UIaddButton( button ) {
-    ui.push( button );
+/**
+ * Adds an element to the global UI.
+ *
+ * @param { CRGButton | CRGDropdown } element Element to add to UI
+ */
+function UIaddElement( element ) {
+    ui.push( element );
 }
 
-function UIaddDropdown( dropdown ) {
-    ui.push( dropdown );
-}
-
+/**
+ * Generates the UI elements added.
+ */
 function UIgenerate() {
     var o = document.getElementById( 'overlay' );
 

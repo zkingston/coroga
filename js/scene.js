@@ -8,27 +8,24 @@ render();
 animate();
 
 function createUI() {
-    UIaddButton( new CRGButton( 'Regenerate', function () {
+    UIaddElement( new CRGButton( 'Regenerate', function ( btn ) {
+        btn.setTextNode( 'Generating' )
         createEnvironment( 70, 50, 2 );
+        btn.setTextNode( 'Regenerate' )
     }));
 
     var tools = new CRGDropdown( 'Tools' );
-    UIaddDropdown( tools );
-    tools.addElement( function () {
-        var b = new CRGDropdownButton( 'Show FPS' );
-        b.callback = function() {
-            var div = stats.domElement;
-            if (div.style.display === 'none') {
-                div.style.display = 'block';
-                b.setTextNode( 'Hide FPS' );
-            } else {
-                div.style.display = 'none';
-                b.setTextNode( 'Show FPS' );
-            }
+    UIaddElement( tools );
+    tools.addElement( new CRGDropdownButton( 'Show FPS', function( btn ) {
+        var div = stats.domElement;
+        if (div.style.display === 'none') {
+            div.style.display = 'block';
+            btn.setTextNode( 'Hide FPS' );
+        } else {
+            div.style.display = 'none';
+            btn.setTextNode( 'Show FPS' );
         }
-
-        return b;
-    }() );
+    }));
 
     UIgenerate();
 }
@@ -129,7 +126,6 @@ function generateRock() {
     var y = Math.floor( rand() * 6 + 3 );
     var z = Math.floor( rand() * 6 + 2 );
 
-    console.log( x, y, z );
     var rock = RockClusterFactory( SpireRockGeometry, x, y, z );
     rock.addToObject( environment.sand, 
                       randOffset( 0, width - 3 * x ),
