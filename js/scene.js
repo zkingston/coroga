@@ -7,11 +7,37 @@ init();
 render();
 animate();
 
-function init() {
-
+function createUI() {
     stats = new Stats();
     stats.showPanel( 0 );
-    document.getElementById( 'stats' ).appendChild( stats.dom );
+    stats.domElement.style.position = 'absolute';
+    stats.domElement.style.display = 'none';
+    stats.domElement.style.margin = '10px 15px auto';
+    document.body.appendChild( stats.domElement );
+
+    UIaddElement( new CRGButton( 'Regenerate', function ( btn ) {
+        createEnvironment( 70, 50, 2 );
+    }));
+
+    var tools = new CRGDropdown( 'Tools' );
+    tools.addElement( new CRGDropdownButton( 'Show FPS', function( btn ) {
+        if (stats.domElement.style.display === 'none') {
+            stats.domElement.style.display = 'block';
+            btn.setTextNode( 'Hide FPS' );
+        } else {
+            stats.domElement.style.display = 'none';
+            btn.setTextNode( 'Show FPS' );
+        }
+    }));
+
+    UIaddElement( tools );
+
+    UIgenerate();
+}
+
+function init() {
+
+    createUI();
 
     clock = new THREE.Clock();
 
@@ -99,7 +125,6 @@ function generateRock() {
     var y = Math.floor( rand() * 6 + 3 );
     var z = Math.floor( rand() * 6 + 2 );
 
-    console.log( x, y, z );
     var rock = RockClusterFactory( SpireRockGeometry, x, y, z );
     rock.addToObject( environment.sand,
                       randOffset( 0, width - 3 * x ),
