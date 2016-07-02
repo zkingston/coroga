@@ -18,7 +18,7 @@ CRGButton = function( text, callback ) {
         }
     }
 
-    this.domElement = function() {
+    this.dom = function() {
         this.div = document.createElement( 'div' );
         this.div.className = 'btn-group btn-group-md';
         this.div.role = 'group';
@@ -58,7 +58,7 @@ CRGDropdownButton = function( text, callback ) {
         }
     }
 
-    this.domElement = function() {
+    this.dom = function() {
         this.a = document.createElement( 'a' );
         this.a.onclick = this.callback;
         this.a.href = '#';
@@ -86,7 +86,7 @@ CRGDropdown = function( text ) {
         this.elements.push( element );
     }
 
-    this.domElement = function() {
+    this.dom = function() {
         this.div = document.createElement( 'div' );
         this.div.className = 'btn-group btn-group-md dropup';
         this.div.role = 'group';
@@ -107,16 +107,16 @@ CRGDropdown = function( text ) {
         att.value = 'false';
         this.btn.setAttributeNode( att );
 
-        this.btn.innerHTML = '{0}<span class="caret"></span>'.format( this.text );
+        this.btn.innerHTML = '{0} <span class="caret"></span>'.format( this.text );
 
         this.div.appendChild( this.btn );
 
         this.ul = document.createElement( 'ul' );
         this.ul.className = 'dropdown-menu';
 
-        for ( var el = 0; el < this.elements.length; el++ ) {
+        for ( var i = 0; i < this.elements.length; i++ ) {
             var li = document.createElement( 'li' );
-            li.appendChild( this.elements[ el ].domElement() );
+            li.appendChild( this.elements[ i ].dom() );
             this.ul.appendChild( li );
         }
 
@@ -124,6 +124,16 @@ CRGDropdown = function( text ) {
 
         return this.div;
     }
+}
+
+CRGDropdown.prototype = Object.create( CRGDropdown.prototype );
+CRGDropdown.prototype.constructor = CRGDropdown;
+CRGDropdown.prototype.clone = function () {
+    var d = new CRGDropdown( this.text );
+    for ( var i = 0; i < this.elements.length; i++ )
+        d.addElement( this.elements[ i ].clone() );
+
+    return d;
 }
 
 function UIaddButton( button ) {
@@ -138,7 +148,7 @@ function UIgenerate() {
     var o = document.getElementById( 'overlay' );
 
     for ( var u = 0; u < ui.length; u++ )
-        o.appendChild( ui[ u ].domElement() );
+        o.appendChild( ui[ u ].dom() );
 }
 
 
@@ -176,17 +186,4 @@ function alertWarning( text ) {
  */
 function alertError( text ) {
     document.getElementById( 'alerts' ).innerHTML += alert.format( 'danger', 'Error', text );
-}
-
-function displayFPS() {
-    var but = document.getElementById('fpstoggle');
-    var div = stats.domElement;
-
-    if (div.style.display === 'none') {
-        div.style.display = 'block';
-        but.innerHTML = 'Hide FPS';
-    } else {
-        div.style.display = 'none';
-        but.innerHTML = 'Show FPS';
-    }
 }
