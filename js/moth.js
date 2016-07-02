@@ -1,59 +1,34 @@
-cos = Math.cos;
-sin = Math.sin;
+var mothProperties = { size: 0.15,
+                       flightRadius: 1.5,
+                       velocity: 0.05 };
 
-var mothProperties = {size: 0.15,
-                      flightRadius: 1.5,
-                      velocity: 0.05
-                    };
+function mothFactory( lantern ) {
+    var m = mothProperties;
 
+    var moth = new THREE.Object3D();
+    moth.addFeatureGeometry( 'moth', new THREE.SphereGeometry( m.size ) );
+    moth.addFeatureMaterialP( 'moth', { transparent : true,
+                                        opacity : 0.7,
+                                        color : 0xffffff,
+                                        side : THREE.DoubleSide,
+                                        shading : THREE.FlatShading,
+                                        shininess : 100,
+                                        emissive : 0xffffff
+                                      } );
 
-function updateMoths() {
+    moth.generateFeatures();
 
-  var m = mothProperties;
-  var moths = environment.moths;
-  var origins = environment.mothVector;
-    for ( var i = 0; i < moths.length; i++ ) {
-        var moth = moths[i];
-        var origin = origins[i];
+    moth.addToObject( lantern );
+    moth.userData.wave = Math.random() * 100;
 
-        x = (moth.wave + tick) * m.velocity;
+    moth.addUpdateCallback( function ( obj ) {
+        x = ( moth.userData.wave + tick ) * m.velocity;
 
         // Triple Cardiod/Rose Curve
-        moth.position.x = (1.5 * cos(x) - cos(4 * x)) * m.flightRadius + origin.x;
-        moth.position.y = (1.5 * sin(x) - sin(4 * x)) * m.flightRadius + origin.y;
-        moth.position.z = sin(x) *m.flightRadius + origin.z;
+        moth.position.x = ( 1.5 * Math.cos( x ) - Math.cos( 4 * x ) ) * m.flightRadius;
+        moth.position.y = ( 1.5 * Math.sin( x ) - Math.sin( 4 * x ) ) * m.flightRadius;
+        moth.position.z = Math.sin( x ) * m.flightRadius;
+    });
 
-    }
-}
-
-function mothFactory(lantern) {
-    var m = mothProperties;
-    if ( !environment.moths ) {
-        environment.moths = []
-        environment.mothVector = []
-    }
-
-    var moth = sphereFactory(         m.size,
-                                     { transparent : true,
-                                       opacity : 0.7,
-                                       color : 0xffffff,
-                                       side : THREE.DoubleSide,
-                                       shading : THREE.FlatShading,
-                                       shininess : 100,
-                                       emissive : 0xffffff
-                                     } );
-
-
-    // DEPENDS ON WHICH PARAMETRIC CURVE
-    moth.position.x = lantern.position.x;
-    moth.position.y = lantern.position.y;
-    moth.position.z = lantern.position.z;
-
-    moth.wave = Math.random() * 100;
-
-    origin = new THREE.Vector3(moth.position.x, moth.position.y, moth.position.z)
-
-    environment.moths.push( moth );
-    environment.mothVector.push(origin);
     return moth;
 }

@@ -1,96 +1,111 @@
-// HEURISTICS
-
-
 // BRANCH HEURISTICS
 
-// What is the length of the branch segment given the joit number.
+/*  Trees are created with a long cone that is bent in a few places.
+    In each of these places "joints", another small tree is recursively produced
+    using another bent cone.
+*/
+
+// What is the length of the branch segment given the joint number.
 function _lengthHeuristic(maxlen, maxjoint, curjoint){
-  //return maxlen * curjoint/maxjoint - curjoint + randRange(1,4)
-  return (curjoint < 2)? randRange(3,5): randRange(2,4)
+<<<<<<< HEAD
+  //return maxlen * curjoint/maxjoint - curjoint + continuousUniform(1,4)
+  return (curjoint < 2)? continuousUniform(3,5): continuousUniform(2,4)
+=======
+  return (curjoint < 2) ? uniform(3,5) : uniform(2,4)
+>>>>>>> master
 }
+
 // Probability a branch will spawn at fork
+// If the branch doesnt fork, it just bends.
 // Always fork at least once.
 function _branchProb(joint){return (joint == 1)? 1.0:0.6};
-var _branchiness = 40 // How many degrees is the cone which new points are sampled
-var _length = 7 // What is the max possible length of a segment
-var _pointiness = .7 // How quickly does the radius taper
-var _segments = 5 // Number of segments a subBranch can have
-var _radiusCutoff = 1.0; // Radius at which to stop spawning off branches (surprisingly good for quality)
+
+// How many degrees is the cone which new branch waypoints are sampled
+var _branchiness = 40
+
+// What is the max possible length of a segment
+var _length = 7;
+
+// How quickly does the radius taper
+var _pointiness = .7
+
+// Max Number of segments a Branch can have
+var _segments = 5
+
+// Radius at which to stop spawning off branches (surprisingly good for quality)
+var _radiusCutoff = 1.0;
 
 
 // CASCADE HEURISTICS
+/* In a cascade, you start from a point/vector, and generate a few children in a
+cone from your vector. Those children then have a chance of spawning children
+but in a smaller cone than the parent.
+*/
 
+// The starting cone angle
+var spreadAngle = 120;
+
+// How much does the cone decrease per child?
+function degradation(){return uniform(0.1,1) * 10};
+
+<<<<<<< HEAD
 // Cascade of shrinking probability cones.
 var spreadAngle = 120; // Starting probability cones
-function degradation(){return randRange(0.1,1) * 10}; // How fast does it shrink
+function degradation(){return continuousUniform(0.1,1) * 10}; // How fast does it shrink
 var flowerSize = .4; // How big are the flowers.
-function flowerDist(){return randRange(flowerSize,2* flowerSize)}; // Space between parent and child
+function flowerDist(){return continuousUniform(flowerSize,2* flowerSize)}; // Space between parent and child
 function childPerDegree(angle){ // How many children based on how big the probability cone is
     // Works closesly with degradation. degradation is how fast the angle drops
-    if (angle > (9/10) * spreadAngle){return Math.floor(randRange(1,4))}
+    if (angle > (9/10) * spreadAngle){return Math.floor(continuousUniform(1,4))}
+=======
+// How big are the flowers.
+var flowerSize = .4;
+
+// Space between parent and child
+function flowerDist(){return uniform(flowerSize,2* flowerSize)};
+
+
+// How many children based on how big the probability cone is
+// Works closesly with degradation. degradation is how fast the angle drops
+// Angle must go to zero for the cascade to stop.
+function childPerDegree(angle){
+    if (angle > (9/10) * spreadAngle){return Math.floor(uniform(1,4))}
+>>>>>>> master
     if (angle > (4/5)*spreadAngle){return Math.floor(4 * angle/spreadAngle)}
-    if (angle == 0){return 0}
+    if (angle == 0){return 0} // base case
     else{return 1}
 }
 
 
-acos = Math.acos
-tan = Math.tan
-function hedronFactory(radius, widthSegs, heightSegs, attributes){
-    var geometry = new THREE.SphereGeometry( radius, 3, 2,0,2.4,0,1.5 );
-    return meshWrap( geometry, attributes );
-}
 
-// function buttsFactory(attributes){
-//   var text = "butts",
-//
-//              height = 20,
-//              size = 70,
-//              hover = 30,
-//              curveSegments = 4,
-//              bevelThickness = 2,
-//              bevelSize = 1.5,
-//              bevelSegments = 3,
-//              bevelEnabled = true,
-//              font = "optimer", // helvetiker, optimer, gentilis, droid sans, droid serif
-//              weight = "bold", // normal bold
-//              style = "normal"; // normal italic
-//
-//
-//
-// var geometry
-//  = new THREE.TextGeometry(
-//    text, {
-//       size: size,
-//        height: height,
-//        curveSegments: curveSegments,
-//
-//        font: font,
-//        weight: weight,
-//        style: style,
-//
-//        bevelThickness: bevelThickness,
-//        bevelSize: bevelSize,
-//        bevelEnabled: bevelEnabled,
-//
-//             });
-//   return meshWrap( geometry, attributes );
-// }
+// HELPER FUNCTIONS
 
-
-
-function chance(n){
-    return  (Math.random() < n)? true : false
-}
-//(start point, vector to perturb, length, cone angle)
+/**
+* Generates a random point in a cone shaped region at a specific length
+* away from an origin point, with the cone centered around a vector.
+* @param {THREE.Vector3} origin The origin of the cone
+* @param {THREE.Vector3} vector The direction the cone is facing
+* @param {number} length The distance away the random point is spawned
+* @param {number} The outer angle for the cone.
+* @param {number} The  inner angle for the cone.
+* @return {THREE.Vector3} A random point in the cone.
+**/
 function conePoint(origin, vector, length, degreeLow, degreeHigh){
-     degreeHigh = (!degreeHigh)? 1:degreeHigh;
-    // Use axis
+    // Default value for degree high
+    degreeHigh = (!degreeHigh) ? 1 : degreeHigh;
+
+    // Normalize the start vector.
     vector.normalize()
-    //length = length * randRange(0,1)
+<<<<<<< HEAD
+    //length = length * continuousUniform(0,1)
+=======
+>>>>>>> master
     var rl = (Math.PI/180) * degreeLow
     var rh = (Math.PI/180) * degreeHigh
-    var a = vector
+
+    // Pick some vectors that will help you come up with a basis.
+    // Use Cross Products to construct the basis. (a,u,v) are the vectors.
+    var a = vector;
     var temp = (a.y != 0 || a.z !=0) ?
       new THREE.Vector3(1,0,0) : new THREE.Vector3(0,1,0);
 
@@ -101,15 +116,24 @@ function conePoint(origin, vector, length, degreeLow, degreeHigh){
     v.crossVectors(a,u).normalize()
     //axis, u, v basis constructed
 
-    var theta = acos(randRange(cos(rl), cos(rh)))
-    var phi = randRange(0, 2*Math.PI)
+<<<<<<< HEAD
+    var theta = acos(continuousUniform(cos(rl), cos(rh)))
+    var phi = continuousUniform(0, 2*Math.PI)
+=======
+>>>>>>> master
 
+    // Randomly generate the angles of the new point for conic form.
+    var theta = acos(uniform(cos(rl), cos(rh)));
+    var phi = uniform(0, 2*Math.PI);
+
+    // Produce the resulting unit vector using the randomly generated angles.
     var x = new THREE.Vector3(
       sin(theta)*(cos(phi) * u.x + sin(phi)* v.x) + cos(theta) *a.x,
       sin(theta)*(cos(phi) * u.y + sin(phi)* v.y) + cos(theta) *a.y,
       sin(theta)*(cos(phi) * u.z + sin(phi)* v.z) + cos(theta) *a.z)
     x.normalize()
 
+    // Stretch the Unit Vector into the size required.
     return new THREE.Vector3(
       origin.x + x.x * length,
       origin.y + x.y * length,
@@ -117,213 +141,206 @@ function conePoint(origin, vector, length, degreeLow, degreeHigh){
 }
 
 
-function burstGenerator(origin, vector){
-    var prop = { transparent : true,
-                         opacity : 0.7,
-                         color : 0xffffff,
-                         side : THREE.DoubleSide,
-                         shading : THREE.FlatShading,
-                         shininess : 100,
-                         emissive : 0xffffff
-                       }
+// TREE GENERATION CODE
+
+/**
+* Using an iterative spawning algorithm, This produces a cascade of particles
+* at a given origin point.
+* @param {THREE.Vector3} origin The point where the cascade should be centered
+* @return {THREE.Points} Returns a particle system propagating from the origin
+*
+**/
+function cascadeGenerator(origin, color){
+
+    // flowers are the geometric object
+    // nodes are their positional data.
 
 
-    var start = sphereFactory(.5, { transparent : true,
-                         opacity : 0.7,
-                         color : 0xf66fff,
-                         side : THREE.DoubleSide,
-                         shading : THREE.FlatShading,
-                         shininess : 100,
-                         emissive : 0xffffff
-                       });
+    // Properties of each flower
 
+    var flowerProperties = new THREE.PointsMaterial({
+        color : color,
+        size : .4
+    });
 
+    // Array of all flower points.
+     var flowers = new THREE.Geometry();
 
-
-
-
-    var origin = new THREE.Vector3(10,10,10)
-    var vector = new THREE.Vector3(1,1,1)
-    for (var i = 0; i < 250; i++){
-             var end = sphereFactory(.1,  prop );
-             var loc = conePoint(origin, vector, 10, 45, 20)
-             end.position.x = loc.x;
-             end.position.y = loc.y;
-             end.position.z = loc.z;
-             scene.add(end);
-    }
-
-
-
-    start.position.x = origin.x;
-    start.position.y = origin.y;
-    start.position.z = origin.z;
-    scene.add(start);
-
-    return start;
-
-}
-
-function cascadeGenerator(origin){
-
-
-
-
-
-
-    var properties = { transparent : true,
-      opacity : 1.0,
-      color : 0xff69b4,
-      side : THREE.DoubleSide,
-      shading : THREE.FlatShading,
-      shininess : 0,
-      emissive : 0xff69b4
-    }
-
-    var flowers = [];
-
-    var flowerVector = new THREE.Vector3(0,0,-1);
+    // We perform an iterative algorithm for the cascade. This is the buffer.
+    // Holds statistics of a parent node (flower) until the node has children.
     var buffer = [];
 
+    // The direction of the cascade. We want it to cascade straight down.
+    var flowerVector = new THREE.Vector3(0,0,-1);
 
 
-
+    // We have to start the cascade. This is the first flower.
     var position = conePoint(origin,
                               flowerVector,
                               flowerDist(),
-                              spreadAngle)
-    //var flower = sphereFactory(flowerSize ,properties);
-    var flower = hedronFactory(flowerSize,3,4,properties);
+                              spreadAngle);
 
-    flower.position.x = position.x;
-    flower.position.y = position.y;
-    flower.position.z = position.z;
+    var flower =  new THREE.Vector3(
+            position.x,
+            position.y,
+            position.z);
 
-    flowers.push(flower)
 
-    //scene.add(flower)
-    var node ={}
-    node.position = position;
-    node.angle = spreadAngle;
+    flowers.vertices.push(flower);
+
+    // Node keeps track of the statistics of a parent like position and spread.
+    var node ={
+        position : position,
+        angle : spreadAngle
+    }
     buffer.push(node);
 
+
+
+    // While there are parents still eligible to have children.
     while (buffer.length >= 1){
-      var parent = buffer.pop()
-      var location = parent.position
-      var numChildren = childPerDegree(parent.angle)
-      var childAngle = Math.max(0,parent.angle - degradation());
+          var parent = buffer.pop()
+          var location = parent.position
+          var numChildren = childPerDegree(parent.angle)
+          var childAngle = Math.max(0,parent.angle - degradation());
 
-      for (var i = 0; i < numChildren; i++){
+          for (var i = 0; i < numChildren; i++){
 
-          var position = conePoint(location,
-                                    flowerVector,
-                                    flowerDist(),
-                                     childAngle)
-          var flower = hedronFactory(flowerSize,3,4 ,properties);
-          flower.position.x = position.x;
-          flower.position.y = position.y;
-          flower.position.z = position.z;
-          flowers.push(flower)
+                var position = conePoint(location,
+                                        flowerVector,
+                                        flowerDist(),
+                                         childAngle)
+                // construct the flower.
+                var flower = new THREE.Vector3(
+                        position.x,
+                        position.y,
+                        position.z
+                );
+                flowers.vertices.push(flower);
 
-      //    scene.add(flower)
-          var node ={}
-          node.position = position;
-          node.angle = childAngle;
-          buffer.push(node);
-      }
+
+                // Give it a node.
+                var node ={}
+                node.position = position;
+                node.angle = childAngle;
+                buffer.push(node);
+          }
     }
-    var flowerMeshGeo = mergeMeshGeometry(flowers);
-    var flowerMat = new THREE.MeshPhongMaterial(properties)
-    var cluster = new THREE.Group();
-    cluster.add(new THREE.Mesh( flowerMeshGeo, flowerMat))
 
-    //scene.add(cluster)
-    return cluster
+
+    var particleSystem = new THREE.Points(
+        flowers,
+        flowerProperties
+    );
+
+    return particleSystem;
 }
 
+
+/**
+* Generates a branch at the given point, starting in the direction
+* of the given vector, starting with a given radius, and having a specified
+* number of segments.
+* @param {THREE.Vector3} origin The source of the branch
+* @param {THREE.Vector3} vector The direction the branch should start
+* @param {number} radius The beginning radius of the branch
+* @param {number} numSegments The number of segments the branch should have
+* @return {object} An object containing data necessary to construct the tree
+**/
 function branchGenerator(origin, vector, radius, numSegments){
     // Randomly generate a path using probability cone
+    // Branch Vector is the list of vector waypoints the branch has.
 
+    // Start with the beginning of the branch...
     var branchVector = [origin];
-
     var curPoint = origin;
     var curVector = vector;
-    for(var iter =0; iter <numSegments; iter++){
 
-      length = _lengthHeuristic(_length,_segments,iter)
-      // Put next point in probability cone. BUT, it gets buggy at theta<15
-      newPoint = conePoint(curPoint,curVector, length ,_branchiness,15)
-      curVector.subVectors(newPoint, curPoint);
-      branchVector.push(newPoint);
-      curPoint = newPoint;
+    // Propagate down until you have a list of waypoints for the branch.
+    for(var iter =0; iter <numSegments; iter++){
+        // Generate a length for the given segment.
+        length = _lengthHeuristic(_length,_segments,iter);
+
+        // Find next point using probability cone. (it gets buggy at theta<15)
+        newPoint = conePoint(curPoint, curVector, length, _branchiness, 15)
+        curVector.subVectors(newPoint, curPoint);
+        branchVector.push(newPoint);
+        curPoint = newPoint;
     }
 
-    // Must take discrete values and return a continuous
-    // Piecewise function with domain 0 to 1.
+    // The waypoints must be transformed into a continuous function.
+    // with domain 0 to 1. i.e. 0 should give the start of the branch
+    // 1 should give the end. Why are we doing this? Because we need to be able
+    // to provide the transform for every point in the zigzagged branch,
+    // not just the waypoints. This will make those points easy to calculate.
+    //
+    // bVec: Branch Vector,
+    // tVec: Transform Vector
+
     var bVec = branchVector;
-    var tVector =[]
+    var tVec =[]
     var branchLength = 0;
+
+    // Take each point in the branch vector, and find its transform vector.
     for(var iter = 1; iter < branchVector.length; iter++){
       var segLength = bVec[iter].distanceTo(bVec[iter - 1]);
       branchLength += segLength;
-      tVector.push(branchLength);
-
+      tVec.push(branchLength);
     }
-    for(var iter = 0; iter < tVector.length; iter++){
-      tVector[iter] = tVector[iter]/branchLength;
-    }
+    tVec = tVec.map(function(x){ return x/branchLength;})
 
 
-
+    // Branches are for some goddamn reason referenced in the middle.
+    // We'll need this to find the endpoints.
     var offset = new THREE.Vector3().subVectors(bVec[1],bVec[0])
 
 
     function f(t){
         // Using t mapping, find the points which t lies between.
-        var bNum= -1;
 
-        for(var iter = 1; iter < tVector.length; iter++){
-          if (t < tVector[iter]){
+        // Find out between two transformed branch waypoints the point lies.
+        var bNum= -1;
+        for(var iter = 1; iter < tVec.length; iter++){
+          if (t < tVec[iter]){
             bNum = iter-1;
             break;
           }
         }
         bNum = (bNum == -1) ? 1 : bNum;
 
-
-        // Between these Points on this vector
+        // Between these Points
         var p1 = bVec[bNum];
         var p2 = bVec[bNum + 1];
+
+        // Using those points, calculate the magnitude of the query point.
         var point = new THREE.Vector3().subVectors(p2,p1);
-        //console.log(point);
-        // How far doe down this vector is this point?
-
-        var mag = point.length() * ((t - tVector[bNum]) / (tVector[bNum + 1] - tVector[bNum]));
-
+        var mag = point.length() * ((t - tVec[bNum]) / (tVec[bNum + 1] - tVec[bNum]));
         point.setLength(mag);
+
         // Now put the point back in 3d space where it was
-        var point2 =  new THREE.Vector3().addVectors(point, p1);
-        // return point
+        var point =  new THREE.Vector3().addVectors(point, p1);
 
-        // Except we are also using IdiotEngine.js, and this shit is positioned
-        // from the center of each segment instead of a pole.
-        // So we need to trick it into offsetting.
+        // Described above. Offset from branch center to find end.
+        var point =  new THREE.Vector3().addVectors(point, offset)
 
-        return new THREE.Vector3().addVectors(point2, offset)
-
+        return point;
     }
 
+    // Using transformed domain, what is the radius at a given point.
     function taper(t){
-      return (1.0 - t) * _pointiness //* branchLength * tan(_pointiness)
+      return (1.0 - t) * _pointiness;
     }
 
+    // What is the radius at a given joint number. This is important because we
+    // spawn new branches at joints, and we want to know how thick they should
+    // be.
     function getRadiusAtJoint(n){
-        return taper(tVector[n])* radius;
+        return taper(tVec[n])* radius;
     }
 
-
+    // Have the tube/cone follow the path described by the transform.
     var Curve = THREE.Curve.create(
-        function(scale){//Herp Derp Constructor
+        function(scale){// Constructor is meaningless here.
             this.scale == (scale === undefined) ? 1 : scale;
         },
         function(t){ // getPoint();
@@ -332,7 +349,7 @@ function branchGenerator(origin, vector, radius, numSegments){
 
     var path = new Curve();
 
-
+    // Make the branch folowing this path, using this taper.
     var branch = new THREE.TubeGeometry(
       path,//path
       10* numSegments, // segments
@@ -342,78 +359,120 @@ function branchGenerator(origin, vector, radius, numSegments){
       taper);// taper
 
 
-    return {"geometry":branch,
-            "length": branchLength,
-            "tVector": tVector,
-            "radius" : getRadiusAtJoint,
-            "taper" : taper,
-            "bVec": branchVector,
-            "offset": offset};
-
+    return {"geometry":branch, // The Tube geometry object
+            "length": branchLength, // The full length of the branch
+            "bVec": branchVector, // The branch waypoints.
+            "tVec": tVec, // The transformed waypoints
+            "radius" : getRadiusAtJoint, // Function finds the radius at joint n
+            "taper" : taper, // The taper of each branch.
+            "offset": offset}; // The offset to refer to a branch by the center
 }
 
-function treeFactory(){
 
-    var origin = new THREE.Vector3(10,10,-2);
+
+/**
+* Constructor for a Tree
+* @param { number }x The x coordinate the tree should spawn
+* @param { number} y The y coordinate the tree should spawn
+* @return { THREE.Group } The tree object
+**/
+function treeFactory(x,y){
+    // Where does the tree start
+    var origin = new THREE.Vector3(x,y,-2);
+
+    // Trees grow upwards.
     var vector = new THREE.Vector3(0,0,1);
+
+    // Tree material
     var treeMat = new THREE.MeshPhongMaterial( { color : 0x505050,
                                                  shading : THREE.FlatShading,
                                                  shininess : 20,
                                                  refractionRatio : 0.1 } );
 
-    //Must do a random tree traversal (LOLOLOL so Punny).
+
+    // Iterative algorithm similar to flower cascade.
+    // Essentially a depth first search style construction.
     // for each joint in each branch in buffer, small chance you form branch
     // if you do, put branch on buffer. UNLESS starting radius is too small,
     // Then dont even bother.
+
+    // Holds all generated branches
     var allBranches = []
+
+    // Branch tips have cascades. Just the tips.
     var tips = [];
+
+    // Holds parent branches until all possible children are spawned.
     var buffer = [];
 
+
+    // Starts the cascade.
+    // Create a mesh for the branch and add it to list of branches.
     var branch = branchGenerator(origin, vector,4, 4);
-
     buffer.push(branch);
-    allBranches.push(new THREE.Mesh( branch["geometry"], treeMat));
+    var branchMesh = new THREE.Mesh( branch["geometry"], treeMat)
+    allBranches.push(branchMesh);
 
+
+    // While parent branches are still on the buffer, eligible for childbirth
     while(buffer.length > 0){
         var cur = buffer.pop()
+        // Go through each joint in the branch
         for(var joint = 1; joint < cur["bVec"].length; joint++){
-              if (chance(_branchProb(joint))){
-                    // what would its radius be?
+            // Randomly choose if a branch will spawn at this joint.
+            if (bernoulli(_branchProb(joint))){
+                    // What would the proposed radius be?
                     var rad = cur["radius"](joint - 1)
+                    // If the radius is too small don't spawn the branch.
                     if (rad > _radiusCutoff){
+                        // o = Origin = Spacial position of joint.
                         var o = new THREE.Vector3().addVectors(cur["bVec"][joint], cur["offset"])
+                        // v = Vector = probability cone centered on parent
                         var v = new THREE.Vector3().subVectors(cur["bVec"][joint],cur["bVec"][joint-1])
-                        var r = rad * randRange(.6,.9)
+<<<<<<< HEAD
+                        var r = rad * continuousUniform(.6,.9)
+=======
+                        // r = Radius = slightly smaller than the parent branch.
+                        var r = rad * uniform(.6,.9);
+                        // n = NumSegments = 1 less than parent.
+>>>>>>> master
                         var n = cur["bVec"].length - joint + 1
-                        var newBranch = branchGenerator(o,v,r,n)
-                        buffer.push(newBranch)
-                        allBranches.push(new THREE.Mesh( newBranch["geometry"], treeMat))
 
-
+                        var newBranch = branchGenerator(o,v,r,n);
+                        buffer.push(newBranch);
+                        var branchMesh = new THREE.Mesh( newBranch["geometry"], treeMat);
+                        allBranches.push(branchMesh);
                     }
               }
         }
-        tips.push(cur)
+        tips.push(cur);
     }
 
 
-
+    // Merge the geometries of the branches;
     var treeMeshGeo = mergeMeshGeometry(allBranches);
+    // Make a mesh of the geometries with tree material.
     var tree = new THREE.Group();
-    tree.add(new THREE.Mesh( treeMeshGeo, treeMat))
+    tree.add(new THREE.Mesh( treeMeshGeo, treeMat));
 
-    var pushup = new THREE.Vector3(0,0,3)
+    // Used for bugfixing.
+    var pushup = new THREE.Vector3(0,0,3);
 
     for (var iter = 0; iter < tips.length; iter++){
-      var cur = tips[iter]
+        var cur = tips[iter];
 
-      // This is technically correct.
-      //var locus = new THREE.Vector3().addVectors(pushup,cur.bVec[cur.bVec.length - 1])
+        // This is the technically correct code, I believe.
+        //var locus = new THREE.Vector3().addVectors(pushup,cur.bVec[cur.bVec.length - 1])
 
-      // hackfix for Weird ass bug where the last branch segment is poorly articulated, so it spawns blossoms unconnected
-      var locus = new THREE.Vector3().addVectors(pushup,cur.bVec[cur.bVec.length - 2])
-      locus.add(cur.offset)
-      tree.add(cascadeGenerator(locus))
+        // Resolves bug where the last branch segment is poorly articulated,
+        // so it spawns blossoms unconnected. Not 100% sure why.
+        var locus = new THREE.Vector3().addVectors(pushup,cur.bVec[cur.bVec.length - 2])
+        locus.add(cur.offset)
+
+        // Places a blossom cascade at the tree tip.
+        tree.add(cascadeGenerator(locus, 0xff69b4))
+        tree.add(cascadeGenerator(locus, 0xcd6889))
+        tree.add(cascadeGenerator(locus, 0xcd3278))
     }
 
     return tree;

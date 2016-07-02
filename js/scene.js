@@ -9,21 +9,41 @@ function nightModeSet(value) {
     nightMode = value;
 }
 
-try {
-    init();
-    render();
-    animate();
-}
-catch ( err ) {
-    alertError( err.toString() );
-    animate();
+init();
+render();
+animate();
+
+function createUI() {
+    stats = new Stats();
+    stats.showPanel( 0 );
+    stats.domElement.style.position = 'absolute';
+    stats.domElement.style.display = 'none';
+    stats.domElement.style.margin = '10px 15px auto';
+    document.body.appendChild( stats.domElement );
+
+    UIaddElement( new CRGButton( 'Regenerate', function ( btn ) {
+        createEnvironment( 70, 50, 2 );
+    }));
+
+    var tools = new CRGDropdown( 'Tools' );
+    tools.addElement( new CRGDropdownButton( 'Show FPS', function( btn ) {
+        if (stats.domElement.style.display === 'none') {
+            stats.domElement.style.display = 'block';
+            btn.setTextNode( 'Hide FPS' );
+        } else {
+            stats.domElement.style.display = 'none';
+            btn.setTextNode( 'Show FPS' );
+        }
+    }));
+
+    UIaddElement( tools );
+
+    UIgenerate();
 }
 
 function init() {
 
-    stats = new Stats();
-    stats.showPanel( 0 );
-    document.getElementById( 'stats' ).appendChild( stats.dom );
+    createUI();
 
     clock = new THREE.Clock();
 
@@ -63,6 +83,7 @@ function init() {
 
     window.addEventListener( 'resize', onWindowResize, false );
 
+    createBase( 70, 50, 2 );
     createEnvironment( 70, 50, 2 );
 
 }
@@ -79,34 +100,24 @@ function onWindowResize() {
 }
 
 function animate() {
-
     stats.begin();
 
-    var delta = clock.getDelta();
     render();
 
     tick++;
-
-    updateLanterns();
-    updateMoths();
-    updateWalls();
-
+    scene.update();
     controls.update();
 
     stats.end();
 
     requestAnimationFrame( animate );
-
 }
 
 function render() {
-
     renderer.render( scene, camera );
-
 }
 
 function initializeLights() {
-
     var sceneLight = new THREE.HemisphereLight( 0xc2c2dd, 0x40c2c2, .1 );
     scene.add( sceneLight );
     environment.hemiLight = sceneLight;
@@ -124,30 +135,24 @@ function initializeLights() {
 }
 
 function generateRock() {
-
     var width = environment.width;
     var height = environment.height;
 
-    var x = Math.floor( Math.random() * 6 + 3 );
-    var y = Math.floor( Math.random() * 6 + 3 );
-    var z = Math.floor( Math.random() * 6 + 1 );
+    var x = Math.floor( rand() * 6 + 3 );
+    var y = Math.floor( rand() * 6 + 3 );
+    var z = Math.floor( rand() * 6 + 2 );
 
-    var rock = ClusterFactory( SpireRockFactory, x, y, z );
+    var rock = RockClusterFactory( SpireRockGeometry, x, y, z );
+    rock.addToObject( environment.sand,
+                      randOffset( 0, width - 3 * x ),
+                      randOffset( 0, height - 4 * y ),
+                      z / 2 - 0.5);
 
-    rock.position.x = peturb( rock.position.x, width - 3 * x );
-    rock.position.y = peturb( rock.position.y, height - 3 * y );
-    rock.position.z += z / 2 - 0.5;
-
-    var base = ClusterBaseFactory( rock );
-
-    rippleSand( 3 * Math.sqrt( x * x + y * y ) / 4, rock );
-
-    scene.add( rock );
+    rippleSand( 2, rock );
 }
 
-function createEnvironment( width, height, depth ) {
 
-
+function createBase( width, height, depth ) {
     if (nightMode) {
         renderer.setClearColor( 0x001331, 1 );
     }
@@ -170,35 +175,32 @@ function createEnvironment( width, height, depth ) {
 
     initializeLights();
 
-    createSand( width, height );
     createWalls( width, height, 15 );
-
-    generateRock();
-
-    while ( Math.random() > 0.3 ) {
-        generateRock();
-    }
 
     var lanterns = [ { x : width / 2 - 2, y : -height / 2 + 2 },
                      { x : -width / 2 + 2, y : height / 2 - 2 } ];
     for ( var i = 0; i < lanterns.length; i++ ) {
         var dim = 3;
         var lantern = lanternFactory( dim, dim, 3 );
-        lantern.position.x = lanterns[i].x;
-        lantern.position.y = lanterns[i].y;
-        lantern.position.z += depth * 2;
-
         var moth = mothFactory( lantern );
 
-        scene.add( lantern );
-        scene.add( moth );
+        lantern.addToObject( scene, lanterns[i].x, lanterns[i].y, depth * 2 );
     }
+}
 
-    tree = treeFactory();
-    scene.add(tree);
+function createEnvironment( width, height, depth ) {
+    if ( typeof environment.sand !== 'undefined' )
+        scene.remove( environment.sand );
+    createSand( width, height );
+
+    generateRock();
+    while ( Math.random() > 0.3 )
+        generateRock();
 
     if (nightMode) {
         stars = createStars();
         scene.add(stars);
     }
+    // tree = treeFactory();
+    // environment.sand.add(tree);
 }
