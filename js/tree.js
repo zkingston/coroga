@@ -7,7 +7,12 @@
 
 // What is the length of the branch segment given the joint number.
 function _lengthHeuristic(maxlen, maxjoint, curjoint){
+<<<<<<< HEAD
+  //return maxlen * curjoint/maxjoint - curjoint + continuousUniform(1,4)
+  return (curjoint < 2)? continuousUniform(3,5): continuousUniform(2,4)
+=======
   return (curjoint < 2) ? uniform(3,5) : uniform(2,4)
+>>>>>>> master
 }
 
 // Probability a branch will spawn at fork
@@ -43,6 +48,16 @@ var spreadAngle = 120;
 // How much does the cone decrease per child?
 function degradation(){return uniform(0.1,1) * 10};
 
+<<<<<<< HEAD
+// Cascade of shrinking probability cones.
+var spreadAngle = 120; // Starting probability cones
+function degradation(){return continuousUniform(0.1,1) * 10}; // How fast does it shrink
+var flowerSize = .4; // How big are the flowers.
+function flowerDist(){return continuousUniform(flowerSize,2* flowerSize)}; // Space between parent and child
+function childPerDegree(angle){ // How many children based on how big the probability cone is
+    // Works closesly with degradation. degradation is how fast the angle drops
+    if (angle > (9/10) * spreadAngle){return Math.floor(continuousUniform(1,4))}
+=======
 // How big are the flowers.
 var flowerSize = .4;
 
@@ -55,6 +70,7 @@ function flowerDist(){return uniform(flowerSize,2* flowerSize)};
 // Angle must go to zero for the cascade to stop.
 function childPerDegree(angle){
     if (angle > (9/10) * spreadAngle){return Math.floor(uniform(1,4))}
+>>>>>>> master
     if (angle > (4/5)*spreadAngle){return Math.floor(4 * angle/spreadAngle)}
     if (angle == 0){return 0} // base case
     else{return 1}
@@ -80,6 +96,10 @@ function conePoint(origin, vector, length, degreeLow, degreeHigh){
 
     // Normalize the start vector.
     vector.normalize()
+<<<<<<< HEAD
+    //length = length * continuousUniform(0,1)
+=======
+>>>>>>> master
     var rl = (Math.PI/180) * degreeLow
     var rh = (Math.PI/180) * degreeHigh
 
@@ -96,6 +116,11 @@ function conePoint(origin, vector, length, degreeLow, degreeHigh){
     v.crossVectors(a,u).normalize()
     //axis, u, v basis constructed
 
+<<<<<<< HEAD
+    var theta = acos(continuousUniform(cos(rl), cos(rh)))
+    var phi = continuousUniform(0, 2*Math.PI)
+=======
+>>>>>>> master
 
     // Randomly generate the angles of the new point for conic form.
     var theta = acos(uniform(cos(rl), cos(rh)));
@@ -404,9 +429,13 @@ function treeFactory(x,y){
                         var o = new THREE.Vector3().addVectors(cur["bVec"][joint], cur["offset"])
                         // v = Vector = probability cone centered on parent
                         var v = new THREE.Vector3().subVectors(cur["bVec"][joint],cur["bVec"][joint-1])
+<<<<<<< HEAD
+                        var r = rad * continuousUniform(.6,.9)
+=======
                         // r = Radius = slightly smaller than the parent branch.
                         var r = rad * uniform(.6,.9);
                         // n = NumSegments = 1 less than parent.
+>>>>>>> master
                         var n = cur["bVec"].length - joint + 1
 
                         var newBranch = branchGenerator(o,v,r,n);
