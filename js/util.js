@@ -45,7 +45,7 @@ THREE.Vector3.prototype.closest = function ( vector_list ) {
 /**
  * Randomly samples from this array.
  *
- * @return { Object } A random element from this 
+ * @return { Object } A random element from this
  */
 Array.prototype.choose = function () {
     return this[ discreteUniform( 0, this.length - 1 ) ];
@@ -262,3 +262,17 @@ function bernoulli ( phi ) {
     var r = continuousUniform( 0, 1 );
     return ( phi < r ) ? 1 : -1;
 }
+
+/**
+ * Normalizes an array
+ */
+Array.prototype.normalize = function() {
+    var sum = this.reduce(add, 0);
+    function add(x, y) {
+        return x + y;
+    }
+
+    for (var i = 0; i < this.length; i++) {
+        this[i] = this[i] / sum;
+    }
+};

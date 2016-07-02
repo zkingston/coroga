@@ -126,7 +126,7 @@ function generateRock() {
     var z = Math.floor( rand() * 6 + 2 );
 
     var rock = RockClusterFactory( SpireRockGeometry, x, y, z );
-    rock.addToObject( environment.sand, 
+    rock.addToObject( environment.sand,
                       randOffset( 0, width - 3 * x ),
                       randOffset( 0, height - 4 * y ),
                       z / 2 - 0.5);
