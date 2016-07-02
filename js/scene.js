@@ -8,24 +8,29 @@ render();
 animate();
 
 function createUI() {
+    stats = new Stats();
+    stats.showPanel( 0 );
+    stats.domElement.style.position = 'absolute';
+    stats.domElement.style.display = 'none';
+    stats.domElement.style.margin = '10px 15px auto';
+    document.body.appendChild( stats.domElement );
+
     UIaddElement( new CRGButton( 'Regenerate', function ( btn ) {
-        btn.setTextNode( 'Generating' )
         createEnvironment( 70, 50, 2 );
-        btn.setTextNode( 'Regenerate' )
     }));
 
     var tools = new CRGDropdown( 'Tools' );
-    UIaddElement( tools );
     tools.addElement( new CRGDropdownButton( 'Show FPS', function( btn ) {
-        var div = stats.domElement;
-        if (div.style.display === 'none') {
-            div.style.display = 'block';
+        if (stats.domElement.style.display === 'none') {
+            stats.domElement.style.display = 'block';
             btn.setTextNode( 'Hide FPS' );
         } else {
-            div.style.display = 'none';
+            stats.domElement.style.display = 'none';
             btn.setTextNode( 'Show FPS' );
         }
     }));
+
+    UIaddElement( tools );
 
     UIgenerate();
 }
@@ -33,12 +38,6 @@ function createUI() {
 function init() {
 
     createUI();
-
-    stats = new Stats();
-    stats.showPanel( 0 );
-    stats.domElement.style.position = 'absolute';
-    stats.domElement.style.display = 'none';
-    document.body.appendChild( stats.domElement );
 
     clock = new THREE.Clock();
 
