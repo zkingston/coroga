@@ -25,6 +25,19 @@ function createUI() {
         createEnvironment( 70, 50, 2 );
     }));
 
+    var generationOptions = new CRGDropdown( 'Generation Options' );
+    generationOptions.addElement( new CRGDropdownButton( 'Night Mode', function( btn ) {
+        if (nightMode == true) {
+            nightModeSet(false);
+            btn.setTextNode( 'Night Mode' );
+        } else {
+            nightModeSet(true);
+            btn.setTextNode( 'Day Mode' );
+        }
+    }));
+    UIaddElement( generationOptions );
+
+
     var tools = new CRGDropdown( 'Tools' );
     tools.addElement( new CRGDropdownButton( 'Show FPS', function( btn ) {
         if (stats.domElement.style.display === 'none') {
@@ -60,12 +73,6 @@ function init() {
                                           antialias: false } );
  	renderer.setPixelRatio( window.devicePixelRatio );
 
-    if (nightMode) {
-        renderer.setClearColor( 0x001331, 1 );
-    }
-    else {
-        renderer.setClearColor( 0xaaccff, 1 );
-    }
     renderer.setSize( window.innerWidth, window.innerHeight );
 	renderer.sortObjects = false;
 
@@ -122,12 +129,7 @@ function initializeLights() {
     scene.add( sceneLight );
     environment.hemiLight = sceneLight;
 
-    if (nightMode) {
-        var lamp = new THREE.DirectionalLight( 0x292929, 0.5 );
-    }
-    else {
-        var lamp = new THREE.DirectionalLight( 0xdddddd, 0.5 );
-    }
+    var lamp = new THREE.DirectionalLight( 0xdddddd, 0.5 );
     lamp.position.set( 0, 10, 30 );
     lamp.castShadow = true;
     scene.add( lamp );
@@ -153,20 +155,8 @@ function generateRock() {
 
 
 function createBase( width, height, depth ) {
-    if (nightMode) {
-        renderer.setClearColor( 0x001331, 1 );
-    }
-    else {
-        renderer.setClearColor( 0xaaccff, 1 );
-    }
 
     scene = new THREE.Scene();
-    if (nightMode) {
-        scene.fog = new THREE.FogExp2( 0x001331, 0.0025 );
-    }
-    else {
-        scene.fog = new THREE.FogExp2( 0xaaccff, 0.005 );
-    }
 
     environment.width = width;
     environment.height = height;
@@ -191,6 +181,8 @@ function createBase( width, height, depth ) {
 function createEnvironment( width, height, depth ) {
     if ( typeof environment.sand !== 'undefined' )
         scene.remove( environment.sand );
+    if ( typeof environment.stars !== 'undefined' && !nightMode )
+        scene.remove( environment.stars );
     createSand( width, height );
 
     generateRock();
@@ -198,8 +190,19 @@ function createEnvironment( width, height, depth ) {
         generateRock();
 
     if (nightMode) {
-        stars = createStars();
-        scene.add(stars);
+        scene.fog = new THREE.FogExp2( 0x001331, 0.0025 );
+        renderer.setClearColor( 0x001331, 1 );
+        environment.lamp = new THREE.DirectionalLight( 0x292929, 0.5 );
+        if (typeof environment.stars === 'undefined') {
+            stars = createStars();
+            environment.stars = stars;
+            scene.add(stars);
+        }
+    }
+    else {
+        scene.fog = new THREE.FogExp2( 0xaaccff, 0.005 );
+        renderer.setClearColor( 0xaaccff, 1 );
+        environment.lamp = new THREE.DirectionalLight( 0xdddddd, 0.5 );
     }
     // tree = treeFactory();
     // environment.sand.add(tree);
