@@ -198,6 +198,9 @@ function createEnvironment( width, height, depth ) {
             environment.stars = stars;
             scene.add(stars);
         }
+        else {
+            scene.add(environment.stars);
+        }
     }
     else {
         scene.fog = new THREE.FogExp2( 0xaaccff, 0.005 );

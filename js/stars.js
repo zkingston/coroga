@@ -4,7 +4,7 @@ function createStars() {
         particles = new THREE.Geometry(),
         pMaterial = new THREE.PointsMaterial({
           color: 0xFFFFFF,
-          size: 5,
+          size: 8,
           map: THREE.ImageUtils.loadTexture("images/particle.png"),
           blending: THREE.AdditiveBlending,
           transparent: true
