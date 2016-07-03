@@ -49,18 +49,17 @@ function PlacementEngine(env, scene){
 
     // TODO: Read these in from config and error check
     //----------------------------------------------------------
+    var biomeConfig = createBiomeMatrix();
+
+    console.log(biomeConfig.featureMap)
+
     this.numberOfBiomes = 3;
     this.maxNumberOfFeatures = 100;
     this.biomeStdDev = Math.max(env.height,env.width) *1.5 / (this.numberOfBiomes-1);
 
-
-    this.featureHandles = [redBall, greenBall, blackBall] // List of constructor handles
-    this.biomeProbabilities = [.25,.25,.5]; // P(B)
-    this.pfbMatrix = [ // P(F|B)
-        [.8,.1, .1],
-        [0,.5,.5],
-        [.33,.33,.34]];
-
+    this.featureHandles = [redBall, greenBall, blackBall]; // List of constructor handles
+    this.biomeProbabilities = [.5,.5]; // P(B)
+    this.pfbMatrix = biomeConfig.matrix;
     //-----------------------------------------------------------
 
     // Utility Functions
@@ -131,14 +130,14 @@ function PlacementEngine(env, scene){
     }
 
     // Member Variables
-    this.biomes = [];
-    this.features = [];
+    this.generatedBiomes = [];
+    this.generatedFeatures = [];
 
     // Produce list and location of biome locii
     for (var i = 0; i < this.numberOfBiomes; i++){
         // Select a biome and add it to list
         var index = dirichletSample(this.biomeProbabilities)
-        this.biomes.push(
+        this.generatedBiomes.push(
             {
                 "bid" : index,
                 "locus" : this.randomLocation2D()
@@ -155,7 +154,7 @@ function PlacementEngine(env, scene){
         // allocate a feature...
         for(var i = 0; i < this.maxNumberOfFeatures; i++){
             // to a random biome
-            var randomBiome = this.biomes[Math.floor(random() * this.biomes.length)];
+            var randomBiome = this.generatedBiomes[Math.floor(random() * this.generatedBiomes.length)];
             var mu = randomBiome.locus;
             var bid = randomBiome.bid;
             var position = this.multivariateGaussianSample2D([mu.x,mu.y]);
@@ -163,7 +162,7 @@ function PlacementEngine(env, scene){
             var fid = dirichletSample(this.pfbMatrix[bid]);
             var featureConstructor = this.featureHandles[fid];
             var feature = featureConstructor(position.x, position.y);
-            this.features.push(feature);
+            this.generatedFeatures.push(feature);
             scene.add(feature);
         }
     }
