@@ -14,10 +14,12 @@ ui = []
 CRGButton = function( text, callback ) {
     this.type = 'Button';
     this.text = text;
+    this.enable = true;
 
     var that = this;
     this.callback = function() {
-        callback( that );   
+        if ( this.enable )
+            callback( that );   
     };
 
     this.elements = [];
@@ -84,8 +86,26 @@ CRGButton = function( text, callback ) {
 
         return textNode;
     };
-/*
-        */
+
+    /**
+     * Set the enable / disable state of the button.
+     *
+     * @param { boolean } enable Enabled status.
+     *
+     * @return { CRGDropdownButton } This
+     */
+    this.setEnable = function( enable ) {
+        this.enable = enable;
+
+        if ( typeof this.btn !== 'undefined' ) {
+            if ( this.enable )
+                this.btn.className = 'btn btn-default enabled';
+            else
+                this.btn.className = 'btn btn-default disabled';
+        }
+
+        return this;
+    }
 
     /**
      * Generates and returns the document element corresponding to the
@@ -95,7 +115,12 @@ CRGButton = function( text, callback ) {
      */
     this.dom = function() {
         this.btn = document.createElement( 'button' );
-        this.btn.className = 'btn btn-default';
+
+        if ( this.enable )
+            this.btn.className = 'btn btn-default enabled';
+        else
+            this.btn.className = 'btn btn-default disabled';
+
         this.btn.onclick = this.callback;
 
         this.textNode = this.textGen();
@@ -125,6 +150,29 @@ CRGButton.prototype.clone = function () {
 };
 
 /**
+ * Creates an instance of a CRGDropdownSeperator, which can be used
+ * to separate groups of options in a CRGDropdown.
+ *
+ * @constructor
+ * @this { CRGDropdownSeperator }
+ */
+CRGDropdownSeparator = function() {
+    /**
+     * Generates and returns the document element corresponding to the
+     * constructed dropdown button.
+     *
+     * @return { Element } Document element for this button
+     */
+    this.dom = function() {
+        var li = document.createElement( 'li' );
+        li.className = 'divider';
+        li.role = 'separator';
+
+        return li;
+    };
+};
+
+/**
  * Creates an instance of a CRGDropdownButton, used to generate UI elements
  * inside of a CRGDropdown object.
  *
@@ -136,10 +184,12 @@ CRGButton.prototype.clone = function () {
 CRGDropdownButton = function( text, callback ) {
     this.type = 'DropdownButton';
     this.text = text;
+    this.enable = true;
 
     var that = this;
     this.callback = function() {
-        callback( that );
+        if ( this.enable )
+            callback( that );
     };
 
     /**
@@ -163,6 +213,26 @@ CRGDropdownButton = function( text, callback ) {
     };
 
     /**
+     * Set the enable / disable state of the button.
+     *
+     * @param { boolean } enable Enabled status.
+     *
+     * @return { CRGDropdownButton } This
+     */
+    this.setEnable = function( enable ) {
+        this.enable = enable;
+
+        if ( typeof this.li !== 'undefined' ) {
+            if ( this.enable )
+                this.li.className = 'enabled';
+            else
+                this.li.className = 'disabled';
+        }
+
+        return this;
+    }
+
+    /**
      * Generates and returns the document element corresponding to the
      * constructed dropdown button.
      *
@@ -176,7 +246,15 @@ CRGDropdownButton = function( text, callback ) {
         this.textNode = document.createTextNode( this.text )
         this.a.appendChild( this.textNode );
 
-        return this.a;
+        this.li = document.createElement( 'li' );
+        this.li.appendChild( this.a );
+
+        if ( this.enable )
+            this.li.className = 'enabled';
+        else
+            this.li.className = 'disabled';
+
+        return this.li;
     };
 };
 
@@ -242,11 +320,8 @@ CRGDropdown = function( text ) {
         this.ul = document.createElement( 'ul' );
         this.ul.className = 'dropdown-menu';
 
-        for ( var i = 0; i < this.elements.length; i++ ) {
-            var li = document.createElement( 'li' );
-            li.appendChild( this.elements[ i ].dom() );
-            this.ul.appendChild( li );
-        }
+        for ( var i = 0; i < this.elements.length; i++ )
+            this.ul.appendChild( this.elements[ i ].dom() );
 
         this.div.appendChild( this.ul );
 

@@ -34,7 +34,6 @@ function createUI() {
             btn.setTextNode( 'Day Mode' );
         }
     }));
-
     UIaddElement( generate ); 
 
     var tools = new CRGDropdown( 'Tools' );
