@@ -60,7 +60,7 @@ function dirichletSample(x) {
     var total = 0;
     var rval = random();
 
-    for (i = 0; i < x.length; i++){
+    for (var i = 0; i < x.length; i++){
         total = total + x[i];
         if (rval < total){
             return i;
