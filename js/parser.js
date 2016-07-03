@@ -51,13 +51,13 @@ function createBiomeMatrix() {
             continue;
         }
 
-        for (var feature in biomes[biome]["features"]) {
-            if (!biomes[biome]["features"].hasOwnProperty(feature)) {
+        for (var feature in biomes[biome].features) {
+            if (!biomes[biome].features.hasOwnProperty(feature)) {
                 continue;
             }
 
             //Add the probability of the feature to the correct matrix index
-            biomeMatrix[biomeMap[biome]][featureMap[feature]] = biomes[biome]["features"][feature];
+            biomeMatrix[biomeMap[biome]][featureMap[feature]] = biomes[biome].features[feature];
         }
     }
 
