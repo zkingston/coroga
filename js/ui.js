@@ -18,8 +18,8 @@ CRGButton = function( text, callback ) {
 
     var that = this;
     this.callback = function() {
-        if ( this.enable )
-            callback( that );   
+        if ( that.enable )
+            callback( that );
     };
 
     this.elements = [];
@@ -92,7 +92,7 @@ CRGButton = function( text, callback ) {
      *
      * @param { boolean } enable Enabled status.
      *
-     * @return { CRGDropdownButton } This
+     * @return { CRGButton } This
      */
     this.setEnable = function( enable ) {
         this.enable = enable;
@@ -188,7 +188,7 @@ CRGDropdownButton = function( text, callback ) {
 
     var that = this;
     this.callback = function() {
-        if ( this.enable )
+        if ( that.enable )
             callback( that );
     };
 
