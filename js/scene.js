@@ -3,15 +3,60 @@ var camera, controls, scene, renderer, clock, stats;
 var environment = {};
 var tick = 0;
 
+var nightMode = false;
+
+function nightModeSet(value) {
+    nightMode = value;
+}
+
 init();
 render();
 animate();
 
-function init() {
-
+function createUI() {
     stats = new Stats();
     stats.showPanel( 0 );
-    document.getElementById( 'stats' ).appendChild( stats.dom );
+    stats.domElement.style.position = 'absolute';
+    stats.domElement.style.display = 'none';
+    stats.domElement.style.margin = '10px 15px auto';
+    document.body.appendChild( stats.domElement );
+
+    UIaddElement( new CRGButton( 'Regenerate', function ( btn ) {
+        createEnvironment( 70, 50, 2 );
+    }));
+
+    var generationOptions = new CRGDropdown( 'Generation Options' );
+    generationOptions.addElement( new CRGDropdownButton( 'Night Mode', function( btn ) {
+        if (nightMode == true) {
+            nightModeSet(false);
+            btn.setTextNode( 'Night Mode' );
+        } else {
+            nightModeSet(true);
+            btn.setTextNode( 'Day Mode' );
+        }
+    }));
+    UIaddElement( generationOptions );
+
+
+    var tools = new CRGDropdown( 'Tools' );
+    tools.addElement( new CRGDropdownButton( 'Show FPS', function( btn ) {
+        if (stats.domElement.style.display === 'none') {
+            stats.domElement.style.display = 'block';
+            btn.setTextNode( 'Hide FPS' );
+        } else {
+            stats.domElement.style.display = 'none';
+            btn.setTextNode( 'Show FPS' );
+        }
+    }));
+
+    UIaddElement( tools );
+
+    UIgenerate();
+}
+
+function init() {
+
+    createUI();
 
     clock = new THREE.Clock();
 
@@ -27,7 +72,7 @@ function init() {
     renderer = new THREE.WebGLRenderer( { alpha: true,
                                           antialias: false } );
  	renderer.setPixelRatio( window.devicePixelRatio );
-    renderer.setClearColor( 0xaaccff, 1 );
+
     renderer.setSize( window.innerWidth, window.innerHeight );
 	renderer.sortObjects = false;
 
@@ -99,7 +144,6 @@ function generateRock() {
     var y = Math.floor( rand() * 6 + 3 );
     var z = Math.floor( rand() * 6 + 2 );
 
-    console.log( x, y, z );
     var rock = RockClusterFactory( SpireRockGeometry, x, y, z );
     rock.addToObject( environment.sand,
                       randOffset( 0, width - 3 * x ),
@@ -109,9 +153,10 @@ function generateRock() {
     rippleSand( 2, rock );
 }
 
+
 function createBase( width, height, depth ) {
+
     scene = new THREE.Scene();
-    scene.fog = new THREE.FogExp2( 0xaaccff, 0.005 );
 
     environment.width = width;
     environment.height = height;
@@ -136,12 +181,32 @@ function createBase( width, height, depth ) {
 function createEnvironment( width, height, depth ) {
     if ( typeof environment.sand !== 'undefined' )
         scene.remove( environment.sand );
+    if ( typeof environment.stars !== 'undefined' && !nightMode )
+        scene.remove( environment.stars );
     createSand( width, height );
 
     generateRock();
     while ( Math.random() > 0.3 )
         generateRock();
 
+    if (nightMode) {
+        scene.fog = new THREE.FogExp2( 0x001331, 0.0025 );
+        renderer.setClearColor( 0x001331, 1 );
+        environment.lamp = new THREE.DirectionalLight( 0x292929, 0.5 );
+        if (typeof environment.stars === 'undefined') {
+            stars = createStars();
+            environment.stars = stars;
+            scene.add(stars);
+        }
+        else {
+            scene.add(environment.stars);
+        }
+    }
+    else {
+        scene.fog = new THREE.FogExp2( 0xaaccff, 0.005 );
+        renderer.setClearColor( 0xaaccff, 1 );
+        environment.lamp = new THREE.DirectionalLight( 0xdddddd, 0.5 );
+    }
     // tree = treeFactory();
     // environment.sand.add(tree);
 }
