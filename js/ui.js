@@ -110,9 +110,8 @@ CRGButton = function( text, callback ) {
         if ( this.elements.length ) {
             var dd = new CRGDropdown( '' );
             dd.elements = this.elements;
-            var ddd = dd.dom();
 
-            div.appendChild( ddd );
+            div.appendChild( dd.dom() );
         }
 
         return div;
@@ -280,10 +279,13 @@ function UIaddElement( element ) {
 function UIgenerate() {
     var o = document.getElementById( 'overlay' );
 
-    for ( var u = 0; u < ui.length; u++ )
+    for ( var u = 0; u < ui.length; u++ ) {
         o.appendChild( ui[ u ].dom() );
+        var s = document.createElement( 'span' );
+        s.innerHTML = '&nbsp&nbsp'
+        o.appendChild( s );
+    }
 }
-
 
 /**
  * Displays a success message at the top of the screen.

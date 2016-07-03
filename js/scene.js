@@ -54,7 +54,6 @@ function createUI() {
 }
 
 function init() {
-
     createUI();
 
     clock = new THREE.Clock();
@@ -91,7 +90,6 @@ function init() {
 
     createBase( 70, 50, 2 );
     createEnvironment( 70, 50, 2 );
-
 }
 
 function onWindowResize() {
