@@ -44,8 +44,8 @@ function bambooFactory(x, y, bush) {
                                                    radius * cfg.jointThickness,
                                                    height * cfg.jointHeight,
                                                    32, 5, false );
-        var offset = (Math.random() * cfg.jointSpacing.value)
-                - cfg.jointSpacing.value/2;
+        var offset = (Math.random() * cfg.jointSpacing.variance)
+                - cfg.jointSpacing.variance/2;
 
         //Rotate joint so that it is upright
         jointGeo.rotateY( cfg.tilt.value );
@@ -55,7 +55,7 @@ function bambooFactory(x, y, bush) {
                             0);
 
         stalk.addFeatureGeometry( "joints", jointGeo );
-        jointStart+= cfg.jointSpacing.value;
+        jointStart+= cfg.jointSpacing.value + offset;
     }
 
     stalk.addFeatureMaterialL( "joints",

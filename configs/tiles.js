@@ -12,16 +12,16 @@ var tiles = {
             }
         ]
     },
-    "bamboo" : {
+    "bambooBush" : {
         size : {
-            x : 16,
-            y : 16
+            x : 4,
+            y : 4
         },
         features : [
             {
                 constructor : generateBambooBush,
-                x : 8,
-                y : 8
+                x : 2,
+                y : 2
             }
         ]
     },
