@@ -16,10 +16,16 @@ function bambooFactory( bush, x, y ) {
     var stalk = new THREE.Object3D();
 
     //Create the "shoot", the plant without the joints
-    var radius = cfg.radius.value + (Math.random() * cfg.radius.variance * cfg.radius.value );
-    var height = cfg.height.value + (Math.random() * cfg.height.variance * cfg.height.value );
 
-    var stalkGeo = new THREE.CylinderGeometry( radius, radius, height, 32, 1, false );
+    //Create variance in the sizes
+    var radius = cfg.radius.value +
+            (Math.random() * cfg.radius.variance * cfg.radius.value );
+    var height = cfg.height.value +
+            (Math.random() * cfg.height.variance * cfg.height.value );
+
+    //Rotate the stalk
+    var stalkGeo = new THREE.CylinderGeometry( radius, radius, height, 32, 1,
+                                               false );
     stalkGeo.rotateX( cfg.tilt.value );
     stalkGeo.translate( x, y, height/2 );
     bush.addFeatureGeometry( "bamboo", stalkGeo );
@@ -50,32 +56,50 @@ function bambooFactory( bush, x, y ) {
     }
 }
 
+/*
+ * Function to prevent collisions, isn't precise but it's not important
+ */
 function isColliding( points, x, y ) {
     for (var i = 0; i < points.length; i++) {
         if (Math.pow( features.bamboo.radius.value, 2 ) >
-                Math.pow( x - points[i][0], 2 ) + Math.pow( y - points[i][1], 2 ) ) {
+                Math.pow( x - points[i][0], 2 ) +
+                Math.pow( y - points[i][1], 2 ) ) {
             return true;
         }
     }
     return false;
 }
 
-function generateBambooBush(xPos, yPos) {
+/*
+ * Generates a group of bamboo stalks + joints
+ */
+function generateBambooBush( xPos, yPos ) {
+    //Config
     var cfg = features.bamboo;
     var bush = new THREE.Object3D();
+
+    //Keep track of points of bamboo to check for collisions
     var points = []
+
     for (var i = 0; i < 25; i++) {
-        var x = Math.random() * tiles.bambooBush.size.x - tiles.bambooBush.size.x/2;
-        var y = Math.random() * tiles.bambooBush.size.y - tiles.bambooBush.size.y/2;
+        //Generate a point in the tile and make sure it's not in collision
+        var x = Math.random() * tiles.bambooBush.size.x
+                - tiles.bambooBush.size.x/2;
+        var y = Math.random() * tiles.bambooBush.size.y
+                - tiles.bambooBush.size.y/2;
         var flag = isColliding( points, x, y );
         while (flag) {
-            x = Math.random() * tiles.bambooBush.size.x - tiles.bambooBush.size.x/2;
-            y = Math.random() * tiles.bambooBush.size.y - tiles.bambooBush.size.y/2;
-            flag = isColliding( points, x, y)
+            x = Math.random() * tiles.bambooBush.size.x
+                    - tiles.bambooBush.size.x/2;
+            y = Math.random() * tiles.bambooBush.size.y
+                    - tiles.bambooBush.size.y/2;
+            flag = isColliding( points, x, y )
         }
         points.push( [ x, y ] );
         bambooFactory( bush, x, y );
     }
+
+    //Add the materials for the stalks and for the joints
     bush.addFeatureMaterialP( "bamboo", { color: cfg.shootColor,
                                           shading: THREE.FlatShading,
                                           reflectivity: 0.5,
@@ -87,6 +111,8 @@ function generateBambooBush(xPos, yPos) {
                                           refractionRatio: 0.5,
                                           shading: THREE.FlatShading,
                                         } );
+
+    //Bufferize for a sad attempt at performance boost
     bush.bufferizeFeature( "bamboo" );
     bush.bufferizeFeature( "joints" );
     bush.generateFeatures();
