@@ -55,9 +55,7 @@ function PlacementEngine(env, scene){
     // Member Variables
     var biomeConfig = createBiomeMatrix();
     this.numTiles = 4;
-    // Didn't have time to put biomeProbabilities in the parser
-    // Marshall if you are reading this, i'd appreciate the help.
-    this.biomeProbabilities = biomeProbabilities;
+    this.biomeProbabilities = biomeConfig.biomeProbabilities;
     this.probabilityMatrix = biomeConfig.matrix;
     this.tileMap = biomeConfig.tileMap;
 

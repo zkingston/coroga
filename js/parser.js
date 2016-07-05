@@ -33,8 +33,8 @@ function createBiomeMatrix() {
     }
 
     //Debug output. Let me know if I should remove this
-    // console.log(biomeMap);
-    // console.log(tileMap);
+    //console.log(biomeMap);
+    //console.log(tileMap);
 
     //Create matrix to hold the values
     var biomeMatrix = [];
@@ -45,30 +45,36 @@ function createBiomeMatrix() {
         }
     }
 
+    var biomeProbabilities = [];
+
     //Look through every biome, and every tile in that biome
     for (var biome in biomes) {
         if (!biomes.hasOwnProperty(biome)) {
             continue;
         }
 
-        for (var tile in biomes[biome]["tiles"]) {
-            if (!biomes[biome]["tiles"].hasOwnProperty(tile)) {
+        //Add all of the probabilities
+        biomeProbabilities.push(biomes[biome].probability);
+
+        for (var tile in biomes[biome].tiles) {
+            if (!biomes[biome].tiles.hasOwnProperty(tile)) {
                 continue;
             }
 
-            //Add the probability of the tile to the correct matrix index
-            biomeMatrix[biomeMap[biome]][tileMap[tile]] = biomes[biome]["tiles"][tile];
+            //Add the probability of the feature to the correct matrix index
+            biomeMatrix[biomeMap[biome]][tileMap[tile]] = biomes[biome].tiles[tile];
         }
     }
 
     normalizeMatrix(biomeMatrix);
+    biomeProbabilities.normalize();
 
-    console.log(biomeMatrix);
 
     //Create an object holding the matrix and maps for usable information
     biomeMatrixContext = {};
     biomeMatrixContext["matrix"] = biomeMatrix;
     biomeMatrixContext["biomeMap"] = biomeMap;
+    biomeMatrixContext["biomeProbabilities"] = biomeProbabilities;
     biomeMatrixContext["tileMap"] = tileMap;
 
     return biomeMatrixContext;
