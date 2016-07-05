@@ -132,23 +132,6 @@ function initializeLights() {
     environment.lamp = lamp;
 }
 
-function generateRock() {
-    var width = environment.width;
-    var height = environment.height;
-
-    var x = Math.floor( rand() * 6 + 3 );
-    var y = Math.floor( rand() * 6 + 3 );
-    var z = Math.floor( rand() * 6 + 2 );
-
-    var rock = RockClusterFactory( SpireRockGeometry, x, y, z );
-    rock.addToObject( environment.sand,
-                      randOffset( 0, width - 3 * x ),
-                      randOffset( 0, height - 4 * y ),
-                      z / 2 - 0.5);
-
-    rippleSand( 2, rock );
-}
-
 
 function createBase( width, height, depth ) {
 
@@ -180,10 +163,10 @@ function createEnvironment( width, height, depth ) {
     if ( typeof environment.stars !== 'undefined' && !nightMode )
         scene.remove( environment.stars );
     createSand( width, height );
-
-    generateRock();
-    while ( Math.random() > 0.3 )
-        generateRock();
+    //
+    // generateSpireRock();
+    // while ( Math.random() > 0.3 )
+    //     generateSpireRock();
 
     if (nightMode) {
         scene.fog = new THREE.FogExp2( 0x001331, 0.0025 );
@@ -203,6 +186,10 @@ function createEnvironment( width, height, depth ) {
         renderer.setClearColor( 0xaaccff, 1 );
         environment.lamp = new THREE.DirectionalLight( 0xdddddd, 0.5 );
     }
-    // tree = treeFactory();
+
+    var placer = new PlacementEngine(environment, scene);
+    placer.runRandomTileEngine();
+
+
     // environment.sand.add(tree);
 }

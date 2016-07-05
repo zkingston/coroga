@@ -5,15 +5,15 @@ function normalizeMatrix(m){
     }
 }
 
-//Function that creates a matrix of feature probabilities given a config file
+//Function that creates a matrix of tile probabilities given a config file
 function createBiomeMatrix() {
 
-    //Keep track of number of unique biomes and features
+    //Keep track of number of unique biomes and tiles
     var biomeCount = 0;
-    var featureCount = 0;
-    //Mappings of biomes and features to matrix indeces
+    var tileCount = 0;
+    //Mappings of biomes and tiles to matrix indeces
     var biomeMap = {};
-    var featureMap = {};
+    var tileMap = {};
 
     //Fill in the biome map
     for (var biome in biomes) {
@@ -24,52 +24,58 @@ function createBiomeMatrix() {
         biomeMap[biome] = biomeCount++;
     }
 
-    //Fill in the feature map
-    for (var feature in features) {
-        if (!features.hasOwnProperty(feature)) {
+    //Fill in the tile map
+    for (var tile in tiles) {
+        if (!tiles.hasOwnProperty(tile)) {
             continue;
         }
-        featureMap[feature] = featureCount++;
+        tileMap[tile] = tileCount++;
     }
 
     //Debug output. Let me know if I should remove this
-    console.log(biomeMap);
-    console.log(featureMap);
+    //console.log(biomeMap);
+    //console.log(tileMap);
 
     //Create matrix to hold the values
     var biomeMatrix = [];
     for (var i = 0; i < biomeCount; i++) {
         biomeMatrix.push([]);
-        for (var j = 0; j < featureCount; j++) {
+        for (var j = 0; j < tileCount; j++) {
             biomeMatrix[i].push(0);
         }
     }
 
-    //Look through every biome, and every feature in that biome
+    var biomeProbabilities = [];
+
+    //Look through every biome, and every tile in that biome
     for (var biome in biomes) {
         if (!biomes.hasOwnProperty(biome)) {
             continue;
         }
 
-        for (var feature in biomes[biome].features) {
-            if (!biomes[biome].features.hasOwnProperty(feature)) {
+        //Add all of the probabilities
+        biomeProbabilities.push(biomes[biome].probability);
+
+        for (var tile in biomes[biome].tiles) {
+            if (!biomes[biome].tiles.hasOwnProperty(tile)) {
                 continue;
             }
 
             //Add the probability of the feature to the correct matrix index
-            biomeMatrix[biomeMap[biome]][featureMap[feature]] = biomes[biome].features[feature];
+            biomeMatrix[biomeMap[biome]][tileMap[tile]] = biomes[biome].tiles[tile];
         }
     }
 
     normalizeMatrix(biomeMatrix);
+    biomeProbabilities.normalize();
 
-    console.log(biomeMatrix);
 
     //Create an object holding the matrix and maps for usable information
     biomeMatrixContext = {};
     biomeMatrixContext["matrix"] = biomeMatrix;
     biomeMatrixContext["biomeMap"] = biomeMap;
-    biomeMatrixContext["featureMap"] = featureMap;
+    biomeMatrixContext["biomeProbabilities"] = biomeProbabilities;
+    biomeMatrixContext["tileMap"] = tileMap;
 
     return biomeMatrixContext;
 }
