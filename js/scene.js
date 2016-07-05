@@ -21,12 +21,11 @@ function createUI() {
     stats.domElement.style.margin = '10px 15px auto';
     document.body.appendChild( stats.domElement );
 
-    UIaddElement( new CRGButton( 'Regenerate', function ( btn ) {
+    var generate = new CRGButton( 'Regenerate', function ( btn ) {
         createEnvironment( 70, 50, 2 );
-    }));
+    });
 
-    var generationOptions = new CRGDropdown( 'Generation Options' );
-    generationOptions.addElement( new CRGDropdownButton( 'Night Mode', function( btn ) {
+    generate.addElement( new CRGDropdownButton( 'Night Mode', function( btn ) {
         if (nightMode == true) {
             nightModeSet(false);
             btn.setTextNode( 'Night Mode' );
@@ -35,8 +34,7 @@ function createUI() {
             btn.setTextNode( 'Day Mode' );
         }
     }));
-    UIaddElement( generationOptions );
-
+    UIaddElement( generate ); 
 
     var tools = new CRGDropdown( 'Tools' );
     tools.addElement( new CRGDropdownButton( 'Show FPS', function( btn ) {
@@ -55,7 +53,6 @@ function createUI() {
 }
 
 function init() {
-
     createUI();
 
     clock = new THREE.Clock();
@@ -92,7 +89,6 @@ function init() {
 
     createBase( 70, 50, 2 );
     createEnvironment( 70, 50, 2 );
-
 }
 
 function onWindowResize() {

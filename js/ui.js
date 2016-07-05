@@ -14,10 +14,24 @@ ui = []
 CRGButton = function( text, callback ) {
     this.type = 'Button';
     this.text = text;
+    this.enable = true;
 
     var that = this;
     this.callback = function() {
-        callback( that );   
+        if ( that.enable )
+            callback( that );
+    };
+
+    this.elements = [];
+
+    /**
+     * Adds a new CRGDropdownButton element to the dropdown list. When used,
+     * transforms this button into a button with dropdown menu.
+     *
+     * @param { CRGDropdownButton } element New element to add
+     */
+    this.addElement = function ( element ) {
+        this.elements.push( element );
     };
 
     /**
@@ -38,7 +52,7 @@ CRGButton = function( text, callback ) {
         }
 
         return this;
-    }
+    };
 
     /**
      * Sets glyphicon to display to the left of the text of the button.
@@ -51,7 +65,7 @@ CRGButton = function( text, callback ) {
     this.setGlyphicon = function( icon ) {
         this.icon = icon;
         return this;
-    }
+    };
 
     this.textGen = function() {
         var textNode = document.createTextNode( this.text );
@@ -71,6 +85,26 @@ CRGButton = function( text, callback ) {
         }
 
         return textNode;
+    };
+
+    /**
+     * Set the enable / disable state of the button.
+     *
+     * @param { boolean } enable Enabled status.
+     *
+     * @return { CRGButton } This
+     */
+    this.setEnable = function( enable ) {
+        this.enable = enable;
+
+        if ( typeof this.btn !== 'undefined' ) {
+            if ( this.enable )
+                this.btn.className = 'btn btn-default enabled';
+            else
+                this.btn.className = 'btn btn-default disabled';
+        }
+
+        return this;
     }
 
     /**
@@ -80,28 +114,63 @@ CRGButton = function( text, callback ) {
      * @return { Element } Document element for this button
      */
     this.dom = function() {
-        this.div = document.createElement( 'div' );
-        this.div.className = 'btn-group btn-group-md';
-        this.div.role = 'group';
-
         this.btn = document.createElement( 'button' );
-        this.btn.className = 'btn btn-default';
+
+        if ( this.enable )
+            this.btn.className = 'btn btn-default enabled';
+        else
+            this.btn.className = 'btn btn-default disabled';
+
         this.btn.onclick = this.callback;
 
         this.textNode = this.textGen();
         this.btn.appendChild( this.textNode );
+        this.btn.style.clear = 'both';
+        this.btn.style.cssfloat = 'left';
 
-        this.div.appendChild( this.btn );
+        var div = document.createElement( 'div' );
+        div.className = 'btn-group btn-group-md';
+        div.appendChild( this.btn );
 
-        return this.div;
-    }
-}
+        if ( this.elements.length ) {
+            var dd = new CRGDropdown( '' );
+            dd.elements = this.elements;
+
+            div.appendChild( dd.dom() );
+        }
+
+        return div;
+    };
+};
 
 CRGButton.prototype = Object.create( CRGButton.prototype );
 CRGButton.prototype.constructor = CRGButton;
 CRGButton.prototype.clone = function () {
     return new CRGButton( this.text, this.callback );
-}
+};
+
+/**
+ * Creates an instance of a CRGDropdownSeperator, which can be used
+ * to separate groups of options in a CRGDropdown.
+ *
+ * @constructor
+ * @this { CRGDropdownSeperator }
+ */
+CRGDropdownSeparator = function() {
+    /**
+     * Generates and returns the document element corresponding to the
+     * constructed dropdown button.
+     *
+     * @return { Element } Document element for this button
+     */
+    this.dom = function() {
+        var li = document.createElement( 'li' );
+        li.className = 'divider';
+        li.role = 'separator';
+
+        return li;
+    };
+};
 
 /**
  * Creates an instance of a CRGDropdownButton, used to generate UI elements
@@ -115,11 +184,13 @@ CRGButton.prototype.clone = function () {
 CRGDropdownButton = function( text, callback ) {
     this.type = 'DropdownButton';
     this.text = text;
+    this.enable = true;
 
     var that = this;
     this.callback = function() {
-        callback( that );
-    }
+        if ( that.enable )
+            callback( that );
+    };
 
     /**
      * Sets the displayed text of the button after it has been created.
@@ -139,6 +210,26 @@ CRGDropdownButton = function( text, callback ) {
         }
 
         return this;
+    };
+
+    /**
+     * Set the enable / disable state of the button.
+     *
+     * @param { boolean } enable Enabled status.
+     *
+     * @return { CRGDropdownButton } This
+     */
+    this.setEnable = function( enable ) {
+        this.enable = enable;
+
+        if ( typeof this.li !== 'undefined' ) {
+            if ( this.enable )
+                this.li.className = 'enabled';
+            else
+                this.li.className = 'disabled';
+        }
+
+        return this;
     }
 
     /**
@@ -155,15 +246,23 @@ CRGDropdownButton = function( text, callback ) {
         this.textNode = document.createTextNode( this.text )
         this.a.appendChild( this.textNode );
 
-        return this.a;
-    }
-}
+        this.li = document.createElement( 'li' );
+        this.li.appendChild( this.a );
+
+        if ( this.enable )
+            this.li.className = 'enabled';
+        else
+            this.li.className = 'disabled';
+
+        return this.li;
+    };
+};
 
 CRGDropdownButton.prototype = Object.create( CRGDropdownButton.prototype );
 CRGDropdownButton.prototype.constructor = CRGDropdownButton;
 CRGDropdownButton.prototype.clone = function () {
     return new CRGDropdownButton( this.text, this.callback );
-}
+};
 
 /**
  * Creates an instance of a CRGDropdown, a dropdown menu that can be added to
@@ -186,7 +285,7 @@ CRGDropdown = function( text ) {
      */
     this.addElement = function( element ) {
         this.elements.push( element );
-    }
+    };
 
     /**
      * Generates and returns the document element corresponding to the
@@ -221,17 +320,14 @@ CRGDropdown = function( text ) {
         this.ul = document.createElement( 'ul' );
         this.ul.className = 'dropdown-menu';
 
-        for ( var i = 0; i < this.elements.length; i++ ) {
-            var li = document.createElement( 'li' );
-            li.appendChild( this.elements[ i ].dom() );
-            this.ul.appendChild( li );
-        }
+        for ( var i = 0; i < this.elements.length; i++ )
+            this.ul.appendChild( this.elements[ i ].dom() );
 
         this.div.appendChild( this.ul );
 
         return this.div;
-    }
-}
+    };
+};
 
 CRGDropdown.prototype = Object.create( CRGDropdown.prototype );
 CRGDropdown.prototype.constructor = CRGDropdown;
@@ -241,7 +337,7 @@ CRGDropdown.prototype.clone = function () {
         d.addElement( this.elements[ i ].clone() );
 
     return d;
-}
+};
 
 /**
  * Adds an element to the global UI.
@@ -258,10 +354,13 @@ function UIaddElement( element ) {
 function UIgenerate() {
     var o = document.getElementById( 'overlay' );
 
-    for ( var u = 0; u < ui.length; u++ )
+    for ( var u = 0; u < ui.length; u++ ) {
         o.appendChild( ui[ u ].dom() );
+        var s = document.createElement( 'span' );
+        s.innerHTML = '&nbsp&nbsp'
+        o.appendChild( s );
+    }
 }
-
 
 /**
  * Displays a success message at the top of the screen.
