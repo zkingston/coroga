@@ -19,9 +19,17 @@ var features = {
         widthVariance: 0.25
     },
     "bamboo": {
-        height: 10,
-        heightVariance: .05,
-        width: 2,
-        widthVariance: 0.1
+        height: { value     : 10,
+                  variance  : 0.05},
+        radius: { value     : 0.25,
+                  variance  : 0.05},
+        tilt:   { value     : Math.PI/2,
+                  variance  : 0.05},
+        jointSpacing:   { value     : 2,
+                          variance  : 0.5},
+        jointThickness : 1.1,
+        jointHeight : 0.01,
+        shootColor : 0x99CC00,
+        jointColor : 0xCCCC66
     }
 };
