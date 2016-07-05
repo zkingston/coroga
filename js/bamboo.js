@@ -11,7 +11,6 @@ function getRandomInt(min, max) {
     height: Height of the stalk
 */
 function bambooFactory(x, y, bush) {
-    console.log("Generating bamboo");
     var cfg = features.bamboo;
 
     var stalk = new THREE.Object3D();
@@ -38,7 +37,7 @@ function bambooFactory(x, y, bush) {
     var joints = new THREE.Object3D();
 
     //Create the joints
-    while (height > jointStart) {
+    while (height > jointStart + cfg.jointSpacing.variance) {
 
         //Generate joint properties with shoot properties * modifiers
         var jointGeo = new THREE.CylinderGeometry( radius * cfg.jointThickness,
@@ -63,11 +62,12 @@ function bambooFactory(x, y, bush) {
              new THREE.MeshLambertMaterial( {color: cfg.jointColor} ));
     stalk.generateFeatures();
 
-    stalk.addToObject(bush, x + Math.random(), y + Math.random(), height/2);
+    stalk.addToObject(bush, x + Math.random() * 2, y + Math.random() * 2, height/2);
     return stalk;
 }
 
 function generateBambooBush(xPos, yPos) {
+    console.log(xPos, yPos);
     var bush = new THREE.Object3D();
     for (var i = 0; i < 10; i++) {
 
