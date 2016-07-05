@@ -20,9 +20,9 @@ var features = {
     },
     "bamboo": {
         height: { value     : 10,
-                  variance  : 0.05},
-        radius: { value     : 0.25,
-                  variance  : 0.05},
+                  variance  : 0.25},
+        radius: { value     : 0.2,
+                  variance  : 0.15},
         tilt:   { value     : Math.PI/2,
                   variance  : 0.05},
         jointSpacing:   { value     : 2,

@@ -1,4 +1,4 @@
-function getRandom(min, max) {
+function getRandom( min, max ) {
   return Math.random() * (max - min) + min;
 }
 
@@ -10,26 +10,19 @@ function getRandomInt(min, max) {
     radius: Thickness of the bamboo at the base
     height: Height of the stalk
 */
-function bambooFactory(x, y, bush) {
+function bambooFactory( bush, x, y ) {
     var cfg = features.bamboo;
 
     var stalk = new THREE.Object3D();
 
     //Create the "shoot", the plant without the joints
-    var radius = cfg.radius.value + (Math.random() * cfg.radius.variance);
-    var height = cfg.height.value + (Math.random() * cfg.height.variance);
+    var radius = cfg.radius.value + (Math.random() * cfg.radius.variance * cfg.radius.value );
+    var height = cfg.height.value + (Math.random() * cfg.height.variance * cfg.height.value );
 
-    stalk.addFeatureGeometry( "bamboo", new THREE.CylinderGeometry( radius,
-                                                                    radius,
-                                                                    height,
-                                                                    32,
-                                                                    1,
-                                                                    false));
-    stalk.addFeatureMaterialL( "bamboo", { color: cfg.shootColor,
-                                           side: THREE.DoubleSide} );
-    //stalk.rotation.x = cfg.tilt.value + (Math.random() * cfg.tilt.variance);
-    stalk.rotation.x = cfg.tilt.value;
-
+    var stalkGeo = new THREE.CylinderGeometry( radius, radius, height, 32, 1, false );
+    stalkGeo.rotateX( cfg.tilt.value );
+    stalkGeo.translate( x, y, height/2 );
+    bush.addFeatureGeometry( "bamboo", stalkGeo );
 
     //Start the joints one "jointSpacing" length up the shoot. That is, we do
     //not want a joint at the bottom of the stalk
@@ -48,31 +41,56 @@ function bambooFactory(x, y, bush) {
                 - cfg.jointSpacing.variance/2;
 
         //Rotate joint so that it is upright
-        jointGeo.rotateY( cfg.tilt.value );
-        jointGeo.translate( 0, -height/2, 0 );
-        jointGeo.translate( 0,
-                            jointStart + offset,
-                            0);
+        jointGeo.rotateX( cfg.tilt.value );
+        jointGeo.translate( x, y,
+                            jointStart + offset );
 
-        stalk.addFeatureGeometry( "joints", jointGeo );
+        bush.addFeatureGeometry( "joints", jointGeo );
         jointStart+= cfg.jointSpacing.value + offset;
     }
+}
 
-    stalk.addFeatureMaterialL( "joints",
-             new THREE.MeshLambertMaterial( {color: cfg.jointColor} ));
-    stalk.generateFeatures();
-
-    stalk.addToObject(bush, x + Math.random() * 2, y + Math.random() * 2, height/2);
-    return stalk;
+function isColliding( points, x, y ) {
+    for (var i = 0; i < points.length; i++) {
+        if (Math.pow( features.bamboo.radius.value, 2 ) >
+                Math.pow( x - points[i][0], 2 ) + Math.pow( y - points[i][1], 2 ) ) {
+            return true;
+        }
+    }
+    return false;
 }
 
 function generateBambooBush(xPos, yPos) {
-    console.log(xPos, yPos);
+    var cfg = features.bamboo;
     var bush = new THREE.Object3D();
-    for (var i = 0; i < 10; i++) {
-
-        bambooFactory(xPos, yPos, bush);
+    var points = []
+    for (var i = 0; i < 25; i++) {
+        var x = Math.random() * tiles.bambooBush.size.x - tiles.bambooBush.size.x/2;
+        var y = Math.random() * tiles.bambooBush.size.y - tiles.bambooBush.size.y/2;
+        var flag = isColliding( points, x, y );
+        while (flag) {
+            x = Math.random() * tiles.bambooBush.size.x - tiles.bambooBush.size.x/2;
+            y = Math.random() * tiles.bambooBush.size.y - tiles.bambooBush.size.y/2;
+            flag = isColliding( points, x, y)
+        }
+        points.push( [ x, y ] );
+        bambooFactory( bush, x, y );
     }
-    bush.addToObject(environment.sand, xPos, yPos, 0);
+    bush.addFeatureMaterialP( "bamboo", { color: cfg.shootColor,
+                                          shading: THREE.FlatShading,
+                                          reflectivity: 0.5,
+                                          refractionRatio: 0.5,
+                                          side: THREE.DoubleSide
+                                        } );
+    bush.addFeatureMaterialP( "joints", { color: cfg.jointColor,
+                                          reflectivity: 0.5,
+                                          refractionRatio: 0.5,
+                                          shading: THREE.FlatShading,
+                                        } );
+    bush.bufferizeFeature( "bamboo" );
+    bush.bufferizeFeature( "joints" );
+    bush.generateFeatures();
+    bush.addToObject( environment.sand, xPos, yPos, 0 );
+    rippleSand( 6, bush );
 }
 

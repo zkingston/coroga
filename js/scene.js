@@ -34,7 +34,7 @@ function createUI() {
             btn.setTextNode( 'Day Mode' );
         }
     }));
-    UIaddElement( generate ); 
+    UIaddElement( generate );
 
     var tools = new CRGDropdown( 'Tools' );
     tools.addElement( new CRGDropdownButton( 'Show FPS', function( btn ) {
@@ -163,10 +163,6 @@ function createEnvironment( width, height, depth ) {
     if ( typeof environment.stars !== 'undefined' && !nightMode )
         scene.remove( environment.stars );
     createSand( width, height );
-    //
-    // generateSpireRock();
-    // while ( Math.random() > 0.3 )
-    //     generateSpireRock();
 
     if (nightMode) {
         scene.fog = new THREE.FogExp2( 0x001331, 0.0025 );
