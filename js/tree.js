@@ -461,3 +461,9 @@ function treeFactory(x,y){
     tree.generateFeatures();
     return tree;
 }
+
+function generateCherryTree(x,y){
+    var tree = treeFactory(x,y)
+    scene.add(tree);
+    return tree;
+}

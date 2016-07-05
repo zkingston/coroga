@@ -15,10 +15,15 @@ function ball(x,y,colorIn) {
       emissive : colorIn
     }
     var geometry = new THREE.SphereGeometry(1);
-    var ball = meshWrap( geometry, properties );
+    var ball = new THREE.Object3D();
+    ball.addFeatureGeometry( 'ball', geometry );
+    ball.addFeatureMaterialP('ball', properties);
+
     ball.position.x = x;
     ball.position.y = y;
     ball.position.z = 2;
+
+    ball.generateFeatures();
 
     return ball;
 }
@@ -37,7 +42,7 @@ function blackBall(x,y){return ball(x,y, 0x000000)}
 
 
 /**
-* Placement engine using gaussian distribution to place features in a scene.
+* Placement engine using tile system to place features in a scene.
 * Requires environment and scene
 *
 * @param {object} env Environment object containing a description of the scene
@@ -47,128 +52,57 @@ function blackBall(x,y){return ball(x,y, 0x000000)}
 **/
 function PlacementEngine(env, scene){
 
-    // TODO: Read these in from config and error check
-    //----------------------------------------------------------
-    var biomeConfig = createBiomeMatrix();
-
-    console.log(biomeConfig.featureMap)
-
-    this.numberOfBiomes = 3;
-    this.maxNumberOfFeatures = 100;
-    this.biomeStdDev = Math.max(env.height,env.width) *1.5 / (this.numberOfBiomes-1);
-
-    this.featureHandles = [redBall, greenBall, blackBall]; // List of constructor handles
-    this.biomeProbabilities = [.5,.5]; // P(B)
-    this.pfbMatrix = biomeConfig.matrix;
-    //-----------------------------------------------------------
-
-    // Utility Functions
-    /**
-    * Takes a 2d Gaussian sample based around a mu vector until it selects
-    * a point within the environment.
-    *
-    * @param {array} mu An array containing the mu values for the mean vector
-    * @return {object} Contains the x and y coordinate of a random sample.
-    **/
-    this.multivariateGaussianSample2D = function(mu) {
-        var S = [[this.biomeStdDev, 0], [0, this.biomeStdDev]];
-        var L = this.choleskyDecomposition2D(S);
-
-        while(true){
-            var z = this.boxMullerTransform2D();
-            var rVal =  {
-                "x" : mu[0] + (L[0][0] * z[0]) + (L[0][1] * z[1]),
-                "y" : mu[1] + (L[1][0] * z[0]) + (L[1][1] * z[1])
-            };
-
-            // Check Bounds
-            if (Math.abs(rVal.x) <= env.width/2 && Math.abs(rVal.y) <= env.height/2){
-                return rVal;
-            }
-        }
-    }
-
-    /**
-    * Used to form a lower triangular matrix for producing random Variables
-    * @param {array} S Covariance matrix
-    * @return {array} a lower triangular matrix
-    *
-    *
-    **/
-    this.choleskyDecomposition2D = function(S) {
-        var L = [[0,0],[0,0]];
-        L[0][0] = sqrt(S[0][0]);
-        L[1][0] = S[1][0] / L[0][0];
-        L[0][1] = 0;
-        L[1][1] = sqrt(S[1][1] - L[1][0]);
-        return L;
-    }
-
-
-    /** Box muller transform for producing random variables
-    * @return {array} an array representation of a vector to produce independent
-    * variables.
-    *
-    **/
-    this.boxMullerTransform2D = function() {
-        var u1 = random();
-        var u2 = random();
-        return [sqrt(-2 * ln(u1)) * cos(2 * pi * u2),
-                sqrt(-2 * ln(u1)) * sin(2 * pi * u2)];
-    }
-
-    /** Extensible in case environment shape changes
-    * Produces a random location in the bounds of the environment
-    * @return {object} object containing the x and y coordinates of the point.
-    **/
-    this.randomLocation2D = function(){
-        // TODO Possible Bug. x and y are switched.
-        return {
-            "x" : -1 * (env.width) /2 + random() * (env.width),
-            "y" : -1 * (env.height) /2 + random() * (env.height)
-        }
-    }
-
     // Member Variables
-    this.generatedBiomes = [];
-    this.generatedFeatures = [];
+    var biomeConfig = createBiomeMatrix();
+    this.numTiles = 4;
+    // Didn't have time to put biomeProbabilities in the parser
+    // Marshall if you are reading this, i'd appreciate the help.
+    this.biomeProbabilities = biomeProbabilities;
+    this.probabilityMatrix = biomeConfig.matrix;
+    this.tileMap = biomeConfig.tileMap;
 
-    // Produce list and location of biome locii
-    for (var i = 0; i < this.numberOfBiomes; i++){
-        // Select a biome and add it to list
-        var index = dirichletSample(this.biomeProbabilities)
-        this.generatedBiomes.push(
-            {
-                "bid" : index,
-                "locus" : this.randomLocation2D()
-            }
+
+
+    // Randomly finds positions for tiles and places them.
+    this.runRandomTileEngine = function(){
+        // Reset the tiles (just in case)
+        this.generatedTiles = [];
+        // Pick your biome
+        var bid = dirichletSample(this.biomeProbabilities);
+        // Figure out the tile probabilities for that biome
+        var tileProbabilities = this.probabilityMatrix[bid];
+        // Make the allocation grid;
+        var grid = new Grid(
+            -1*(environment.width - 5)/2,
+            (environment.width - 5)/2,
+            -1*(environment.height - 5)/2,
+            (environment.height - 5)/2
         );
-    }
 
-    /**
-    * Runs the engine by selecting a random biome and randomly placing features
-    * within it.
-    *
-    **/
-    this.runBiomeBasedEngine = function() {
-        // allocate a feature...
-        for(var i = 0; i < this.maxNumberOfFeatures; i++){
-            // to a random biome
-            var randomBiome = this.generatedBiomes[Math.floor(random() * this.generatedBiomes.length)];
-            var mu = randomBiome.locus;
-            var bid = randomBiome.bid;
-            var position = this.multivariateGaussianSample2D([mu.x,mu.y]);
-            // select feature within biome
-            var fid = dirichletSample(this.pfbMatrix[bid]);
-            var featureConstructor = this.featureHandles[fid];
-            var feature = featureConstructor(position.x, position.y);
-            this.generatedFeatures.push(feature);
-            scene.add(feature);
+
+        for (var i = 0; i < this.numTiles; i++){
+            // Pick a tile type
+            var tid = dirichletSample(tileProbabilities);
+            // Find which tile exactly this id refers to
+            var tileName = Object.keys(this.tileMap)[tid];
+            // Look up the tile's configs
+            var tile = tiles[tileName];
+            // Find the location of bottom left corner of the tile
+            var position = grid.allocate(tile.size.x, tile.size.y);
+
+
+            // If we were able to allocate it.
+            if(!(position === null)){
+                // Calculate the offsets for each feature within the tile
+                for(var f = 0; f < tile.features.length; f++){
+                    var feature = tile.features[f];
+                    // Put the feature down.
+                    feature.constructor(
+                        position.x + feature.x,
+                        position.y + feature.y
+                    );
+                }
+            }
         }
     }
-
-
-    // TODO
-    this.runFeatureBasedEngine = function() {}
-
 }

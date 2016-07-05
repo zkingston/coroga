@@ -1,15 +1,15 @@
 var biomes = {
     "forest": {
-        "features": {
-          "rock": 0.25,
-          "tree": 0.9
+        "tiles": {
+          "loneTree": 0.25,
+          "rockCluster": 0.75
         }
     },
     "desert": {
-        "features": {
-          "tree": 0.25,
-          "rock": 0.75,
-          "bamboo": 0.1
+        "tiles": {
+          "loneTree": 0.25,
+          "rockCluster": 0.75
         }
     }
 }
+var biomeProbabilities = [.5,.5];
