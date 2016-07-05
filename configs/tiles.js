@@ -1,27 +1,27 @@
 var tiles = {
     "loneTree" : {
-        "size" : {
-            "x" : 16,
-            "y" : 16
+        size : {
+            x : 16,
+            y : 16
         },
-        "features" : [
+        features : [
             {
-                "constructor" : generateCherryTree,
-                "x" : 8,
-                "y" : 8
+                constructor : generateCherryTree,
+                x : 8,
+                y : 8
             }
         ]
     },
     "rockCluster" : {
-        "size" : {
-            "x" : 8,
-            "y" : 8
+        size : {
+            x : 8,
+            y : 8
         },
-        "features" : [
+        features : [
             {
-                "constructor" : generateSpireRock,
-                "x" : 4,
-                "y" : 4
+                constructor : generateSpireRock,
+                x : 4,
+                y : 4
             }
         ]
     }

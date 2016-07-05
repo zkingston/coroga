@@ -1,12 +1,12 @@
 var biomes = {
     "forest": {
-        "tiles": {
+        tiles: {
           "loneTree": 0.25,
           "rockCluster": 0.75
         }
     },
     "desert": {
-        "tiles": {
+        tiles: {
           "loneTree": 0.25,
           "rockCluster": 0.75
         }
