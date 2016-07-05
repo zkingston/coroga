@@ -36,17 +36,7 @@ function RockClusterFactory( RockGeometry, width, height, depth ) {
 }
 
 function SpireRockGeometry( width, height, depth ) {
-    var cfg = { t_rad_range : { min : 0.4,
-                                max : 0.8 },
-                r_seg_range : { min : 5,
-                                max : 10 },
-                h_seg_range : { min : 5,
-                                max : 10 },
-                rotate      : { min : -Math.PI / 8,
-                                max : Math.PI / 8 },
-                vector_mag  : 0.3,
-                top_perturb : 0.5,
-                top_offset  : 0.3 };
+    var cfg = features.spireRock;
 
     width = Math.ceil( width );
     height = Math.ceil( height );
@@ -100,6 +90,20 @@ function SpireRockGeometry( width, height, depth ) {
     geometry.rotateX( -rotate );
 
     return geometry;
+
+    // OPTIMAL CONFIGS
+    // t_rad_range : { min : 0.4,
+    //                 max : 0.8 },
+    // r_seg_range : { min : 5,
+    //                 max : 10 },
+    // h_seg_range : { min : 5,
+    //                 max : 10 },
+    // rotate      : { min : -Math.PI / 8,
+    //                 max : Math.PI / 8 },
+    // vector_mag  : 0.3,
+    // top_perturb : 0.5,
+    // top_offset  : 0.3
+
 }
 
 function MossDecorator( rock, threshold ) {
@@ -141,3 +145,43 @@ function MossDecorator( rock, threshold ) {
     return mossyRock;
 
 }
+
+
+function generateSpireRock(xPos, yPos) {
+    var width = environment.width;
+    var height = environment.height;
+
+    var x = Math.floor( rand() * 6 + 3 );
+    var y = Math.floor( rand() * 6 + 3 );
+    var z = Math.floor( rand() * 6 + 2 );
+
+    var rock = RockClusterFactory( SpireRockGeometry, x, y, z );
+    rock.addToObject( environment.sand,
+                      xPos,
+                      yPos,
+                      z / 2 - 0.5);
+
+    rippleSand( 2, rock );
+}
+
+//
+// function MossySpireRockGeometry(width, height, depth){
+//     return MossDecorator(SpireRockGeometry(width, height, depth));
+// }
+
+// function generateMossySpireRock(xPos, yPos) {
+//     var width = environment.width;
+//     var height = environment.height;
+//
+//     var x = Math.floor( rand() * 6 + 3 );
+//     var y = Math.floor( rand() * 6 + 3 );
+//     var z = Math.floor( rand() * 6 + 2 );
+//
+//     var rock = RockClusterFactory( SpireRockGeometry, x, y, z );
+//     rock.addToObject( environment.sand,
+//                       xPos,
+//                       yPos,
+//                       z / 2 - 0.5);
+//
+//     rippleSand( 2, rock );
+// }
