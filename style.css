@@ -9,6 +9,7 @@ body {
 
 #canvas {
     z-index: 3;
+    display: none;
 }
 
 #alerts {
@@ -34,6 +35,7 @@ body {
     bottom: 0;
     left: 0;
     right: 0;
+    display: none;
 }
 
 .btn {
@@ -50,6 +52,19 @@ body {
     width: 100%;
     margin: auto;
     z-index: 1;
+}
+#loading {
+    display: block;
+    position: absolute;
+    top: 0;
+    left: 0;
+    z-index: 100;
+    width: 100vw;
+    height: 100vh;
+    background-color: rgba(192, 192, 192, 0.5);
+    background-image: url("images/loading.gif");
+    background-repeat: no-repeat;
+    background-position: center;
 }
 
 .btn-group > .btn-group {

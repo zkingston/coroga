@@ -34,7 +34,7 @@ function createUI() {
             btn.setTextNode( 'Day Mode' );
         }
     }));
-    UIaddElement( generate ); 
+    UIaddElement( generate );
 
     var tools = new CRGDropdown( 'Tools' );
     tools.addElement( new CRGDropdownButton( 'Show FPS', function( btn ) {
@@ -193,3 +193,24 @@ function createEnvironment( width, height, depth ) {
 
     // environment.sand.add(tree);
 }
+
+function onReady(callback) {
+    var intervalID = window.setInterval(checkReady, 1000);
+
+    function checkReady() {
+        if (document.getElementsByTagName('body')[0] !== undefined) {
+            window.clearInterval(intervalID);
+            callback.call(this);
+        }
+    }
+}
+
+function show(id, value) {
+    document.getElementById(id).style.display = value ? 'block' : 'none';
+}
+
+onReady(function () {
+    show('canvas', true);
+    show('toolbar', true);
+    show('loading', false);
+});
