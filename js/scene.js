@@ -111,7 +111,7 @@ function animate() {
     scene.update();
     controls.update();
 
-    environment.sand.rotateZ(0.01);
+    environment.sand.rotateZ(0.001);
     stats.end();
 
     requestAnimationFrame( animate );
@@ -137,13 +137,6 @@ function initializeLights() {
 function createBase( width, height, depth ) {
 
     scene = new THREE.Scene();
-
-    environment.width = width;
-    environment.height = height;
-    environment.depth = depth;
-    environment.radius = Math.sqrt( height * height / 4 + width * width / 4 );
-
-
     initializeLights();
 
     // createWalls( width, height, 15 );
@@ -165,10 +158,9 @@ function createEnvironment( width, height, depth ) {
     if ( typeof environment.stars !== 'undefined' && !nightMode )
         scene.remove( environment.stars );
 
-    createIsland( discreteUniform( 30, 50 ), discreteUniform( 30, 50 ), depth );
+    createIsland( discreteUniform( 20, 70 ), discreteUniform( 20, 70 ), depth );
 
-    return;
-    createSand( width, height );
+    // createSand( width, height );
     //
     // generateSpireRock();
     // while ( Math.random() > 0.3 )

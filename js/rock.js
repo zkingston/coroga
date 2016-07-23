@@ -107,6 +107,7 @@ function SpireRockGeometry( width, height, depth ) {
 }
 
 function MossDecorator( rock, threshold ) {
+    
 
     var mossyRock = new THREE.Group();
     mossyRock.add( rock );
@@ -161,7 +162,7 @@ function generateSpireRock(xPos, yPos) {
                       yPos,
                       z / 2 - 0.5);
 
-    rippleSand( 2, rock );
+    // rippleSand( 2, rock );
 }
 
 //

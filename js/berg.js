@@ -8,7 +8,7 @@ function Noise( width, height, depth ) {
 
     for ( var x = 0; x < this.width; ++x )
         for ( var y = 0; y < this.height; ++y )
-            this.noise[x][y] = continuousUniform( 0, 1 );
+            this.noise[ x ][ y ] = continuousUniform( 0, 1 );
 }
 
 Noise.prototype.smoothNoise = function ( x, y ) {
@@ -23,13 +23,13 @@ Noise.prototype.smoothNoise = function ( x, y ) {
     var y2 = ( y1 + this.height - 1 ) % this.height;
 
     var value = 0;
-    value += xfrac         * yfrac         * this.noise[x1][y1];
-    value += ( 1 - xfrac ) * yfrac         * this.noise[x2][y1];
-    value += xfrac         * ( 1 - yfrac ) * this.noise[x1][y2];
-    value += ( 1 - xfrac ) * ( 1 - yfrac ) * this.noise[x2][y2];
+    value += xfrac         * yfrac         * this.noise[ x1 ][ y1 ];
+    value += ( 1 - xfrac ) * yfrac         * this.noise[ x2 ][ y1 ];
+    value += xfrac         * ( 1 - yfrac ) * this.noise[ x1 ][ y2 ];
+    value += ( 1 - xfrac ) * ( 1 - yfrac ) * this.noise[ x2 ][ y2 ];
 
     return value;
-}
+};
 
 Noise.prototype.turbulence = function ( x, y, size ) {
     var value = 0;
@@ -66,25 +66,22 @@ function createIsland ( width, height, depth ) {
     } );
 
     max = max.clone();
-
     islandGeo.vertices.map( function ( vertex ) {
         if ( vertex.z > 0 ) {
             var dist = vertex.distanceTo( max );
             vertex.z *= 1 / ( 1 + Math.exp( 12 * dist / (1.2 * radius)  - 4))
+        } else {
+            vertex.z -= 3;
         }
 
         vertex.perturb( 0.5 );
+        vertex.z -= 0.003 * (Math.pow( vertex.x, 2 ) + Math.pow( vertex.y, 2 ));
     } );
 
     islandGeo.scale( width / radius, height / radius, 1 );
 
     island.addFeatureGeometry( 'base', islandGeo );
     island.addFeatureMaterialP( 'base', { shading : THREE.FlatShading } );
-
-
-
-
-
 
 
     island.generateFeatures();
@@ -95,4 +92,35 @@ function createIsland ( width, height, depth ) {
     island.userData.height = height;
 
     environment.sand = island;
+    environment.width = width * 2;
+    environment.height = height * 2;
+}
+
+function MossDecorator( geo, threshold ) {
+
+    var mossyRock = new THREE.Group();
+    mossyRock.add( rock );
+
+    var mossGeo = rock.geometry.clone();
+    mossGeo.computeFaceNormals();
+
+    var mossAngle = new THREE.Vector3( 0, 0, 1 );
+
+    for ( var i = 0; i < mossGeo.faces.length; i++ ) {
+        var face = mossGeo.faces[i];
+
+        if ( face.normal.dot( mossAngle ) < threshold ) {
+            console.log (face.normal.dot( mossAngle ) );
+            var va = mossGeo.vertices[face.a];
+            var vb = mossGeo.vertices[face.b];
+            var vc = mossGeo.vertices[face.c];
+
+            va.z -= 0.1;
+            vb.z -= 0.1;
+            vc.z -= 0.1;
+        }
+    }
+
+    return mossyRock;
+
 }
