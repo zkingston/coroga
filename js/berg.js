@@ -53,14 +53,27 @@ function createIsland ( width, height, depth ) {
 
     var islandGeo = new THREE.IcosahedronGeometry( radius, 3 );
 
+    var max = new THREE.Vector3();
     islandGeo.vertices.map( function ( vertex ) {
         if ( vertex.z < 0 ) {
-            vertex.z *= 0.1 * Math.exp(  botNoise.turbulence( vertex.x + width, vertex.y + height, 200 ) );
-            vertex.perturb( 0.2 );
+            vertex.z *= 0.08 * Math.exp(  botNoise.turbulence( vertex.x + width, vertex.y + height, 200 ) );
         } else {
-            vertex.z *= 0.1 * Math.exp(  topNoise.turbulence( vertex.x + width, vertex.y + height, 200 ) );
-            vertex.perturb( 0.2 );
+            vertex.z *= 0.08 * Math.exp(  topNoise.turbulence( vertex.x + width, vertex.y + height, 100 ) );
+
+            if ( vertex.z > max.z )
+                max = vertex;
         }
+    } );
+
+    max = max.clone();
+
+    islandGeo.vertices.map( function ( vertex ) {
+        if ( vertex.z > 0 ) {
+            var dist = vertex.distanceTo( max );
+            vertex.z *= 1 / ( 1 + Math.exp( 12 * dist / (1.2 * radius)  - 4))
+        }
+
+        vertex.perturb( 0.5 );
     } );
 
     islandGeo.scale( width / radius, height / radius, 1 );

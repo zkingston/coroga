@@ -63,7 +63,7 @@ function init() {
                                           1000 );
 
     camera.up = new THREE.Vector3( 0, 0, 1 );
-    camera.position.set( -60, -60, 30 );
+    camera.position.set( -100, -100, 30 );
     camera.lookAt( 0, 0, 0 );
 
     renderer = new THREE.WebGLRenderer( { alpha: true,
@@ -87,7 +87,7 @@ function init() {
 
     window.addEventListener( 'resize', onWindowResize, false );
 
-    createBase( 70, 50, 2 );
+    createBase();
     createEnvironment( 70, 50, 2 );
 }
 
@@ -111,6 +111,7 @@ function animate() {
     scene.update();
     controls.update();
 
+    environment.sand.rotateZ(0.01);
     stats.end();
 
     requestAnimationFrame( animate );
@@ -141,6 +142,7 @@ function createBase( width, height, depth ) {
     environment.height = height;
     environment.depth = depth;
     environment.radius = Math.sqrt( height * height / 4 + width * width / 4 );
+
 
     initializeLights();
 
