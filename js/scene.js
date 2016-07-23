@@ -144,17 +144,17 @@ function createBase( width, height, depth ) {
 
     initializeLights();
 
-    createWalls( width, height, 15 );
+    // createWalls( width, height, 15 );
 
-    var lanterns = [ { x : width / 2 - 2, y : -height / 2 + 2 },
-                     { x : -width / 2 + 2, y : height / 2 - 2 } ];
-    for ( var i = 0; i < lanterns.length; i++ ) {
-        var dim = 3;
-        var lantern = lanternFactory( dim, dim, 3 );
-        var moth = mothFactory( lantern );
+    // var lanterns = [ { x : width / 2 - 2, y : -height / 2 + 2 },
+    //                  { x : -width / 2 + 2, y : height / 2 - 2 } ];
+    // for ( var i = 0; i < lanterns.length; i++ ) {
+    //     var dim = 3;
+    //     var lantern = lanternFactory( dim, dim, 3 );
+    //     var moth = mothFactory( lantern );
 
-        lantern.addToObject( scene, lanterns[i].x, lanterns[i].y, depth * 2 );
-    }
+    //     lantern.addToObject( scene, lanterns[i].x, lanterns[i].y, depth * 2 );
+    // }
 }
 
 function createEnvironment( width, height, depth ) {
@@ -162,6 +162,10 @@ function createEnvironment( width, height, depth ) {
         scene.remove( environment.sand );
     if ( typeof environment.stars !== 'undefined' && !nightMode )
         scene.remove( environment.stars );
+
+    createIsland( discreteUniform( 30, 50 ), discreteUniform( 30, 50 ), depth );
+
+    return;
     createSand( width, height );
     //
     // generateSpireRock();
