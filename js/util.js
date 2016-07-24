@@ -353,3 +353,53 @@ Noise.prototype.turbulence = function ( x, y, size ) {
     return value / initialSize;
 }
 
+/**
+ * Generates a geometry of extruded faces. Extruded faces are chosen based on
+ * the dot product of the face normal with a reference vector, in this case the
+ * unit Z vector. Thresholds can be set on the dot product value as well as the
+ * Z value of the vertices of the face.
+ *
+ * @param { THREE.Geometry } geometry Geometry to extrude faces from
+ * @param { number }         dMin     Dot product value minimum threshold
+ * @param { number }         dMax     Dot product value maximum threshold
+ * @param { number }         zMin     Z value minimum threshold
+ * @param { number }         zMax     Z value maximum threshold
+ * @param { number }         offset   Offset from face to extrude
+ *
+ * @return { THREE.Geometry } Geometry with extruded faces
+ */
+function extrudeFaces( geometry, dMin, dMax, zMin, zMax, offset ) {
+
+    geometry.computeFaceNormals();
+
+    var extrude = new THREE.Geometry();
+
+    extrude.vertices = new Array( geometry.vertices.length );
+    for ( var i = 0; i < geometry.vertices.length; ++i )
+        extrude.vertices[ i ] = geometry.vertices[ i ].clone();
+
+    var mossAngle = new THREE.Vector3( 0, 0, 1 );
+
+    for ( var i = 0; i < geometry.faces.length; i++ ) {
+        var face = geometry.faces[i];
+
+        var dot = face.normal.dot( mossAngle );
+        if ( dot < dMax && dot > dMin ) {
+            var va = extrude.vertices[ face.a ];
+            var vb = extrude.vertices[ face.b ];
+            var vc = extrude.vertices[ face.c ];
+
+            var z = ( va.z + vb.z + vc.z );
+            if ( z < zMax * 3 && z > zMin * 3 ) {
+                var normal = face.normal.multiplyScalar( offset );
+                va.add( normal );
+                vb.add( normal );
+                vc.add( normal );
+                extrude.faces.push(face.clone());
+            }
+        }
+    }
+
+    return extrude;
+
+}

@@ -107,39 +107,3 @@ function createIsland ( width, height ) {
     environment.width = width * 2;
     environment.height = height * 2;
 }
-
-function extrudeFaces( geometry, dMin, dMax, zMin, zMax, offset ) {
-
-    geometry.computeFaceNormals();
-
-    var extrude = new THREE.Geometry();
-
-    extrude.vertices = new Array( geometry.vertices.length );
-    for ( var i = 0; i < geometry.vertices.length; ++i )
-        extrude.vertices[ i ] = geometry.vertices[ i ].clone();
-
-    var mossAngle = new THREE.Vector3( 0, 0, 1 );
-
-    for ( var i = 0; i < geometry.faces.length; i++ ) {
-        var face = geometry.faces[i];
-
-        var dot = face.normal.dot( mossAngle );
-        if ( dot < dMax && dot > dMin ) {
-            var va = extrude.vertices[ face.a ];
-            var vb = extrude.vertices[ face.b ];
-            var vc = extrude.vertices[ face.c ];
-
-            var z = ( va.z + vb.z + vc.z );
-            if ( z < zMax * 3 && z > zMin * 3 ) {
-                var normal = face.normal.multiplyScalar( offset );
-                va.add( normal );
-                vb.add( normal );
-                vc.add( normal );
-                extrude.faces.push(face.clone());
-            }
-        }
-    }
-
-    return extrude;
-
-}
