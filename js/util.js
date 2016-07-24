@@ -43,6 +43,41 @@ THREE.Vector3.prototype.closest = function ( vector_list ) {
 };
 
 /**
+ * Returns the centroid of a face.
+ *
+ * @param { THREE.Face3 } face Face to get centroid of
+ *
+ * @return { THREE.Vector3 } Centroid of face
+ */
+THREE.Geometry.prototype.faceCentroid = function ( face ) {
+    var centroid = new THREE.Vector3();
+    centroid.add( this.vertices[ face.a ] );
+    centroid.add( this.vertices[ face.b ] );
+    centroid.add( this.vertices[ face.c ] );
+
+    return centroid;
+};
+
+/**
+ * Removes all faces from this geometry that fail to satisfy the provided function.
+ *
+ * @param { function( THREE.Face3 ) } f Face evaluator - should return true on faces that should be kept
+ *
+ * @return { THREE.Geometry } This
+ */
+THREE.Geometry.prototype.cut = function ( f ) {
+    var cutFaces = [];
+
+    for ( var i = 0; i < this.faces.length; ++i ) {
+        var face = this.faces[ i ];
+        if ( f( face ) )
+            cutFaces.push( face )
+    }
+
+    this.faces = cutFaces;
+};
+
+/**
  * Randomly samples from this array.
  *
  * @return { Object } A random element from this
