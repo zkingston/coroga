@@ -139,3 +139,18 @@ function createIsland ( width, height ) {
     environment.width = width * 2;
     environment.height = height * 2;
 }
+
+function rippleSand( diameter, object ) {
+    var bound = object.boundingCircle();
+    var center = object.localToWorld( bound.center );
+
+    var island = environment.island;
+
+    island.traverseFeatureGeometry( 'sand', function ( v ) {
+        var dist = center.distanceTo( v );
+
+        if ( dist <= diameter + bound.radius ) {
+            v.z = randOffset( Math.cos( dist * rakeModifier ) * rakeHeight * 1.2, sandRandom );
+        }
+    } );
+}

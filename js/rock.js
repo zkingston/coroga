@@ -163,7 +163,7 @@ function generateSpireRock(xPos, yPos) {
                       yPos,
                       z / 2 - 0.5);
 
-    // rippleSand( 2, rock );
+    rippleSand( 2, rock );
 }
 
 //
