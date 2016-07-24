@@ -111,7 +111,6 @@ function animate() {
     scene.update();
     controls.update();
 
-    environment.sand.rotateZ(0.001);
     stats.end();
 
     requestAnimationFrame( animate );
@@ -153,12 +152,12 @@ function createBase( width, height, depth ) {
 }
 
 function createEnvironment( width, height, depth ) {
-    if ( typeof environment.sand !== 'undefined' )
-        scene.remove( environment.sand );
+    if ( typeof environment.island !== 'undefined' )
+        scene.remove( environment.island );
     if ( typeof environment.stars !== 'undefined' && !nightMode )
         scene.remove( environment.stars );
 
-    createIsland( discreteUniform( 20, 70 ), discreteUniform( 20, 70 ), depth );
+    createIsland( discreteUniform( 30, 70 ), discreteUniform( 30, 70 ), depth );
 
     // createSand( width, height );
     //

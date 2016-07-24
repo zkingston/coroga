@@ -1,4 +1,4 @@
-function Noise( width, height, depth ) {
+function Noise( width, height ) {
     this.width = Math.round( width );
     this.height = Math.round( height );
 
@@ -43,7 +43,7 @@ Noise.prototype.turbulence = function ( x, y, size ) {
     return value / initialSize;
 }
 
-function createIsland ( width, height, depth ) {
+function createIsland ( width, height ) {
     var island = new THREE.Object3D();
 
     var radius = Math.min( width, height );
@@ -79,48 +79,64 @@ function createIsland ( width, height, depth ) {
     } );
 
     islandGeo.scale( width / radius, height / radius, 1 );
+    islandGeo.verticesNeedUpdate = true;
 
     island.addFeatureGeometry( 'base', islandGeo );
-    island.addFeatureMaterialP( 'base', { shading : THREE.FlatShading } );
+    island.addFeatureMaterialP( 'base', { color : 0x566053, shading : THREE.FlatShading } );
 
+    island.addFeatureGeometry( 'grass', MossDecorator( islandGeo, 0.9, 1 ) );
+    // island.addFeatureGeometry( 'grass', MossDecorator( islandGeo, 0, 0.3 ) );
+    island.addFeatureMaterialP( 'grass', { color : 0x73f773, shading : THREE.FlatShading } );
+    
+    island.bufferizeFeature( 'base' );
 
     island.generateFeatures();
+
+    island.addUpdateCallback( function( obj ) {
+        // obj.rotateZ( 0.001 );
+        obj.position.z = Math.sin( 0.005 * tick ) * 3;
+        obj.rotation.x = Math.sin( 0.005 * tick ) * 0.03;
+        obj.rotation.y = Math.cos( 0.005 * tick ) * 0.03;
+    } );
 
     island.addToObject( scene );
 
     island.userData.width = width;
     island.userData.height = height;
 
-    environment.sand = island;
+    environment.island = island;
     environment.width = width * 2;
     environment.height = height * 2;
 }
 
-function MossDecorator( geo, threshold ) {
+function MossDecorator( geo, min, max ) {
 
-    var mossyRock = new THREE.Group();
-    mossyRock.add( rock );
+    geo.computeFaceNormals();
 
-    var mossGeo = rock.geometry.clone();
-    mossGeo.computeFaceNormals();
+    var mossGeo = new THREE.Geometry();
+    mossGeo.vertices = new Array( geo.vertices.length );
+    for ( var i = 0; i < geo.vertices.length; ++i )
+        mossGeo.vertices[ i ] = geo.vertices[ i ].clone();
 
     var mossAngle = new THREE.Vector3( 0, 0, 1 );
 
-    for ( var i = 0; i < mossGeo.faces.length; i++ ) {
-        var face = mossGeo.faces[i];
+    for ( var i = 0; i < geo.faces.length; i++ ) {
+        var face = geo.faces[i];
 
-        if ( face.normal.dot( mossAngle ) < threshold ) {
-            console.log (face.normal.dot( mossAngle ) );
+        var dot = face.normal.dot( mossAngle );
+        if ( dot < max && dot > min ) {
+            console.log( dot );
             var va = mossGeo.vertices[face.a];
             var vb = mossGeo.vertices[face.b];
             var vc = mossGeo.vertices[face.c];
 
-            va.z -= 0.1;
-            vb.z -= 0.1;
-            vc.z -= 0.1;
+            va.z += 0.1;
+            vb.z += 0.1;
+            vc.z += 0.1;
+            mossGeo.faces.push(face.clone());
         }
     }
 
-    return mossyRock;
+    return mossGeo;
 
 }
