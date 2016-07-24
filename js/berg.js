@@ -3,6 +3,14 @@ var rakeHeight = 0.125;
 var sandRandom = 0.08;
 var sideRakeBuffer = 5;
 
+/**
+ * Create an island base, with the rock, grass, sand, and covering snow for the mountain.
+ *
+ * @param { number } width Radial width of island
+ * @param { number } height Radial height of island
+ *
+ * @return { THREE.Object3d } A new island object
+ */
 function createIsland ( width, height ) {
     var island = new THREE.Object3D();
 
@@ -133,6 +141,8 @@ function createIsland ( width, height ) {
         else {
             lock = false;
             obj.clearUpdateCallbacks();
+
+            // Fun hack to switch the update callback
             obj.addUpdateCallback( function( obj ) {
                 obj.position.z = Math.sin( 0.005 * tick ) * 3;
                 obj.rotation.x = Math.sin( 0.005 * tick ) * 0.03;

@@ -158,10 +158,14 @@ function generateSpireRock(xPos, yPos) {
     var z = Math.floor( rand() * 6 + 2 );
 
     var rock = RockClusterFactory( SpireRockGeometry, x, y, z );
-    rock.addToObject( environment.island,
-                      xPos,
-                      yPos,
-                      z / 2 - 0.5);
+
+    try {
+        rock.addToObjectProject( environment.island,
+                                 xPos,
+                                 yPos )
+    } catch (e) {
+        console.log( e);
+    }
 
     rippleSand( 2, rock );
 }
