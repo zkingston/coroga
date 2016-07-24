@@ -81,14 +81,32 @@ function createIsland ( width, height ) {
     islandGeo.scale( width / radius, height / radius, 1 );
 
     island.addFeatureGeometry( 'base', islandGeo );
-    island.addFeatureMaterialP( 'base', { color : 0x566053, shading : THREE.FlatShading } );
+    island.addFeatureMaterialP( 'base', { color : 0x566053,
+                                          shading : THREE.FlatShading,
+                                          shininess : 10,
+                                          refractionRatio : 0.1 } );
 
-    island.addFeatureGeometry( 'grass', extrudeFaces( islandGeo, 0.8, 1.0, -15, 10 ) );
-    island.addFeatureGeometry( 'grass', extrudeFaces( islandGeo, -0.4, 0.4, -10, 0 ) );
-    island.addFeatureMaterialP( 'grass', { color : 0x73f773, shading : THREE.FlatShading } );
-    
-    island.addFeatureGeometry( 'snow', extrudeFaces( islandGeo, -1, 1, 20, 100 ) );
-    island.addFeatureMaterialP( 'snow', { color : 0xffffff, shading : THREE.FlatShading } );
+    // Grass
+    island.addFeatureGeometry( 'grass', extrudeFaces( islandGeo, 0.8, 1.0, 0, 10, 0.01 ) );
+    island.addFeatureGeometry( 'grass', extrudeFaces( islandGeo, -1, 1, -10, 0, 0.01 ) );
+
+    var grass = island.getFeature( 'grass' ).geometry;
+    grass.vertices.map( function ( vertex ) {
+        var v = new THREE.Vector3( max.x, max.y, vertex.z );
+    } );
+
+
+    island.addFeatureMaterialP( 'grass', { color : 0x73f773,
+                                           shading : THREE.FlatShading,
+                                           shininess : 0,
+                                           refractionRatio : 0.1 } );
+
+    island.addFeatureGeometry( 'snow', extrudeFaces( islandGeo, 0.3, 1, 20, 100, 0.2 ) );
+    island.addFeatureMaterialP( 'snow', { color : 0xffffff,
+                                          shading : THREE.FlatShading,
+                                          emissive : 0xaaaaaa,
+                                          shininess : 70,
+                                          refractionRatio : 0.7 } );
 
     island.bufferizeFeature( 'base' );
     island.bufferizeFeature( 'grass' );
@@ -113,7 +131,7 @@ function createIsland ( width, height ) {
     environment.height = height * 2;
 }
 
-function extrudeFaces( geometry, dMin, dMax, zMin, zMax ) {
+function extrudeFaces( geometry, dMin, dMax, zMin, zMax, offset ) {
 
     geometry.computeFaceNormals();
 
@@ -130,15 +148,16 @@ function extrudeFaces( geometry, dMin, dMax, zMin, zMax ) {
 
         var dot = face.normal.dot( mossAngle );
         if ( dot < dMax && dot > dMin ) {
-            var va = extrude.vertices[face.a];
-            var vb = extrude.vertices[face.b];
-            var vc = extrude.vertices[face.c];
+            var va = extrude.vertices[ face.a ];
+            var vb = extrude.vertices[ face.b ];
+            var vc = extrude.vertices[ face.c ];
 
             var z = ( va.z + vb.z + vc.z );
             if ( z < zMax * 3 && z > zMin * 3 ) {
-                va += face.normal;
-                vb += face.normal;
-                vc += face.normal;
+                var normal = face.normal.multiplyScalar( offset );
+                va.add( normal );
+                vb.add( normal );
+                vc.add( normal );
                 extrude.faces.push(face.clone());
             }
         }

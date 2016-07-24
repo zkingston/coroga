@@ -30,6 +30,7 @@ function RockClusterFactory( RockGeometry, width, height, depth ) {
 
     rocks.addFeatureMaterialP( 'rocks', { color : 0x505050,
                                           shading : THREE.FlatShading,
+                                          shininess : 10,
                                           refractionRatio : 0.1 } )
     rocks.generateFeatures();
     return rocks;
