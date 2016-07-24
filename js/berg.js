@@ -52,6 +52,7 @@ function createIsland ( width, height ) {
 
 
     var islandGeo = new THREE.IcosahedronGeometry( radius, 3 );
+    islandGeo.scale( width / radius, height / radius, 1 );
 
     var max = new THREE.Vector3();
     islandGeo.vertices.map( function ( vertex ) {
@@ -78,8 +79,6 @@ function createIsland ( width, height ) {
         vertex.z -= 0.003 * (Math.pow( vertex.x, 2 ) + Math.pow( vertex.y, 2 ));
     } );
 
-    islandGeo.scale( width / radius, height / radius, 1 );
-
     island.addFeatureGeometry( 'base', islandGeo );
     island.addFeatureMaterialP( 'base', { color : 0x566053,
                                           shading : THREE.FlatShading,
@@ -87,12 +86,13 @@ function createIsland ( width, height ) {
                                           refractionRatio : 0.1 } );
 
     // Grass
-    island.addFeatureGeometry( 'grass', extrudeFaces( islandGeo, 0.8, 1.0, 0, 10, 0.01 ) );
+    island.addFeatureGeometry( 'grass', extrudeFaces( islandGeo, 0.8, 1.0, -20, 10, 0.01 ) );
     island.addFeatureGeometry( 'grass', extrudeFaces( islandGeo, -1, 1, -10, 0, 0.01 ) );
 
     var grass = island.getFeature( 'grass' ).geometry;
     grass.vertices.map( function ( vertex ) {
-        var v = new THREE.Vector3( max.x, max.y, vertex.z );
+        var m = new THREE.Vector3( max.x, max.y, vertex.z );
+        var e = new THREE.Vector3( max.x, max.y, vertex.z );
     } );
 
 
