@@ -406,7 +406,10 @@ THREE.Object3D.prototype.addToObjectProject = function ( object, x, y, vector ) 
         var position = object.worldToLocal( intersects[ 0 ].point );
         var orientation = intersects[ 0 ].face.normal;
 
-        this.rotation = orientation;
+        this.rotateX( orientation.x );
+        this.rotateY( orientation.y );
+        this.rotateZ( orientation.z );
+
         this.addToObject( object, x, y, position.z );
 
         return this;
