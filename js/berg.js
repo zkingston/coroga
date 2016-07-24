@@ -79,16 +79,20 @@ function createIsland ( width, height ) {
     } );
 
     islandGeo.scale( width / radius, height / radius, 1 );
-    islandGeo.verticesNeedUpdate = true;
 
     island.addFeatureGeometry( 'base', islandGeo );
     island.addFeatureMaterialP( 'base', { color : 0x566053, shading : THREE.FlatShading } );
 
-    island.addFeatureGeometry( 'grass', MossDecorator( islandGeo, 0.9, 1 ) );
-    // island.addFeatureGeometry( 'grass', MossDecorator( islandGeo, 0, 0.3 ) );
+    island.addFeatureGeometry( 'grass', extrudeFaces( islandGeo, 0.8, 1.0, -15, 10 ) );
+    island.addFeatureGeometry( 'grass', extrudeFaces( islandGeo, -0.4, 0.4, -10, 0 ) );
     island.addFeatureMaterialP( 'grass', { color : 0x73f773, shading : THREE.FlatShading } );
     
+    island.addFeatureGeometry( 'snow', extrudeFaces( islandGeo, -1, 1, 20, 100 ) );
+    island.addFeatureMaterialP( 'snow', { color : 0xffffff, shading : THREE.FlatShading } );
+
     island.bufferizeFeature( 'base' );
+    island.bufferizeFeature( 'grass' );
+    island.bufferizeFeature( 'snow' );
 
     island.generateFeatures();
 
@@ -109,34 +113,37 @@ function createIsland ( width, height ) {
     environment.height = height * 2;
 }
 
-function MossDecorator( geo, min, max ) {
+function extrudeFaces( geometry, dMin, dMax, zMin, zMax ) {
 
-    geo.computeFaceNormals();
+    geometry.computeFaceNormals();
 
-    var mossGeo = new THREE.Geometry();
-    mossGeo.vertices = new Array( geo.vertices.length );
-    for ( var i = 0; i < geo.vertices.length; ++i )
-        mossGeo.vertices[ i ] = geo.vertices[ i ].clone();
+    var extrude = new THREE.Geometry();
+
+    extrude.vertices = new Array( geometry.vertices.length );
+    for ( var i = 0; i < geometry.vertices.length; ++i )
+        extrude.vertices[ i ] = geometry.vertices[ i ].clone();
 
     var mossAngle = new THREE.Vector3( 0, 0, 1 );
 
-    for ( var i = 0; i < geo.faces.length; i++ ) {
-        var face = geo.faces[i];
+    for ( var i = 0; i < geometry.faces.length; i++ ) {
+        var face = geometry.faces[i];
 
         var dot = face.normal.dot( mossAngle );
-        if ( dot < max && dot > min ) {
-            console.log( dot );
-            var va = mossGeo.vertices[face.a];
-            var vb = mossGeo.vertices[face.b];
-            var vc = mossGeo.vertices[face.c];
+        if ( dot < dMax && dot > dMin ) {
+            var va = extrude.vertices[face.a];
+            var vb = extrude.vertices[face.b];
+            var vc = extrude.vertices[face.c];
 
-            va.z += 0.1;
-            vb.z += 0.1;
-            vc.z += 0.1;
-            mossGeo.faces.push(face.clone());
+            var z = ( va.z + vb.z + vc.z );
+            if ( z < zMax * 3 && z > zMin * 3 ) {
+                va += face.normal;
+                vb += face.normal;
+                vc += face.normal;
+                extrude.faces.push(face.clone());
+            }
         }
     }
 
-    return mossGeo;
+    return extrude;
 
 }
