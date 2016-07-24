@@ -276,3 +276,80 @@ Array.prototype.normalize = function() {
         this[i] = this[i] / sum;
     }
 };
+
+/**
+ * Creates an instance of a turbulent noise generator.
+ *
+ * @constructor
+ * @this { Noise }
+ * 
+ * @param { number } width  Width of noise grid. Must be integer
+ * @param { number } height Height of noise grid. Must be integer
+ */
+function Noise( width, height ) {
+    this.width = Math.round( width );
+    this.height = Math.round( height );
+
+    // Create noise grid
+    this.noise = new Array( this.width );
+    for ( var i = 0; i < this.width; ++i )
+        this.noise[ i ] = new Array( this.height );
+
+    // Fill in noise grid with some noise
+    for ( var x = 0; x < this.width; ++x )
+        for ( var y = 0; y < this.height; ++y )
+            this.noise[ x ][ y ] = continuousUniform( 0, 1 );
+}
+
+/**
+ * Sample the noise grid using bilinear interpolation.
+ *
+ * @param { number } x X location on grid to sample from
+ * @param { number } y Y location on grid to sample from
+ *
+ * @return { number } Noise value at x, y
+ */
+Noise.prototype.smoothNoise = function ( x, y ) {
+    var xint = Math.round( x );
+    var yint = Math.round( y );
+    var xfrac = x % 1;
+    var yfrac = y % 1;
+
+    // Get the neighboring noise cells
+    var x1 = ( xint + this.width ) % this.width;
+    var y1 = ( yint + this.height ) % this.height;
+    var x2 = ( x1 + this.width - 1 ) % this.width;
+    var y2 = ( y1 + this.height - 1 ) % this.height;
+
+    // Bilinear interpolation of neighboring cells
+    var value = 0;
+    value += xfrac         * yfrac         * this.noise[ x1 ][ y1 ];
+    value += ( 1 - xfrac ) * yfrac         * this.noise[ x2 ][ y1 ];
+    value += xfrac         * ( 1 - yfrac ) * this.noise[ x1 ][ y2 ];
+    value += ( 1 - xfrac ) * ( 1 - yfrac ) * this.noise[ x2 ][ y2 ];
+
+    return value;
+};
+
+/**
+ * Samples multiple noise sizes to generate smooth, natural looking noise.
+ *
+ * @param { number } x    X location on grid to sample from
+ * @param { number } y    Y location on grid to sample from
+ * @param { number } size Smoothing factor
+ *
+ * @return { number } Noise value at x, y
+ */
+noise.prototype.turbulence = function ( x, y, size ) {
+    var value = 0;
+    var initialSize = size;
+
+    // Sample noise at different levels
+    while ( size >= 1 ) {
+        value += this.smoothNoise( x / size, y / size ) * size;
+        size /= 1.3; // Weird magic constant to make the noise look less blocky
+    }
+
+    return value / initialSize;
+}
+
