@@ -340,7 +340,7 @@ Noise.prototype.smoothNoise = function ( x, y ) {
  *
  * @return { number } Noise value at x, y
  */
-noise.prototype.turbulence = function ( x, y, size ) {
+Noise.prototype.turbulence = function ( x, y, size ) {
     var value = 0;
     var initialSize = size;
 
