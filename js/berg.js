@@ -1,5 +1,5 @@
-var rakeModifier = 6;
-var rakeHeight = 0.125;
+var rakeModifier = 3;
+var rakeHeight = 0.2;
 var sandRandom = 0.08;
 var sideRakeBuffer = 5;
 
@@ -62,6 +62,10 @@ function createIsland ( width, height ) {
         vertex.perturb( 0.5 );
     } );
 
+    // Add mountain to userdata
+    island.userData.mountain = { center : max,
+                                 radius : 6 };
+
     // Create island base feature
     island.addFeatureGeometry( 'base', islandGeo );
     island.addFeatureMaterialP( 'base', { color : 0x566053,
@@ -71,6 +75,7 @@ function createIsland ( width, height ) {
 
     // Create some nice sand areas
     var numSand = discreteUniform( 1, 2 );
+    island.userData.sands = [];
     for ( var i = 0; i < numSand; ++i ) {
         // Let's make some sand - get the offset from center the sand bowl will be
         // placed and the sand pit's dimensions
@@ -80,7 +85,7 @@ function createIsland ( width, height ) {
         var sandHeight = 2 * height - 2 * sandYOff;
         var sandRad = Math.min( sandWidth, sandHeight );
 
-        var sand = new THREE.PlaneGeometry( sandWidth, sandHeight, 2 * sandWidth, 2 * sandHeight );
+        var sand = new THREE.PlaneGeometry( sandWidth, sandHeight, sandWidth, sandHeight );
 
         var sandWidth2 = Math.pow( sandWidth, 2 );
         var sandHeight2 = Math.pow( sandHeight, 2 );
@@ -102,12 +107,19 @@ function createIsland ( width, height ) {
             vertex.z -= 20 * ( Math.pow( vertex.x, 2 ) / sandWidth2 + Math.pow( vertex.y, 2 ) / sandHeight2 );
         } );
 
+        var sandX = discreteUniform( -1, 1 ).sign() * sandXOff;
+        var sandY = discreteUniform( -1, 1 ).sign() * sandYOff;
+
         // Translate
-        sand.translate( discreteUniform( -1, 1 ).sign() * sandXOff,
-                        discreteUniform( -1, 1 ).sign() * sandYOff, 0 );
+        sand.translate( sandX, sandY, 0 );
+
+        // Add sand to userdata
+        island.userData.sands.push( { center : new THREE.Vector3( sandX, sandY, 0 ),
+                                      width : sandWidth,
+                                      height : sandHeight } );
+
 
         island.addFeatureGeometry( 'sand', sand );
-
     }
 
     island.addFeatureMaterialP( 'sand', { color : 0xfcfbdf,
@@ -196,7 +208,8 @@ function switchIslands( width, height, depth ) {
     var islandHeight = discreteUniform( 30, 70 );
     var newIsland = createIsland( islandWidth, islandHeight, depth );
 
-    newIsland.addToObject( scene, 0, 0, -500 );
+    newIsland.addToObject( scene );
+    newIsland.position.z = -500;
     environment.island = newIsland;
     environment.width = islandWidth * 2;
     environment.height = islandHeight * 2;
@@ -205,6 +218,7 @@ function switchIslands( width, height, depth ) {
 function rippleSand( diameter, object ) {
     var bound = object.boundingCircle();
     var center = object.localToWorld( bound.center );
+    console.log( center );
 
     var island = environment.island;
 
@@ -212,7 +226,7 @@ function rippleSand( diameter, object ) {
         var dist = center.distanceTo( v );
 
         if ( dist <= diameter + bound.radius ) {
-            v.z = randOffset( Math.cos( dist * rakeModifier ) * rakeHeight * 1.2, sandRandom );
+            v.z += Math.cos( dist * rakeModifier ) * rakeHeight * 1.2;
         }
     } );
 }

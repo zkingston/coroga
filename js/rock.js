@@ -162,12 +162,11 @@ function generateSpireRock(xPos, yPos) {
     try {
         rock.addToObjectProject( environment.island,
                                  xPos,
-                                 yPos )
+                                 yPos );
+        rippleSand( 2, rock );
     } catch (e) {
         console.log( e);
     }
-
-    rippleSand( 2, rock );
 }
 
 //
