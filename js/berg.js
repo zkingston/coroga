@@ -60,7 +60,6 @@ function createIsland ( width, height ) {
 
         // Bend all vertices down on a parabola away from the island's center.
         vertex.perturb( 0.5 );
-        vertex.z -= 0.003 * (Math.pow( vertex.x, 2 ) + Math.pow( vertex.y, 2 ));
     } );
 
     // Create island base feature
@@ -70,31 +69,46 @@ function createIsland ( width, height ) {
                                           shininess : 10,
                                           refractionRatio : 0.1 } );
 
-    // Let's make some sand - get the offset from center the sand bowl will be placed
-    var sandXOff = continuousUniform( 0, width / 4 );
-    var sandYOff = continuousUniform( 0, height / 4 );
-    var sandRad = Math.min( width - sandXOff, height - sandYOff );
+    // Create some nice sand areas
+    var numSand = discreteUniform( 1, 2 );
+    for ( var i = 0; i < numSand; ++i ) {
+        // Let's make some sand - get the offset from center the sand bowl will be
+        // placed and the sand pit's dimensions
+        var sandXOff = continuousUniform( 0, width / 2 );
+        var sandYOff = continuousUniform( 0, height / 2 );
+        var sandWidth = 2 * width - 2 * sandXOff;
+        var sandHeight = 2 * height - 2 * sandYOff;
+        var sandRad = Math.min( sandWidth, sandHeight );
 
-    // Create a nice circle of sand
-    var sand = new THREE.RingGeometry( 0, sandRad - 5, 64, 64);
-    island.addFeatureGeometry( 'sand', sand );
+        var sand = new THREE.PlaneGeometry( sandWidth, sandHeight, 2 * sandWidth, 2 * sandHeight );
 
-    // Rake the sand
-    sand.vertices.map( function ( vertex ) {
-        var dist = Math.pow( vertex.x, 2 ) + Math.pow( vertex.y, 2 );
-        vertex.z = Math.sin( Math.sqrt( dist ) * rakeModifier ) * rakeHeight + 0.8;
-    } );
+        var sandWidth2 = Math.pow( sandWidth, 2 );
+        var sandHeight2 = Math.pow( sandHeight, 2 );
+        // Cut out all face not inside the bounding ellipse
+        sand.cut( function ( face ) {
+            var centroid = sand.faceCentroid( face );
 
-    // Scale and translate
-    sand.scale( ( width - sandXOff ) / sandRad, ( height - sandYOff ) / sandRad, 1 );
-    sand.translate( discreteUniform( -1, 1 ).sign() * sandXOff,
-                    discreteUniform( -1, 1 ).sign() * sandYOff, 0 );
+            // Ellipsoid inequality
+            if ( ( Math.pow( centroid.x, 2 ) / sandWidth2 + 
+                   Math.pow( centroid.y, 2 ) / sandHeight2 ) > 1 )
+                return false;
 
-    // Bowl it out to match island shape
-    sand.vertices.map( function ( vertex ) {
-        var dist = Math.pow( vertex.x, 2 ) + Math.pow( vertex.y, 2 );
-        vertex.z -= 0.004 * dist;
-    } );
+            return true;
+        } );
+
+        // Rake the sand
+        sand.vertices.map( function ( vertex ) {
+            vertex.z = Math.sin( vertex.x * rakeModifier ) * rakeHeight + 2;
+            vertex.z -= 20 * ( Math.pow( vertex.x, 2 ) / sandWidth2 + Math.pow( vertex.y, 2 ) / sandHeight2 );
+        } );
+
+        // Translate
+        sand.translate( discreteUniform( -1, 1 ).sign() * sandXOff,
+                        discreteUniform( -1, 1 ).sign() * sandYOff, 0 );
+
+        island.addFeatureGeometry( 'sand', sand );
+
+    }
 
     island.addFeatureMaterialP( 'sand', { color : 0xfcfbdf,
                                           shading : THREE.FlatShading,
@@ -102,8 +116,15 @@ function createIsland ( width, height ) {
                                           refractionRatio : 0.5 } );
 
 
+    // Bowl out the island's shape
+    island.traverseGeometry( function ( vertex ) {
+        var dist = Math.pow( vertex.x, 2 ) + Math.pow( vertex.y, 2 );
+        vertex.z -= 0.003 * dist;
+    } )
 
-    // This extrudes grass on the flat top of the island - But doesn't go up too high so mountains stay bare.
+
+    // This extrudes grass on the flat top of the island - But doesn't go up too
+    // high so mountains stay bare.
     island.addFeatureGeometry( 'grass', extrudeFaces( islandGeo, 0.8, 1.0, -20, 10, 0.01 ) );
     // This covers the lower part of the island so we get some grass overhang.
     island.addFeatureGeometry( 'grass', extrudeFaces( islandGeo, -1, 1, -10, 0, 0.01 ) );
@@ -180,8 +201,6 @@ function switchIslands( width, height, depth ) {
     environment.width = islandWidth * 2;
     environment.height = islandHeight * 2;
 }
-
-
 
 function rippleSand( diameter, object ) {
     var bound = object.boundingCircle();
