@@ -1,3 +1,8 @@
+var rakeModifier = 6;
+var rakeHeight = 0.125;
+var sandRandom = 0.08;
+var sideRakeBuffer = 5;
+
 function createIsland ( width, height ) {
     var island = new THREE.Object3D();
 
@@ -57,6 +62,39 @@ function createIsland ( width, height ) {
                                           shininess : 10,
                                           refractionRatio : 0.1 } );
 
+    // Let's make some sand - get the offset from center the sand bowl will be placed
+    var sandXOff = continuousUniform( 0, width / 4 );
+    var sandYOff = continuousUniform( 0, height / 4 );
+    var sandRad = Math.min( width - sandXOff, height - sandYOff );
+
+    // Create a nice circle of sand
+    var sand = new THREE.RingGeometry( 0, sandRad - 5, 64, 64);
+    island.addFeatureGeometry( 'sand', sand );
+
+    // Rake the sand
+    sand.vertices.map( function ( vertex ) {
+        var dist = Math.pow( vertex.x, 2 ) + Math.pow( vertex.y, 2 );
+        vertex.z = Math.sin( Math.sqrt( dist ) * rakeModifier ) * rakeHeight + 0.8;
+    } );
+
+    // Scale and translate
+    sand.scale( ( width - sandXOff ) / sandRad, ( height - sandYOff ) / sandRad, 1 );
+    sand.translate( discreteUniform( -1, 1 ).sign() * sandXOff,
+                    discreteUniform( -1, 1 ).sign() * sandYOff, 0 );
+
+    // Bowl it out to match island shape
+    sand.vertices.map( function ( vertex ) {
+        var dist = Math.pow( vertex.x, 2 ) + Math.pow( vertex.y, 2 );
+        vertex.z -= 0.004 * dist;
+    } );
+
+    island.addFeatureMaterialP( 'sand', { color : 0xfcfbdf,
+                                          shading : THREE.FlatShading,
+                                          shininess : 10,
+                                          refractionRatio : 0.5 } );
+
+
+
     // This extrudes grass on the flat top of the island - But doesn't go up too high so mountains stay bare.
     island.addFeatureGeometry( 'grass', extrudeFaces( islandGeo, 0.8, 1.0, -20, 10, 0.01 ) );
     // This covers the lower part of the island so we get some grass overhang.
@@ -64,12 +102,6 @@ function createIsland ( width, height ) {
 
     // Distort the grass so we can let some sand features come through.
     var grass = island.getFeature( 'grass' ).geometry;
-    grass.vertices.map( function ( vertex ) {
-        var m = new THREE.Vector3( max.x, max.y, vertex.z );
-        var e = new THREE.Vector3( max.x, max.y, vertex.z );
-    } );
-
-
     island.addFeatureMaterialP( 'grass', { color : 0x73f773,
                                            shading : THREE.FlatShading,
                                            shininess : 0,
