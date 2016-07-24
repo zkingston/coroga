@@ -198,17 +198,31 @@ THREE.Object3D.prototype.generateFeatures = function() {
  * @return { THREE.Object3D } This
  */
 THREE.Object3D.prototype.addUpdateCallback = function( callback ) {
-    this.userData.update = callback;
+    if ( typeof this.userData.update === 'undefined' )
+        this.userData.update = [];
+
+    this.userData.update.push( callback );
     return this;
 }
 
 /**
- * Recursively calls the update callback added to an Object3D.
+ * Clears the update callback list of an object.
+ *
+ * @return { THREE.Object3D } This
+ */
+THREE.Object3D.prototype.clearUpdateCallbacks = function() {
+    this.userData.update = [];
+    return this;
+}
+
+/**
+ * Recursively calls the update callbacks added to an Object3D.
  */
 THREE.Object3D.prototype.update = function() {
     this.traverse( function ( obj ) {
         if ( typeof obj.userData.update !== 'undefined' )
-            obj.userData.update( obj );
+            for ( var i = 0; i < obj.userData.update.length; ++i )
+                obj.userData.update[ i ]( obj );
     });
 }
 

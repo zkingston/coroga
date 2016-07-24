@@ -121,24 +121,57 @@ function createIsland ( width, height ) {
 
     island.generateFeatures();
 
-    // Gently oscillate
     island.addUpdateCallback( function( obj ) {
-        // obj.rotateZ( 0.001 );
-        obj.position.z = Math.sin( 0.005 * tick ) * 3;
-        obj.rotation.x = Math.sin( 0.005 * tick ) * 0.03;
-        obj.rotation.y = Math.cos( 0.005 * tick ) * 0.03;
-    } );
+        // Rise up if we were placed lower
+        if ( obj.position.z < 0 ) {
+            obj.position.z += 10;
+            obj.rotation.x = Math.sin( 0.005 * tick ) * 0.03;
+            obj.rotation.y = Math.cos( 0.005 * tick ) * 0.03;
+        }
 
-    island.addToObject( scene );
+        // Gently oscillate
+        else {
+            lock = false;
+            obj.clearUpdateCallbacks();
+            obj.addUpdateCallback( function( obj ) {
+                obj.position.z = Math.sin( 0.005 * tick ) * 3;
+                obj.rotation.x = Math.sin( 0.005 * tick ) * 0.03;
+                obj.rotation.y = Math.cos( 0.005 * tick ) * 0.03;
+            } );
+        }
+    } );
 
     // Set environmental data.
     island.userData.width = 2 * width;
     island.userData.height = 2 * height;
 
-    environment.island = island;
-    environment.width = width * 2;
-    environment.height = height * 2;
+    return island;
+
 }
+
+function switchIslands( width, height, depth ) {
+    lock = true;
+    environment.island.clearUpdateCallbacks();
+    environment.island.addUpdateCallback( function ( obj ) {
+        obj.position.z += 10;
+        obj.rotation.x = Math.sin( 0.005 * tick ) * 0.03;
+        obj.rotation.y = Math.cos( 0.005 * tick ) * 0.03;
+
+        if ( obj.position.z > 500 )
+            garbage.push( obj );
+    } );
+
+    var islandWidth = discreteUniform( 30, 70 );
+    var islandHeight = discreteUniform( 30, 70 );
+    var newIsland = createIsland( islandWidth, islandHeight, depth );
+
+    newIsland.addToObject( scene, 0, 0, -500 );
+    environment.island = newIsland;
+    environment.width = islandWidth * 2;
+    environment.height = islandHeight * 2;
+}
+
+
 
 function rippleSand( diameter, object ) {
     var bound = object.boundingCircle();

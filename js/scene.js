@@ -1,4 +1,6 @@
 var camera, controls, scene, renderer, clock, stats;
+var garbage = [];
+var lock = false;
 
 var environment = {};
 var tick = 0;
@@ -63,7 +65,7 @@ function init() {
                                           1000 );
 
     camera.up = new THREE.Vector3( 0, 0, 1 );
-    camera.position.set( -100, -100, 30 );
+    camera.position.set( 0, -200, 50 );
     camera.lookAt( 0, 0, 0 );
 
     renderer = new THREE.WebGLRenderer( { alpha: true,
@@ -108,8 +110,12 @@ function animate() {
     render();
 
     tick++;
+
     scene.update();
     controls.update();
+
+    for ( var i = 0; i < garbage.length; ++i )
+        scene.remove( garbage[ i ] );
 
     stats.end();
 
@@ -152,18 +158,24 @@ function createBase( width, height, depth ) {
 }
 
 function createEnvironment( width, height, depth ) {
+    if ( lock )
+        return;
+
     if ( typeof environment.island !== 'undefined' )
-        scene.remove( environment.island );
+        switchIslands( width, height, depth );
+    else {
+        var islandWidth = discreteUniform( 30, 70 );
+        var islandHeight = discreteUniform( 30, 70 );
+        var island = createIsland( islandWidth, islandHeight, depth );
+
+        island.addToObject( scene );
+        environment.island = island;
+        environment.width =  islandWidth * 2;
+        environment.height = islandHeight * 2;
+    }
+
     if ( typeof environment.stars !== 'undefined' && !nightMode )
         scene.remove( environment.stars );
-
-    createIsland( discreteUniform( 30, 70 ), discreteUniform( 30, 70 ), depth );
-
-    // createSand( width, height );
-    //
-    // generateSpireRock();
-    // while ( Math.random() > 0.3 )
-    //     generateSpireRock();
 
     if (nightMode) {
         scene.fog = new THREE.FogExp2( 0x001331, 0.0025 );
@@ -186,7 +198,4 @@ function createEnvironment( width, height, depth ) {
 
     var placer = new PlacementEngine(environment, scene);
     placer.runRandomTileEngine();
-
-
-    // environment.sand.add(tree);
 }
