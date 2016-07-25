@@ -24,8 +24,8 @@ function bambooFactory( bush, x, y ) {
             (Math.random() * cfg.height.variance * cfg.height.value );
 
     //Rotate the stalk
-    var stalkGeo = new THREE.CylinderGeometry( radius, radius, height, 32, 1,
-                                               false );
+    var stalkGeo = new THREE.CylinderGeometry( radius, radius, height,
+                                               cfg.segments, 1, false );
     stalkGeo.rotateX( cfg.tilt.value );
     stalkGeo.translate( x, y, height/2 );
     bush.addFeatureGeometry( "bamboo", stalkGeo );
@@ -42,7 +42,7 @@ function bambooFactory( bush, x, y ) {
         var jointGeo = new THREE.CylinderGeometry( radius * cfg.jointThickness,
                                                    radius * cfg.jointThickness,
                                                    height * cfg.jointHeight,
-                                                   32, 5, false );
+                                                   cfg.segments, 5, false );
         var offset = (Math.random() * cfg.jointSpacing.variance)
                 - cfg.jointSpacing.variance/2;
 
@@ -113,10 +113,10 @@ function generateBambooBush( xPos, yPos ) {
                                         } );
 
     //Bufferize for a sad attempt at performance boost
-    bush.bufferizeFeature( "bamboo" );
-    bush.bufferizeFeature( "joints" );
+    //bush.bufferizeFeature( "bamboo" );
+    //bush.bufferizeFeature( "joints" );
     bush.generateFeatures();
-    bush.addToObject( environment.sand, xPos, yPos, 0 );
+    bush.addToObjectProject( environment.island, xPos, yPos );
     rippleSand( 6, bush );
 }
 
