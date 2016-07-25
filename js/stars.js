@@ -1,6 +1,6 @@
 function createStars() {
     // create the particle variables
-    var particleCount = 1800,
+    var particleCount = 2200,
         particles = new THREE.Geometry(),
         pMaterial = new THREE.PointsMaterial({
           color: 0xFFFFFF,

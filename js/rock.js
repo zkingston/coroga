@@ -150,9 +150,6 @@ function SpireRockGeometry( width, height, depth ) {
 
 
 function generateSpireRock(xPos, yPos) {
-    var width = environment.width;
-    var height = environment.height;
-
     var x = Math.floor( rand() * 6 + 3 );
     var y = Math.floor( rand() * 6 + 3 );
     var z = Math.floor( rand() * 6 + 2 );

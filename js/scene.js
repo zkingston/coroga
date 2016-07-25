@@ -36,7 +36,7 @@ function createUI() {
             btn.setTextNode( 'Day Mode' );
         }
     }));
-    UIaddElement( generate ); 
+    UIaddElement( generate );
 
     var tools = new CRGDropdown( 'Tools' );
     tools.addElement( new CRGDropdownButton( 'Show FPS', function( btn ) {

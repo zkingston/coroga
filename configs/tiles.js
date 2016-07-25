@@ -12,6 +12,19 @@ var tiles = {
             }
         ]
     },
+    "bambooBush" : {
+        size : {
+            x : 4,
+            y : 4
+        },
+        features : [
+            {
+                constructor : generateBambooBush,
+                x : 2,
+                y : 2
+            }
+        ]
+    },
     "rockCluster" : {
         size : {
             x : 8,

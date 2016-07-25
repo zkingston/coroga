@@ -19,10 +19,19 @@ var features = {
         widthVariance: 0.25
     },
     "bamboo": {
-        height: 10,
-        heightVariance: .05,
-        width: 2,
-        widthVariance: 0.1
+        height: { value     : 10,
+                  variance  : 0.25},
+        radius: { value     : 0.2,
+                  variance  : 0.15},
+        tilt:   { value     : Math.PI/2,
+                  variance  : 0.05},
+        jointSpacing:   { value     : 2,
+                          variance  : 0.5},
+        segments : 10,
+        jointThickness : 1.1,
+        jointHeight : 0.01,
+        shootColor : 0x99CC00,
+        jointColor : 0xCCCC66
     },
     "island" : { // Holy magic number batman
         // Island Base
@@ -82,7 +91,7 @@ var features = {
         animation : { raise     : 10,              // How fast does the island rise when swapped?
                       threshold : 500,             // z axis threshold for island appear / disappear
                       zWobble   : { scale : 0.005, // z axis wobble
-                                    mult  : 3 }, 
+                                    mult  : 3 },
                       xWobble   : { scale : 0.005, // x rotation wobble
                                     mult  : 0.03 },
                       yWobble   : { scale : 0.005, // y rotation wobble
