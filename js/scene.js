@@ -157,16 +157,17 @@ function createBase( width, height, depth ) {
     // }
 }
 
-function createEnvironment( width, height, depth ) {
+function createEnvironment() {
     if ( lock )
         return;
 
     if ( typeof environment.island !== 'undefined' )
-        switchIslands( width, height, depth );
+        islandSwitch();
     else {
-        var islandWidth = discreteUniform( 30, 70 );
-        var islandHeight = discreteUniform( 30, 70 );
-        var island = createIsland( islandWidth, islandHeight, depth );
+        var cfg = features.island;
+        var islandWidth = discreteUniform( cfg.width.min, cfg.width.max );
+        var islandHeight = discreteUniform( cfg.height.min, cfg.height.max );
+        var island = islandCreate( islandWidth, islandHeight );
 
         island.addToObject( scene );
         environment.island = island;

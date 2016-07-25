@@ -1,8 +1,3 @@
-var rakeModifier = 3;
-var rakeHeight = 0.2;
-var sandRandom = 0.08;
-var sideRakeBuffer = 5;
-
 /**
  * Create an island base, with the rock, grass, sand, and covering snow for the mountain.
  *
@@ -11,8 +6,109 @@ var sideRakeBuffer = 5;
  *
  * @return { THREE.Object3d } A new island object
  */
-function createIsland ( width, height ) {
+function islandCreate ( width, height ) {
+    var cfg = features.island;
     var island = new THREE.Object3D();
+
+    // Set environmental data.
+    island.userData.width = width;
+    island.userData.height = height;
+
+    islandAddBase( island );
+    islandAddSand( island );
+
+    // Bowl out the island's shape
+    island.traverseGeometry( function ( vertex ) {
+        var dist = Math.pow( vertex.x, 2 ) + Math.pow( vertex.y, 2 );
+        vertex.z -= cfg.bowl * dist;
+    } )
+
+    islandAddGrass( island );
+    islandAddSnow( island );
+
+    // Can't bufferize sand as it may be rippled by other objects
+    island.bufferizeFeature( 'base' );
+    island.bufferizeFeature( 'grass' );
+    island.bufferizeFeature( 'snow' );
+
+    island.generateFeatures();
+
+    // Add the update callback that will give gentle sway / raise the island
+    // when spawned
+    island.addUpdateCallback( function( obj ) {
+        // Rise up if we were placed lower
+        if ( obj.position.z < 0 ) {
+            obj.position.z += cfg.animation.raise;
+            islandWobble( obj );
+        }
+
+        // Gently oscillate
+        else {
+            lock = false;
+            obj.clearUpdateCallbacks();
+
+            // Fun hack to switch the update callback
+            obj.addUpdateCallback( function( obj ) {
+                obj.position.z = Math.sin( cfg.animation.zWobble.scale * tick ) * cfg.animation.zWobble.mult;
+                islandWobble( obj );
+            } );
+        }
+    } );
+
+    return island;
+}
+
+function islandWobble( obj ) {
+    var cfg = features.island.animation;
+    obj.rotation.x = Math.sin( cfg.xWobble.scale * tick ) * cfg.xWobble.mult;
+    obj.rotation.y = Math.cos( cfg.yWobble.scale * tick ) * cfg.yWobble.mult;
+}
+
+function islandSwitch() {
+    var cfg = features.island;
+    var animCfg = cfg.animation;
+    lock = true;
+    environment.island.clearUpdateCallbacks();
+    environment.island.addUpdateCallback( function ( obj ) {
+        obj.position.z += animCfg.raise;
+        islandWobble( obj );
+
+        if ( obj.position.z > animCfg.threshold )
+            garbage.push( obj );
+    } );
+
+    var islandWidth = discreteUniform( cfg.width.min, cfg.width.max );
+    var islandHeight = discreteUniform( cfg.height.min, cfg.height.max );
+    var newIsland = islandCreate( islandWidth, islandHeight );
+
+    newIsland.addToObject( scene );
+    newIsland.position.z = -animCfg.threshold;
+    environment.island = newIsland;
+    environment.width = islandWidth * 2;
+    environment.height = islandHeight * 2;
+}
+
+function rippleSand( diameter, object ) {
+    var island = environment.island;
+    var cfg = features.island.sand;
+
+    var bound = object.boundingCircle();
+    var center = object.localToWorld( bound.center );
+
+    island.traverseFeatureGeometry( 'sand', function ( v ) {
+        var dist = center.distanceTo( v );
+
+        if ( dist <= diameter + bound.radius ) {
+            v.z += Math.cos( dist * cfg.modifier ) * cfg.height * 1.2;
+        }
+    } );
+}
+
+function islandAddBase( island ) {
+    var cfg = features.island.base;
+
+    var width = island.userData.width;
+    var height = island.userData.height;
 
     var radius = Math.min( width, height );
 
@@ -22,22 +118,28 @@ function createIsland ( width, height ) {
     var botNoise = new Noise( 2 * width, 2 * height );
 
     // Create and scale island geometry to be ellipsoid
-    var islandGeo = new THREE.IcosahedronGeometry( radius, 3 );
-    islandGeo.scale( width / radius, height / radius, 1 );
+    var base = new THREE.IcosahedronGeometry( radius, cfg.detail );
+    base.scale( width / radius, height / radius, 1 );
 
     // Find the highest point on the island while we are doing the noising pass
     var max = new THREE.Vector3();
-    islandGeo.vertices.map( function ( vertex ) {
+    base.vertices.map( function ( vertex ) {
         // Use bottom noise generator, with a little smoother scale ( 200 )
         if ( vertex.z < 0 ) {
             // This function is a bit magic, but it works. Causes exponential
             // spiking of heights to get nicer topography.
             // Width & height are added to make values non-negative.
-            vertex.z *= 0.08 * Math.exp(  botNoise.turbulence( vertex.x + width, vertex.y + height, 200 ) );
+            vertex.z *= cfg.noise.spike *
+                Math.exp( botNoise.turbulence( vertex.x + width,
+                                               vertex.y + height,
+                                               cfg.noise.bottom ) );
 
         // Use top noies generator, we don't care if it's noisier as it will be squashed later
         } else {
-            vertex.z *= 0.08 * Math.exp(  topNoise.turbulence( vertex.x + width, vertex.y + height, 100 ) );
+            vertex.z *= cfg.noise.spike *
+                Math.exp( topNoise.turbulence( vertex.x + width,
+                                               vertex.y + height,
+                                               cfg.noise.top ) );
 
             // Keep track of max value
             if ( vertex.z > max.z )
@@ -47,19 +149,19 @@ function createIsland ( width, height ) {
 
     // Hulk squash
     max = max.clone();
-    islandGeo.vertices.map( function ( vertex ) {
+    base.vertices.map( function ( vertex ) {
         // Use inverse sigmoid function to squash values farther away from peak, but still keep a smooth descent.
         if ( vertex.z > 0 ) {
             var dist = vertex.distanceTo( max );
-            vertex.z *= 1 / ( 1 + Math.exp( 12 * dist / (1.2 * radius)  - 4))
+            vertex.z *= 1 / ( 1 + Math.exp( cfg.peak.mult * dist / (cfg.peak.reduce * radius)  - cfg.peak.shift))
 
         // Displace lower half a little bit as the squashing will cause a pile up of vertices. Makes it look more natural.
         } else {
-            vertex.z -= 3;
+            vertex.z -= cfg.displace;
         }
 
         // Bend all vertices down on a parabola away from the island's center.
-        vertex.perturb( 0.5 );
+        vertex.perturb( cfg.perturb );
     } );
 
     // Add mountain to userdata
@@ -67,14 +169,18 @@ function createIsland ( width, height ) {
                                  radius : 6 };
 
     // Create island base feature
-    island.addFeatureGeometry( 'base', islandGeo );
-    island.addFeatureMaterialP( 'base', { color : 0x566053,
-                                          shading : THREE.FlatShading,
-                                          shininess : 10,
-                                          refractionRatio : 0.1 } );
+    island.addFeatureGeometry( 'base', base );
+    island.addFeatureMaterialP( 'base', cfg.material );
+};
+
+function islandAddSand( island ) {
+    var cfg = features.island.sand;
+
+    var width = island.userData.width;
+    var height = island.userData.height;
 
     // Create some nice sand areas
-    var numSand = discreteUniform( 1, 2 );
+    var numSand = discreteUniform( 1, cfg.maxPatch );
     island.userData.sands = [];
     for ( var i = 0; i < numSand; ++i ) {
         // Let's make some sand - get the offset from center the sand bowl will be
@@ -85,16 +191,18 @@ function createIsland ( width, height ) {
         var sandHeight = 2 * height - 2 * sandYOff;
         var sandRad = Math.min( sandWidth, sandHeight );
 
-        var sand = new THREE.PlaneGeometry( sandWidth, sandHeight, sandWidth, sandHeight );
+        var sand = new THREE.PlaneGeometry( sandWidth, sandHeight,
+                                            sandWidth, sandHeight );
 
         var sandWidth2 = Math.pow( sandWidth, 2 );
         var sandHeight2 = Math.pow( sandHeight, 2 );
+
         // Cut out all face not inside the bounding ellipse
         sand.cut( function ( face ) {
             var centroid = sand.faceCentroid( face );
 
             // Ellipsoid inequality
-            if ( ( Math.pow( centroid.x, 2 ) / sandWidth2 + 
+            if ( ( Math.pow( centroid.x, 2 ) / sandWidth2 +
                    Math.pow( centroid.y, 2 ) / sandHeight2 ) > 1 )
                 return false;
 
@@ -103,8 +211,9 @@ function createIsland ( width, height ) {
 
         // Rake the sand
         sand.vertices.map( function ( vertex ) {
-            vertex.z = Math.sin( vertex.x * rakeModifier ) * rakeHeight + 2;
-            vertex.z -= 20 * ( Math.pow( vertex.x, 2 ) / sandWidth2 + Math.pow( vertex.y, 2 ) / sandHeight2 );
+            vertex.z = Math.sin( vertex.x * cfg.modifier ) * cfg.height + 2;
+            vertex.z -= 20 * ( Math.pow( vertex.x, 2 ) / sandWidth2 +
+                               Math.pow( vertex.y, 2 ) / sandHeight2 );
         } );
 
         var sandX = discreteUniform( -1, 1 ).sign() * sandXOff;
@@ -118,115 +227,38 @@ function createIsland ( width, height ) {
                                       width : sandWidth,
                                       height : sandHeight } );
 
-
         island.addFeatureGeometry( 'sand', sand );
     }
 
-    island.addFeatureMaterialP( 'sand', { color : 0xfcfbdf,
-                                          shading : THREE.FlatShading,
-                                          shininess : 10,
-                                          refractionRatio : 0.5 } );
+    island.addFeatureMaterialP( 'sand', cfg.material );
+};
 
+function islandAddGrass( island ) {
+    var cfg = features.island.grass;
+    var base = island.getFeature( 'base' ).geometry;
 
-    // Bowl out the island's shape
-    island.traverseGeometry( function ( vertex ) {
-        var dist = Math.pow( vertex.x, 2 ) + Math.pow( vertex.y, 2 );
-        vertex.z -= 0.003 * dist;
-    } )
-
-
-    // This extrudes grass on the flat top of the island - But doesn't go up too
-    // high so mountains stay bare.
-    island.addFeatureGeometry( 'grass', extrudeFaces( islandGeo, 0.8, 1.0, -20, 10, 0.01 ) );
-    // This covers the lower part of the island so we get some grass overhang.
-    island.addFeatureGeometry( 'grass', extrudeFaces( islandGeo, -1, 1, -10, 0, 0.01 ) );
+    for ( var i = 0; i < cfg.extrusions.length; ++i ) {
+        var e = cfg.extrusions[ i ];
+        island.addFeatureGeometry( 'grass',
+                                   extrudeFaces( base, e.dMin, e.dMax,
+                                                 e.zMin, e.zMax, e.offset ) );
+    }
 
     // Distort the grass so we can let some sand features come through.
     var grass = island.getFeature( 'grass' ).geometry;
-    island.addFeatureMaterialP( 'grass', { color : 0x73f773,
-                                           shading : THREE.FlatShading,
-                                           shininess : 0,
-                                           refractionRatio : 0.1 } );
+    island.addFeatureMaterialP( 'grass', cfg.material );
+};
 
-    // Create snow caps - Only place snow on somewhat flat mountain faces above z = 20.
-    island.addFeatureGeometry( 'snow', extrudeFaces( islandGeo, 0.3, 1, 20, 100, 0.2 ) );
-    island.addFeatureMaterialP( 'snow', { color : 0xffffff,
-                                          shading : THREE.FlatShading,
-                                          emissive : 0xaaaaaa,
-                                          shininess : 70,
-                                          refractionRatio : 0.7 } );
+function islandAddSnow( island ) {
+    var cfg = features.island.snow;
+    var base = island.getFeature( 'base' ).geometry;
 
-    island.bufferizeFeature( 'base' );
-    island.bufferizeFeature( 'grass' );
-    island.bufferizeFeature( 'snow' );
+    for ( var i = 0; i < cfg.extrusions.length; ++i ) {
+        var e = cfg.extrusions[ i ];
+        island.addFeatureGeometry( 'snow',
+                                   extrudeFaces( base, e.dMin, e.dMax,
+                                                 e.zMin, e.zMax, e.offset ) );
+    }
 
-    island.generateFeatures();
-
-    island.addUpdateCallback( function( obj ) {
-        // Rise up if we were placed lower
-        if ( obj.position.z < 0 ) {
-            obj.position.z += 10;
-            obj.rotation.x = Math.sin( 0.005 * tick ) * 0.03;
-            obj.rotation.y = Math.cos( 0.005 * tick ) * 0.03;
-        }
-
-        // Gently oscillate
-        else {
-            lock = false;
-            obj.clearUpdateCallbacks();
-
-            // Fun hack to switch the update callback
-            obj.addUpdateCallback( function( obj ) {
-                obj.position.z = Math.sin( 0.005 * tick ) * 3;
-                obj.rotation.x = Math.sin( 0.005 * tick ) * 0.03;
-                obj.rotation.y = Math.cos( 0.005 * tick ) * 0.03;
-            } );
-        }
-    } );
-
-    // Set environmental data.
-    island.userData.width = 2 * width;
-    island.userData.height = 2 * height;
-
-    return island;
-
-}
-
-function switchIslands( width, height, depth ) {
-    lock = true;
-    environment.island.clearUpdateCallbacks();
-    environment.island.addUpdateCallback( function ( obj ) {
-        obj.position.z += 10;
-        obj.rotation.x = Math.sin( 0.005 * tick ) * 0.03;
-        obj.rotation.y = Math.cos( 0.005 * tick ) * 0.03;
-
-        if ( obj.position.z > 500 )
-            garbage.push( obj );
-    } );
-
-    var islandWidth = discreteUniform( 30, 70 );
-    var islandHeight = discreteUniform( 30, 70 );
-    var newIsland = createIsland( islandWidth, islandHeight, depth );
-
-    newIsland.addToObject( scene );
-    newIsland.position.z = -500;
-    environment.island = newIsland;
-    environment.width = islandWidth * 2;
-    environment.height = islandHeight * 2;
-}
-
-function rippleSand( diameter, object ) {
-    var bound = object.boundingCircle();
-    var center = object.localToWorld( bound.center );
-    console.log( center );
-
-    var island = environment.island;
-
-    island.traverseFeatureGeometry( 'sand', function ( v ) {
-        var dist = center.distanceTo( v );
-
-        if ( dist <= diameter + bound.radius ) {
-            v.z += Math.cos( dist * rakeModifier ) * rakeHeight * 1.2;
-        }
-    } );
-}
+    island.addFeatureMaterialP( 'snow', cfg.material );
+};
