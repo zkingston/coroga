@@ -198,17 +198,31 @@ THREE.Object3D.prototype.generateFeatures = function() {
  * @return { THREE.Object3D } This
  */
 THREE.Object3D.prototype.addUpdateCallback = function( callback ) {
-    this.userData.update = callback;
+    if ( typeof this.userData.update === 'undefined' )
+        this.userData.update = [];
+
+    this.userData.update.push( callback );
     return this;
 }
 
 /**
- * Recursively calls the update callback added to an Object3D.
+ * Clears the update callback list of an object.
+ *
+ * @return { THREE.Object3D } This
+ */
+THREE.Object3D.prototype.clearUpdateCallbacks = function() {
+    this.userData.update = [];
+    return this;
+}
+
+/**
+ * Recursively calls the update callbacks added to an Object3D.
  */
 THREE.Object3D.prototype.update = function() {
     this.traverse( function ( obj ) {
         if ( typeof obj.userData.update !== 'undefined' )
-            obj.userData.update( obj );
+            for ( var i = 0; i < obj.userData.update.length; ++i )
+                obj.userData.update[ i ]( obj );
     });
 }
 
@@ -361,4 +375,41 @@ THREE.Object3D.prototype.setText = function ( text ) {
     this.userData.text = sprite;
 
     return this;
+}
+
+/**
+ * Adds this object to another object at a specified location, projected onto
+ * the other object's surface.
+ *
+ * @param { THREE.Object3D } object The object to add this to
+ * @param { number }         x      Relative x coordinate
+ * @param { number }         y      Relative y coordinate
+ * @param { THREE.Vector3 }  vector Direction of projection. Negative Z by default
+ *
+ * @throws { string } Error is thrown if object does not intersect with other object
+ *
+ * @return { THREE.Object3D } This
+ */
+THREE.Object3D.prototype.addToObjectProject = function ( object, x, y, vector ) {
+    if ( typeof vector === 'undefined' )
+        vector = new THREE.Vector3( 0, 0, -1 );
+
+    var raycaster = new THREE.Raycaster();
+
+    // Total hack with the Z value. Should really try to see maximum extent from bounding box.
+    raycaster.set( object.localToWorld( new THREE.Vector3( x, y, 100 ) ),
+                   vector );
+
+    var intersects = raycaster.intersectObject( object, true );
+
+    if ( intersects.length ) {
+        var position = object.worldToLocal( intersects[ 0 ].point );
+        var orientation = intersects[ 0 ].face.normal;
+
+        this.addToObject( object, x, y, position.z );
+
+        return this;
+    }
+
+    throw "Projection error: No intersection";
 }

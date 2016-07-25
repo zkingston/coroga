@@ -463,7 +463,12 @@ function treeFactory(x,y){
 }
 
 function generateCherryTree(x,y){
-    var tree = treeFactory(x,y);
-    tree.addToObject( environment.sand );
+    var tree = treeFactory(0, 0);
+    try {
+        tree.addToObjectProject( environment.island, x, y );
+    } catch ( e ) {
+        console.log( e );
+    }
+
     return tree;
 }
