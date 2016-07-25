@@ -1,8 +1,8 @@
 var biomes = {
     "riverLand": {
-        probability: 0.8,
+        probability: 0,
         tiles: {
-          "bambooBush": 0.8,
+          "bambooBush": 0,
           "rockCluster": 0.2
         }
     },
