@@ -30,6 +30,7 @@ function RockClusterFactory( RockGeometry, width, height, depth ) {
 
     rocks.addFeatureMaterialP( 'rocks', { color : 0x505050,
                                           shading : THREE.FlatShading,
+                                          shininess : 10,
                                           refractionRatio : 0.1 } )
     rocks.generateFeatures();
     return rocks;
@@ -106,45 +107,46 @@ function SpireRockGeometry( width, height, depth ) {
 
 }
 
-function MossDecorator( rock, threshold ) {
+// function MossDecorator( rock, threshold ) {
+    
 
-    var mossyRock = new THREE.Group();
-    mossyRock.add( rock );
+//     var mossyRock = new THREE.Group();
+//     mossyRock.add( rock );
 
-    var mossGeo = rock.geometry.clone();
-    mossGeo.computeFaceNormals();
+//     var mossGeo = rock.geometry.clone();
+//     mossGeo.computeFaceNormals();
 
-    var mossAngle = new THREE.Vector3( 0, 1, 1 );
+//     var mossAngle = new THREE.Vector3( 0, 1, 1 );
 
-    for ( var i = 0; i < mossGeo.faces.length; i++ ) {
-        var face = mossGeo.faces[i];
+//     for ( var i = 0; i < mossGeo.faces.length; i++ ) {
+//         var face = mossGeo.faces[i];
 
-        if ( face.normal.dot( mossAngle ) < threshold ) {
-            console.log (face.normal.dot( mossAngle ) );
-            var va = mossGeo.vertices[face.a];
-            var vb = mossGeo.vertices[face.b];
-            var vc = mossGeo.vertices[face.c];
+//         if ( face.normal.dot( mossAngle ) < threshold ) {
+//             console.log (face.normal.dot( mossAngle ) );
+//             var va = mossGeo.vertices[face.a];
+//             var vb = mossGeo.vertices[face.b];
+//             var vc = mossGeo.vertices[face.c];
 
-            va.z -= 0.1;
-            vb.z -= 0.1;
-            vc.z -= 0.1;
-        }
-    }
+//             va.z -= 0.1;
+//             vb.z -= 0.1;
+//             vc.z -= 0.1;
+//         }
+//     }
 
-    var mossMat = new THREE.MeshPhongMaterial( { color : 0x77d97e,
-                                                 shading : THREE.FlatShading,
-                                                 shininess : 30,
-                                                 refractionRatio : 0.0 } );
+//     var mossMat = new THREE.MeshPhongMaterial( { color : 0x77d97e,
+//                                                  shading : THREE.FlatShading,
+//                                                  shininess : 30,
+//                                                  refractionRatio : 0.0 } );
 
-    var moss = new THREE.Mesh( mossGeo, mossMat );
-    moss.position.x = rock.position.x;
-    moss.position.y = rock.position.y;
-    moss.position.z = rock.position.z;
-    mossyRock.add( moss );
+//     var moss = new THREE.Mesh( mossGeo, mossMat );
+//     moss.position.x = rock.position.x;
+//     moss.position.y = rock.position.y;
+//     moss.position.z = rock.position.z;
+//     mossyRock.add( moss );
 
-    return mossyRock;
+//     return mossyRock;
 
-}
+// }
 
 
 function generateSpireRock(xPos, yPos) {
@@ -153,12 +155,15 @@ function generateSpireRock(xPos, yPos) {
     var z = Math.floor( rand() * 6 + 2 );
 
     var rock = RockClusterFactory( SpireRockGeometry, x, y, z );
-    rock.addToObject( environment.sand,
-                      xPos,
-                      yPos,
-                      z / 2 - 0.5);
 
-    rippleSand( 2, rock );
+    try {
+        rock.addToObjectProject( environment.island,
+                                 xPos,
+                                 yPos );
+        rippleSand( 2, rock );
+    } catch (e) {
+        console.log( e);
+    }
 }
 
 //

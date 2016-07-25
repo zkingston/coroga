@@ -1,4 +1,6 @@
 var camera, controls, scene, renderer, clock, stats;
+var garbage = [];
+var lock = false;
 
 var environment = {};
 var tick = 0;
@@ -63,7 +65,7 @@ function init() {
                                           1000 );
 
     camera.up = new THREE.Vector3( 0, 0, 1 );
-    camera.position.set( -60, -60, 30 );
+    camera.position.set( 0, -200, 50 );
     camera.lookAt( 0, 0, 0 );
 
     renderer = new THREE.WebGLRenderer( { alpha: true,
@@ -87,7 +89,7 @@ function init() {
 
     window.addEventListener( 'resize', onWindowResize, false );
 
-    createBase( 70, 50, 2 );
+    createBase();
     createEnvironment( 70, 50, 2 );
 }
 
@@ -108,8 +110,12 @@ function animate() {
     render();
 
     tick++;
+
     scene.update();
     controls.update();
+
+    for ( var i = 0; i < garbage.length; ++i )
+        scene.remove( garbage[ i ] );
 
     stats.end();
 
@@ -136,33 +142,41 @@ function initializeLights() {
 function createBase( width, height, depth ) {
 
     scene = new THREE.Scene();
-
-    environment.width = width;
-    environment.height = height;
-    environment.depth = depth;
-    environment.radius = Math.sqrt( height * height / 4 + width * width / 4 );
-
     initializeLights();
 
-    createWalls( width, height, 15 );
+    // createWalls( width, height, 15 );
 
-    var lanterns = [ { x : width / 2 - 2, y : -height / 2 + 2 },
-                     { x : -width / 2 + 2, y : height / 2 - 2 } ];
-    for ( var i = 0; i < lanterns.length; i++ ) {
-        var dim = 3;
-        var lantern = lanternFactory( dim, dim, 3 );
-        var moth = mothFactory( lantern );
+    // var lanterns = [ { x : width / 2 - 2, y : -height / 2 + 2 },
+    //                  { x : -width / 2 + 2, y : height / 2 - 2 } ];
+    // for ( var i = 0; i < lanterns.length; i++ ) {
+    //     var dim = 3;
+    //     var lantern = lanternFactory( dim, dim, 3 );
+    //     var moth = mothFactory( lantern );
 
-        lantern.addToObject( scene, lanterns[i].x, lanterns[i].y, depth * 2 );
-    }
+    //     lantern.addToObject( scene, lanterns[i].x, lanterns[i].y, depth * 2 );
+    // }
 }
 
-function createEnvironment( width, height, depth ) {
-    if ( typeof environment.sand !== 'undefined' )
-        scene.remove( environment.sand );
+function createEnvironment() {
+    if ( lock )
+        return;
+
+    if ( typeof environment.island !== 'undefined' )
+        islandSwitch();
+    else {
+        var cfg = features.island;
+        var islandWidth = discreteUniform( cfg.width.min, cfg.width.max );
+        var islandHeight = discreteUniform( cfg.height.min, cfg.height.max );
+        var island = islandCreate( islandWidth, islandHeight );
+
+        island.addToObject( scene );
+        environment.island = island;
+        environment.width =  islandWidth * 2;
+        environment.height = islandHeight * 2;
+    }
+
     if ( typeof environment.stars !== 'undefined' && !nightMode )
         scene.remove( environment.stars );
-    createSand( width, height );
 
     if (nightMode) {
         scene.fog = new THREE.FogExp2( 0x001331, 0.0025 );
@@ -185,7 +199,4 @@ function createEnvironment( width, height, depth ) {
 
     var placer = new PlacementEngine(environment, scene);
     placer.runRandomTileEngine();
-
-
-    // environment.sand.add(tree);
 }
