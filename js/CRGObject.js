@@ -371,24 +371,52 @@ THREE.Object3D.prototype.addAudio = function ( source, volume, loop, distance ) 
         sound = new THREE.PositionalAudio( listener );
     }
 
-    audioLoader.load(
-        source,
-        function( buffer ) {  // On Load
-            sound.setBuffer( buffer );
-            sound.setLoop( loop );
-            sound.setVolume( volume );
+    try {
+        audioLoader.load(
+            source,
+            function( buffer ) {  // On Load
+                sound.setBuffer( buffer );
+                sound.setLoop( loop );
+                sound.setVolume( volume );
 
-            if ( typeof distance !== 'undefined' )
-                sound.setRefDistance( distance );
-        },
-        function ( xhr ) {   // In Progress
-            console.log( "Audio file " + source + " " + (xhr.loaded / xhr.total * 100) + '% loaded' );
-        } );
+                if ( typeof distance !== 'undefined' )
+                    sound.setRefDistance( distance );
 
-    this.userData.sound = sound;
+                if ( sound.playOnLoad )
+                    sound.play();
+            },
+            function ( xhr ) {   // In Progress
+                console.log( "Audio file {0} {1}% loaded.".format( source, xhr.loaded / xhr.total * 100 ) );
+            },
+            function ( xhr ) {   // On Error (I.E. CORS is borked)
+                alertWarning( "Failed to load audio file {0}. CORS is probably broken.".format( source ) );
+            } );
+
+        this.userData.sound = sound;
+        sound.addToObject( this );
+
+        Object.observe( this, function ( delta ) {
+            if ( delta.type == 'delete' )
+                delete sound;
+        } )
+
+    } catch ( e ) {
+        alertWarning( e );
+    }
 }
 
 THREE.Object3D.prototype.playAudio = function () {
-    if ( typeof this.userData.sound !== 'undefined' )
-        this.userData.sound.play();
+    var sound = this.userData.sound;
+    if ( typeof sound !== 'undefined' ) {
+        if ( sound.sourceType === 'empty' )
+            sound.playOnLoad = true;
+        else
+            this.userData.sound.play();
+    }
+}
+
+THREE.Object3D.prototype.pauseAudio = function () {
+    var sound = this.userData.sound;
+    if ( typeof sound !== 'undefined' )
+        this.userData.sound.pause();
 }

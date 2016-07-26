@@ -465,5 +465,11 @@ function treeFactory(x,y){
 function generateCherryTree(x,y){
     var tree = treeFactory(x,y);
     tree.addToObject( environment.sand );
+
+    if ( rand() < 0.5 ) {
+        tree.addAudio( 'audio/cicada.ogg', 0.5, true, 20 );
+        tree.playAudio();
+    }
+
     return tree;
 }

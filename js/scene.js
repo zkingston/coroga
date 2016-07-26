@@ -47,9 +47,29 @@ function createUI() {
         }
     }));
 
+    tools.addElement( new CRGDropdownButton( 'Stop Audio', function( btn ) {
+        if ( listener.getMasterVolume() > 0 ) {
+            listener.setMasterVolume( 0 );
+            btn.setTextNode( 'Play Audio' );
+        } else {
+            listener.setMasterVolume( 1 );
+            btn.setTextNode( 'Stop Audio' );
+        }
+    }));
+
+
     UIaddElement( tools );
 
     UIgenerate();
+}
+
+function videoKilledTheRadioStar() {
+    scene.traverse( function ( obj ) {
+        var sound = obj.userData.sound;
+        if ( typeof sound !== 'undefined' ) {
+            obj.remove( sound );
+        }
+    } );
 }
 
 function init() {
