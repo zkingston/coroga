@@ -1,4 +1,4 @@
-var camera, controls, scene, renderer, clock, stats;
+var camera, controls, scene, renderer, clock, stats, listener, audioLoader;
 
 var environment = {};
 var tick = 0;
@@ -65,6 +65,11 @@ function init() {
     camera.up = new THREE.Vector3( 0, 0, 1 );
     camera.position.set( -60, -60, 30 );
     camera.lookAt( 0, 0, 0 );
+
+    listener = new THREE.AudioListener();
+    camera.add( listener );
+
+    audioLoader = new THREE.AudioLoader();
 
     renderer = new THREE.WebGLRenderer( { alpha: true,
                                           antialias: false } );

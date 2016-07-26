@@ -362,3 +362,33 @@ THREE.Object3D.prototype.setText = function ( text ) {
 
     return this;
 }
+
+THREE.Object3D.prototype.addAudio = function ( source, volume, loop, distance ) {
+    var sound;
+    if ( typeof distance === 'undefined' ) {
+        sound = new THREE.Audio( listener );
+    } else {
+        sound = new THREE.PositionalAudio( listener );
+    }
+
+    audioLoader.load(
+        source,
+        function( buffer ) {  // On Load
+            sound.setBuffer( buffer );
+            sound.setLoop( loop );
+            sound.setVolume( volume );
+
+            if ( typeof distance !== 'undefined' )
+                sound.setRefDistance( distance );
+        },
+        function ( xhr ) {   // In Progress
+            console.log( "Audio file " + source + " " + (xhr.loaded / xhr.total * 100) + '% loaded' );
+        } );
+
+    this.userData.sound = sound;
+}
+
+THREE.Object3D.prototype.playAudio = function () {
+    if ( typeof this.userData.sound !== 'undefined' )
+        this.userData.sound.play();
+}
