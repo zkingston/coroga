@@ -55,7 +55,10 @@ body {
 }
 #loading {
     padding-top: 50px;
-
+    background-color: #aaccff;
+    position: absolute;
+    height: 100%;
+    width: 100%;
 }
 
 .btn-group > .btn-group {
