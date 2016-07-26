@@ -64,7 +64,7 @@ function createUI() {
 }
 
 function videoKilledTheRadioStar() {
-    scene.traverse( function ( obj ) {
+    environment.sand.traverse( function ( obj ) {
         var sound = obj.userData.sound;
         if ( typeof sound !== 'undefined' ) {
             sound.disconnect();
@@ -97,7 +97,7 @@ function init() {
  	renderer.setPixelRatio( window.devicePixelRatio );
 
     renderer.setSize( window.innerWidth, window.innerHeight );
-	renderer.sortObjects = false;
+    renderer.sortObjects = false;
 
     controls = new THREE.OrbitControls( camera );
     var angleOffset = Math.PI / 32;
@@ -158,10 +158,11 @@ function initializeLights() {
     environment.lamp = lamp;
 }
 
-
 function createBase( width, height, depth ) {
-
     scene = new THREE.Scene();
+
+    scene.addAudio( 'audio/ambiance.ogg', 0.1, true );
+    scene.playAudio();
 
     environment.width = width;
     environment.height = height;

@@ -409,11 +409,6 @@ THREE.Object3D.prototype.addAudio = function ( source, volume, loop, distance ) 
         this.userData.sound = sound;
         sound.addToObject( this );
 
-        Object.observe( this, function ( delta ) {
-            if ( delta.type == 'delete' )
-                delete sound;
-        } )
-
     } catch ( e ) {
         alertWarning( e );
     }
