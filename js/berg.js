@@ -179,57 +179,55 @@ function islandAddSand( island ) {
     var width = island.userData.width;
     var height = island.userData.height;
 
-    // Create some nice sand areas
-    var numSand = discreteUniform( 1, cfg.maxPatch );
-    island.userData.sands = [];
-    for ( var i = 0; i < numSand; ++i ) {
-        // Let's make some sand - get the offset from center the sand bowl will be
-        // placed and the sand pit's dimensions
-        var sandXOff = continuousUniform( 0, width / 2 );
-        var sandYOff = continuousUniform( 0, height / 2 );
-        var sandWidth = 2 * width - 2 * sandXOff;
-        var sandHeight = 2 * height - 2 * sandYOff;
-        var sandRad = Math.min( sandWidth, sandHeight );
 
-        var sand = new THREE.PlaneGeometry( sandWidth, sandHeight,
-                                            sandWidth, sandHeight );
+    var sandXOff = continuousUniform( 0, 2 );
+    var sandYOff = continuousUniform( 0, 2 );
 
-        var sandWidth2 = Math.pow( sandWidth, 2 );
-        var sandHeight2 = Math.pow( sandHeight, 2 );
+    var sandWidth = 2 * width -  sandXOff;
+    var sandHeight = 2 * height - sandYOff;
 
-        // Cut out all face not inside the bounding ellipse
-        sand.cut( function ( face ) {
-            var centroid = sand.faceCentroid( face );
+    var sand = new THREE.PlaneGeometry( sandWidth, sandHeight,
+                                        sandWidth, sandHeight );
 
-            // Ellipsoid inequality
-            if ( ( Math.pow( centroid.x, 2 ) / sandWidth2 +
-                   Math.pow( centroid.y, 2 ) / sandHeight2 ) > 1 )
-                return false;
+    var sandWidth2 = Math.pow( 2.5 * width, 2 );
+    var sandHeight2 = Math.pow( 2.5 * height, 2 );
 
-            return true;
-        } );
+    // Cut out all face not inside the bounding ellipse
+    sand.cut( function ( face ) {
+        var centroid = sand.faceCentroid( face );
 
-        // Rake the sand
-        sand.vertices.map( function ( vertex ) {
-            vertex.z = Math.sin( vertex.x * cfg.modifier ) * cfg.height + 2;
-            vertex.z -= 20 * ( Math.pow( vertex.x, 2 ) / sandWidth2 +
-                               Math.pow( vertex.y, 2 ) / sandHeight2 );
-        } );
+        // Ellipsoid inequality
+        if ( ( Math.pow( centroid.x, 2 ) / sandWidth2 +
+               Math.pow( centroid.y, 2 ) / sandHeight2 ) > 1 )
+            return false;
 
-        var sandX = discreteUniform( -1, 1 ).sign() * sandXOff;
-        var sandY = discreteUniform( -1, 1 ).sign() * sandYOff;
+        // Cut out mountain
+        var mountain = island.userData.mountain;
+        if ( mountain.center.distanceTo( centroid ) < mountain.radius )
+            return false;
 
-        // Translate
-        sand.translate( sandX, sandY, 0 );
+        return true;
+    } );
 
-        // Add sand to userdata
-        island.userData.sands.push( { center : new THREE.Vector3( sandX, sandY, 0 ),
-                                      width : sandWidth,
-                                      height : sandHeight } );
+    // Rake the sand
+    sand.vertices.map( function ( vertex ) {
+        vertex.z = Math.sin( vertex.x * cfg.modifier ) * cfg.height + 1.8;
+        vertex.z -= 20 * ( Math.pow( vertex.x, 2 ) / sandWidth2 +
+                           Math.pow( vertex.y, 2 ) / sandHeight2 );
+    } );
 
-        island.addFeatureGeometry( 'sand', sand );
-    }
+    var sandX = discreteUniform( -1, 1 ).sign() * sandXOff;
+    var sandY = discreteUniform( -1, 1 ).sign() * sandYOff;
 
+    // Translate
+    sand.translate( sandX, sandY, 0 );
+
+    // // Add sand to userdata
+    island.userData.sand = { center : new THREE.Vector3( sandX, sandY, 0 ),
+                             width : sandWidth,
+                             height : sandHeight };
+
+    island.addFeatureGeometry( 'sand', sand );
     island.addFeatureMaterialP( 'sand', cfg.material );
 };
 
