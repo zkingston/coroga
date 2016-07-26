@@ -363,6 +363,20 @@ THREE.Object3D.prototype.setText = function ( text ) {
     return this;
 }
 
+/**
+ * Add an audio file to an object. This audio file can then be played for fun
+ * positional audio effects. Note that if you are running the rock garden
+ * locally you need to host the files through a server or you are going to get
+ * hit with CORS problems.
+ *
+ * @param { string }  source   URL for audio source file
+ * @param { number }  volume   Volume gain of source. Between 0 and 1 inclusive
+ * @param { boolean } loop     Does this audio source loop?
+ * @param { number }  distance Reference distance for reducing volume. If
+ *                             undefined assumes global ambient audio source
+ *
+ * @return { THREE.Object3D } This
+ */
 THREE.Object3D.prototype.addAudio = function ( source, volume, loop, distance ) {
     var sound;
     if ( typeof distance === 'undefined' ) {
@@ -405,6 +419,9 @@ THREE.Object3D.prototype.addAudio = function ( source, volume, loop, distance ) 
     }
 }
 
+/**
+ * Plays attached audio source.
+ */
 THREE.Object3D.prototype.playAudio = function () {
     var sound = this.userData.sound;
     if ( typeof sound !== 'undefined' ) {
@@ -415,6 +432,9 @@ THREE.Object3D.prototype.playAudio = function () {
     }
 }
 
+/**
+ * Pauses attached audio source.
+ */
 THREE.Object3D.prototype.pauseAudio = function () {
     var sound = this.userData.sound;
     if ( typeof sound !== 'undefined' )
