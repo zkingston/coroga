@@ -67,7 +67,8 @@ function videoKilledTheRadioStar() {
     scene.traverse( function ( obj ) {
         var sound = obj.userData.sound;
         if ( typeof sound !== 'undefined' ) {
-            obj.remove( sound );
+            sound.disconnect();
+            delete sound;
         }
     } );
 }
@@ -183,8 +184,10 @@ function createBase( width, height, depth ) {
 }
 
 function createEnvironment( width, height, depth ) {
-    if ( typeof environment.sand !== 'undefined' )
+    if ( typeof environment.sand !== 'undefined' ) {
+        videoKilledTheRadioStar();
         scene.remove( environment.sand );
+    }
     if ( typeof environment.stars !== 'undefined' && !nightMode )
         scene.remove( environment.stars );
     createSand( width, height );
