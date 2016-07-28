@@ -175,6 +175,12 @@ function createEnvironment() {
         environment.height = islandHeight * 2;
     }
 
+    if (typeof environment.skybox === 'undefined' ) {
+        var skybox = createSkybox();
+        environment.skybox = skybox;
+        scene.add(skybox);
+    }
+
     if ( typeof environment.stars !== 'undefined' && !nightMode )
         scene.remove( environment.stars );
 
@@ -192,8 +198,9 @@ function createEnvironment() {
         }
     }
     else {
-        scene.fog = new THREE.FogExp2( 0xaaccff, 0.005 );
-        renderer.setClearColor( 0xaaccff, 1 );
+        //scene.fog = new THREE.FogExp2( 0xaaccff, 0.005 );
+        //renderer.setClearColor( 0xaaccff, 0.1 );
+        renderer.setClearColor( 0x000000, 0 );
         environment.lamp = new THREE.DirectionalLight( 0xdddddd, 0.5 );
     }
 
