@@ -10,6 +10,8 @@ function islandCreate ( width, height ) {
     var cfg = features.island;
     var island = new THREE.Object3D();
 
+    console.log( "Creating island with width {0} and height {1}".format( width, height ) );
+
     // Set environmental data.
     island.userData.width = width;
     island.userData.height = height;

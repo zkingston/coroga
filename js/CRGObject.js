@@ -100,6 +100,8 @@ THREE.Object3D.prototype.addFeatureGeometries = function( feature, geometries ) 
  */
 THREE.Object3D.prototype.bufferizeFeature = function( feature ) {
     var f = this.getFeature( feature );
+
+
     f.geometry = new THREE.BufferGeometry().fromGeometry( f.geometry );
 
     return this;
@@ -125,6 +127,8 @@ THREE.Object3D.prototype.updateFeatures = function() {
             if ( g.type !== 'BufferGeometry' ) {
                 g.verticesNeedUpdate = true;
                 g.computeFaceNormals();
+                g.computeVertexNormals();
+            } else {
                 g.computeVertexNormals();
             }
         }
@@ -411,5 +415,5 @@ THREE.Object3D.prototype.addToObjectProject = function ( object, x, y, vector ) 
         return this;
     }
 
-    throw "Projection error: No intersection";
+    throw "Projection error: No intersection at coordinate {0}, {1}.".format( x, y );
 }

@@ -161,8 +161,8 @@ function generateSpireRock(xPos, yPos) {
                                  xPos,
                                  yPos );
         rippleSand( 2, rock );
-    } catch (e) {
-        console.log( e);
+    } catch ( e ) {
+        console.log( e );
     }
 }
 
