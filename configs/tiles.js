@@ -37,5 +37,18 @@ var tiles = {
                 y : 4
             }
         ]
+    },
+    "mossyRockCluster" : {
+        size : {
+            x : 8,
+            y : 8
+        },
+        features : [
+            {
+                constructor : generateMossyRock,
+                x : 4,
+                y : 4
+            }
+        ]
     }
 }
