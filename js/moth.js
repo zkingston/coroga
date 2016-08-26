@@ -30,5 +30,8 @@ function mothFactory( lantern ) {
         moth.position.z = Math.sin( x ) * m.flightRadius;
     });
 
+    moth.addAudio( 'audio/wings.ogg', 0.3, true, 5 );
+    moth.playAudio();
+
     return moth;
 }

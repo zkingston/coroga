@@ -1,4 +1,4 @@
-var camera, controls, scene, renderer, clock, stats;
+var camera, controls, scene, renderer, clock, stats, listener, audioLoader;
 
 var environment = {};
 var tick = 0;
@@ -47,9 +47,30 @@ function createUI() {
         }
     }));
 
+    tools.addElement( new CRGDropdownButton( 'Stop Audio', function( btn ) {
+        if ( listener.getMasterVolume() > 0 ) {
+            listener.setMasterVolume( 0 );
+            btn.setTextNode( 'Play Audio' );
+        } else {
+            listener.setMasterVolume( 1 );
+            btn.setTextNode( 'Stop Audio' );
+        }
+    }));
+
+
     UIaddElement( tools );
 
     UIgenerate();
+}
+
+function videoKilledTheRadioStar() {
+    environment.sand.traverse( function ( obj ) {
+        var sound = obj.userData.sound;
+        if ( typeof sound !== 'undefined' ) {
+            sound.disconnect();
+            delete sound;
+        }
+    } );
 }
 
 function init() {
@@ -66,12 +87,17 @@ function init() {
     camera.position.set( -60, -60, 30 );
     camera.lookAt( 0, 0, 0 );
 
+    listener = new THREE.AudioListener();
+    camera.add( listener );
+
+    audioLoader = new THREE.AudioLoader();
+
     renderer = new THREE.WebGLRenderer( { alpha: true,
                                           antialias: false } );
  	renderer.setPixelRatio( window.devicePixelRatio );
 
     renderer.setSize( window.innerWidth, window.innerHeight );
-	renderer.sortObjects = false;
+    renderer.sortObjects = false;
 
     controls = new THREE.OrbitControls( camera );
     var angleOffset = Math.PI / 32;
@@ -132,10 +158,11 @@ function initializeLights() {
     environment.lamp = lamp;
 }
 
-
 function createBase( width, height, depth ) {
-
     scene = new THREE.Scene();
+
+    scene.addAudio( 'audio/ambiance.ogg', 0.1, true );
+    scene.playAudio();
 
     environment.width = width;
     environment.height = height;
@@ -158,8 +185,10 @@ function createBase( width, height, depth ) {
 }
 
 function createEnvironment( width, height, depth ) {
-    if ( typeof environment.sand !== 'undefined' )
+    if ( typeof environment.sand !== 'undefined' ) {
+        videoKilledTheRadioStar();
         scene.remove( environment.sand );
+    }
     if ( typeof environment.stars !== 'undefined' && !nightMode )
         scene.remove( environment.stars );
     createSand( width, height );

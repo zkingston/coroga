@@ -362,3 +362,76 @@ THREE.Object3D.prototype.setText = function ( text ) {
 
     return this;
 }
+
+/**
+ * Add an audio file to an object. This audio file can then be played for fun
+ * positional audio effects. Note that if you are running the rock garden
+ * locally you need to host the files through a server or you are going to get
+ * hit with CORS problems.
+ *
+ * @param { string }  source   URL for audio source file
+ * @param { number }  volume   Volume gain of source. Between 0 and 1 inclusive
+ * @param { boolean } loop     Does this audio source loop?
+ * @param { number }  distance Reference distance for reducing volume. If
+ *                             undefined assumes global ambient audio source
+ *
+ * @return { THREE.Object3D } This
+ */
+THREE.Object3D.prototype.addAudio = function ( source, volume, loop, distance ) {
+    var sound;
+    if ( typeof distance === 'undefined' ) {
+        sound = new THREE.Audio( listener );
+    } else {
+        sound = new THREE.PositionalAudio( listener );
+    }
+
+    try {
+        audioLoader.load(
+            source,
+            function( buffer ) {  // On Load
+                sound.setBuffer( buffer );
+                sound.setLoop( loop );
+                sound.setVolume( volume );
+
+                if ( typeof distance !== 'undefined' )
+                    sound.setRefDistance( distance );
+
+                if ( sound.playOnLoad )
+                    sound.play();
+            },
+            function ( xhr ) {   // In Progress
+                console.log( "Audio file {0} {1}% loaded.".format( source, xhr.loaded / xhr.total * 100 ) );
+            },
+            function ( xhr ) {   // On Error (I.E. CORS is borked)
+                alertWarning( "Failed to load audio file {0}. CORS is probably broken.".format( source ) );
+            } );
+
+        this.userData.sound = sound;
+        sound.addToObject( this );
+
+    } catch ( e ) {
+        alertWarning( e );
+    }
+}
+
+/**
+ * Plays attached audio source.
+ */
+THREE.Object3D.prototype.playAudio = function () {
+    var sound = this.userData.sound;
+    if ( typeof sound !== 'undefined' ) {
+        if ( sound.sourceType === 'empty' )
+            sound.playOnLoad = true;
+        else
+            this.userData.sound.play();
+    }
+}
+
+/**
+ * Pauses attached audio source.
+ */
+THREE.Object3D.prototype.pauseAudio = function () {
+    var sound = this.userData.sound;
+    if ( typeof sound !== 'undefined' )
+        this.userData.sound.pause();
+}
