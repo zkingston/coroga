@@ -68,6 +68,16 @@ function Grid(xlow, xhigh, ylow, yhigh, curve) {
         return true;
     }
 
+    this.markUnavailable = function(xIn, xSize, yIn, ySize){
+        // Turn the coords into the grid format and add the region.
+        var region = {
+            "xPos" : max(0,floor(xIn - xlow)),
+            "xSize" : xSize,
+            "yPos" : max(0,floor(yIn - ylow)),
+            "ySize" : ySize
+        };
+        this.tiles.push(region);
+    }
     // Lazily and greedily tries to find space.
     // TODO make XCOM quilt zones possibly. idk.
     // TODO make space finding algorithm not stupid.

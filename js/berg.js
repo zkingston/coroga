@@ -117,6 +117,22 @@ function islandAddBase( island ) {
     var topNoise = new Noise( 2 * width, 2 * height );
     var botNoise = new Noise( 2 * width, 2 * height );
 
+    var massCenter = function( x, y, percent){
+
+        // A&B are dimensions of island, ab are dimensions of % *center of mass
+        var A = width / 2;
+        var B = height / 2;
+
+        // #algebra; Turns out pB^2 = b^2
+        var a = Math.sqrt( percent * A * A );
+        var b = Math.sqrt( percent * B * B );
+        if ( ( (x * x) / (a * a) ) + ( (y * y) / (b * b) ) < 1 ){
+            return true
+        }else{
+            return false;
+        }
+    }
+
     // Create and scale island geometry to be ellipsoid
     var base = new THREE.IcosahedronGeometry( radius, cfg.detail );
     base.scale( width / radius, height / radius, 1 );
@@ -142,10 +158,15 @@ function islandAddBase( island ) {
                                                cfg.noise.top ) );
 
             // Keep track of max value
-            if ( vertex.z > max.z )
-                max = vertex;
+            if( massCenter( vertex.x, vertex.y, 0.99 ) == false ) {
+                // But only if it is sufficiently far from the center of mass.
+                if ( vertex.z > max.z) {
+                    max = vertex;
+                }
+            }
         }
     } );
+
 
     // Hulk squash
     max = max.clone();

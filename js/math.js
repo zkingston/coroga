@@ -9,6 +9,7 @@ pi = Math.PI;
 sqrt = Math.sqrt;
 pow = Math.pow;
 max = Math.max;
+floor = Math.floor;
 
 /**
 * Bernoulli distribution. Returns true with probability n

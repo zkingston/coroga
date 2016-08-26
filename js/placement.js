@@ -12,8 +12,8 @@ function PlacementEngine(env, scene){
 
     // TODO Fix this;
     // This is a hardcoded parametric ellipse bounds checker.
-    // Eventually this needs to be passed in. 
-    var c = function(x,y){
+    // Eventually this needs to be passed in.
+    var islandCurve = function(x,y){
         var dim = environment.island.userData;
         var xr = dim.width;
         var yr = dim.height;
@@ -48,8 +48,18 @@ function PlacementEngine(env, scene){
             (environment.width - 5)/2,
             -1*(environment.height - 5)/2,
             (environment.height - 5)/2,
-            c
+            islandCurve
         );
+
+        // If there are any no-go regions, mark them.
+
+        var ngrCenter = environment.island.userData.mountain.center;
+        var ngrRadius = environment.island.userData.mountain.radius;
+
+        grid.markUnavailable(ngrCenter.x - ngrRadius,
+                            ngrRadius * 2,
+                            ngrCenter.y - ngrRadius,
+                            ngrRadius * 2);
 
 
         for (var i = 0; i < this.numTiles; i++){
