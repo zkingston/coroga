@@ -391,8 +391,8 @@ Noise.prototype.turbulence = function ( x, y, size ) {
 /**
  * Generates a geometry of extruded faces. Extruded faces are chosen based on
  * the dot product of the face normal with a reference vector, in this case the
- * unit Z vector. Thresholds can be set on the dot product value as well as the
- * Z value of the vertices of the face.
+ * unit Z vector by default. Thresholds can be set on the dot product value as
+ * well as the Z value of the vertices of the face.
  *
  * @param { THREE.Geometry } geometry Geometry to extrude faces from
  * @param { number }         dMin     Dot product value minimum threshold
@@ -400,10 +400,11 @@ Noise.prototype.turbulence = function ( x, y, size ) {
  * @param { number }         zMin     Z value minimum threshold
  * @param { number }         zMax     Z value maximum threshold
  * @param { number }         offset   Offset from face to extrude
+ * @param { THREE.Vector3 }  angle    Reference angle.
  *
  * @return { THREE.Geometry } Geometry with extruded faces
  */
-function extrudeFaces( geometry, dMin, dMax, zMin, zMax, offset ) {
+function extrudeFaces( geometry, dMin, dMax, zMin, zMax, offset, angle ) {
 
     geometry.computeFaceNormals();
 
@@ -413,7 +414,9 @@ function extrudeFaces( geometry, dMin, dMax, zMin, zMax, offset ) {
     for ( var i = 0; i < geometry.vertices.length; ++i )
         extrude.vertices[ i ] = geometry.vertices[ i ].clone();
 
-    var mossAngle = new THREE.Vector3( 0, 0, 1 );
+    var mossAngle = angle;
+    if ( typeof angle === 'undefined' )
+        mossAngle = new THREE.Vector3( 0, 0, 1 );
 
     for ( var i = 0; i < geometry.faces.length; i++ ) {
         var face = geometry.faces[i];

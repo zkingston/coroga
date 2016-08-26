@@ -32,6 +32,7 @@ function RockClusterFactory( RockGeometry, width, height, depth ) {
                                           shading : THREE.FlatShading,
                                           shininess : 10,
                                           refractionRatio : 0.1 } )
+
     rocks.generateFeatures();
     return rocks;
 }
@@ -107,49 +108,7 @@ function SpireRockGeometry( width, height, depth ) {
 
 }
 
-// function MossDecorator( rock, threshold ) {
-    
-
-//     var mossyRock = new THREE.Group();
-//     mossyRock.add( rock );
-
-//     var mossGeo = rock.geometry.clone();
-//     mossGeo.computeFaceNormals();
-
-//     var mossAngle = new THREE.Vector3( 0, 1, 1 );
-
-//     for ( var i = 0; i < mossGeo.faces.length; i++ ) {
-//         var face = mossGeo.faces[i];
-
-//         if ( face.normal.dot( mossAngle ) < threshold ) {
-//             console.log (face.normal.dot( mossAngle ) );
-//             var va = mossGeo.vertices[face.a];
-//             var vb = mossGeo.vertices[face.b];
-//             var vc = mossGeo.vertices[face.c];
-
-//             va.z -= 0.1;
-//             vb.z -= 0.1;
-//             vc.z -= 0.1;
-//         }
-//     }
-
-//     var mossMat = new THREE.MeshPhongMaterial( { color : 0x77d97e,
-//                                                  shading : THREE.FlatShading,
-//                                                  shininess : 30,
-//                                                  refractionRatio : 0.0 } );
-
-//     var moss = new THREE.Mesh( mossGeo, mossMat );
-//     moss.position.x = rock.position.x;
-//     moss.position.y = rock.position.y;
-//     moss.position.z = rock.position.z;
-//     mossyRock.add( moss );
-
-//     return mossyRock;
-
-// }
-
-
-function generateSpireRock(xPos, yPos) {
+function generateSpireRock( xPos, yPos ) {
     var x = Math.floor( rand() * 6 + 3 );
     var y = Math.floor( rand() * 6 + 3 );
     var z = Math.floor( rand() * 6 + 2 );
@@ -166,24 +125,33 @@ function generateSpireRock(xPos, yPos) {
     }
 }
 
-//
-// function MossySpireRockGeometry(width, height, depth){
-//     return MossDecorator(SpireRockGeometry(width, height, depth));
-// }
+function generateMossyRock( xPos, yPos ) {
+    var x = Math.floor( rand() * 6 + 3 );
+    var y = Math.floor( rand() * 6 + 3 );
+    var z = Math.floor( rand() * 6 + 2 );
 
-// function generateMossySpireRock(xPos, yPos) {
-//     var width = environment.width;
-//     var height = environment.height;
-//
-//     var x = Math.floor( rand() * 6 + 3 );
-//     var y = Math.floor( rand() * 6 + 3 );
-//     var z = Math.floor( rand() * 6 + 2 );
-//
-//     var rock = RockClusterFactory( SpireRockGeometry, x, y, z );
-//     rock.addToObject( environment.sand,
-//                       xPos,
-//                       yPos,
-//                       z / 2 - 0.5);
-//
-//     rippleSand( 2, rock );
-// }
+    var rock = RockClusterFactory( SpireRockGeometry, x, y, z );
+
+    var rockGeo = rock.getFeature( 'rocks' ).geometry;
+    rock.addFeatureGeometry( 'moss',
+                             extrudeFaces( rockGeo, 0.8, 1,
+                                           z / 4, z, 0.01 ) );
+    rock.addFeatureGeometry( 'moss',
+                             extrudeFaces( rockGeo, 0.5, 1,
+                                           z / 4, z, 0.01, new THREE.Vector3(0, 1, 0 ) ) );
+
+    rock.addFeatureMaterialP( 'moss', { color : 0x73f773,
+                                        shading : THREE.FlatShading,
+                                        shininess : 0,
+                                        refractionRatio : 0.1 } )
+    rock.generateFeatures();
+
+    try {
+        rock.addToObjectProject( environment.island,
+                                 xPos,
+                                 yPos );
+        rippleSand( 2, rock );
+    } catch ( e ) {
+        console.log( e );
+    }
+}
