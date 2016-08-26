@@ -15,13 +15,13 @@
 * @param {number} yhigh The upperbound of the garden's bounding box y
 **/
 
-function Grid(xlow, xhigh, ylow, yhigh) {
+function Grid(xlow, xhigh, ylow, yhigh, curve) {
 
     this.xlow = xlow;
     this.xhigh = xhigh;
     this.ylow =  ylow;
     this.yhigh = yhigh;
-
+    this.curve = curve;
     this.tiles = [];
 
 
@@ -83,7 +83,7 @@ function Grid(xlow, xhigh, ylow, yhigh) {
         // Try 10 times to find a good spot for it.
         // Obviously there is a complete and exact solution
         // But this should prove concept.
-        for(var tries = 0; tries < 10; tries++){
+        for(var tries = 0; tries < 20; tries++){
 
             var candidate = {
                 "xPos" : uniform(0, xhigh - xlow - xSizeIn),
@@ -91,6 +91,18 @@ function Grid(xlow, xhigh, ylow, yhigh) {
                 "yPos" : uniform(0, yhigh - ylow - ySizeIn),
                 "ySize" : ySizeIn
             };
+
+            // Check if this is even on solid land
+            // See if all verteces are in the map.
+            var c = candidate;
+            if(
+                (curve(c.xPos,c.yPos) &&
+                curve(c.xPos + c.xSize, c.yPos) &&
+                curve(c.xPos, c.yPos + c.ySize) &&
+                curve(c.xPos + c.xSize, c.yPos + c.ySize)) == false
+            ){
+                continue;
+            }
 
             // If there is nothing allocated yet, there is no conflict
             if (this.tiles.length == 0){
@@ -108,16 +120,4 @@ function Grid(xlow, xhigh, ylow, yhigh) {
         // Tried and failed.
         return null;
     }
-
-
-
-
-
-
-
-
-
-
-
-
 }

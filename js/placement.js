@@ -1,45 +1,3 @@
-/**
-* Produces a colored ball at target location. Used for debugging.
-* @param { number } x The x coordinate of the ball
-* @param { number } y The y coordinate of the ball
-* @param {string} colorIn
-* @return { THREE.Mesh } ball The ball object to be added to the scene
-**/
-function ball(x,y,colorIn) {
-    var properties = { transparent : true,
-      opacity : 1.0,
-      color : colorIn,
-      side : THREE.DoubleSide,
-      shading : THREE.FlatShading,
-      shininess : 0,
-      emissive : colorIn
-    }
-    var geometry = new THREE.SphereGeometry(1);
-    var ball = new THREE.Object3D();
-    ball.addFeatureGeometry( 'ball', geometry );
-    ball.addFeatureMaterialP('ball', properties);
-
-    ball.position.x = x;
-    ball.position.y = y;
-    ball.position.z = 2;
-
-    ball.generateFeatures();
-
-    return ball;
-}
-
-/**
-* Produces a colored ball at target location. Used for debugging.
-* @param { number } x The x coordinate of the ball
-* @param { number } y The y coordinate of the ball
-* @return { THREE.Mesh } ball The ball object to be added to the scene
-**/
-function redBall(x,y){return ball(x,y,0xdc143c)}
-function greenBall(x,y){return ball(x,y,0x00ff00)}
-function blackBall(x,y){return ball(x,y, 0x000000)}
-
-
-
 
 /**
 * Placement engine using tile system to place features in a scene.
@@ -51,6 +9,21 @@ function blackBall(x,y){return ball(x,y, 0x000000)}
 *        placer.runBiomeBasedEngine();
 **/
 function PlacementEngine(env, scene){
+
+    // TODO Fix this;
+    // This is a hardcoded parametric ellipse bounds checker.
+    // Eventually this needs to be passed in. 
+    var c = function(x,y){
+        var dim = environment.island.userData;
+        var xr = dim.width;
+        var yr = dim.height;
+
+        if (((x*x)/(xr*xr))+((y*y)/(yr*yr))<1){
+            return true
+        }else{
+            return false;
+        }
+    }
 
     // Member Variables
     var biomeConfig = createBiomeMatrix();
@@ -74,7 +47,8 @@ function PlacementEngine(env, scene){
             -1*(environment.width - 5)/2,
             (environment.width - 5)/2,
             -1*(environment.height - 5)/2,
-            (environment.height - 5)/2
+            (environment.height - 5)/2,
+            c
         );
 
 

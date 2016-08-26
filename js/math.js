@@ -7,7 +7,8 @@ random = Math.random;
 ln = Math.log;
 pi = Math.PI;
 sqrt = Math.sqrt;
-
+pow = Math.pow;
+max = Math.max;
 
 /**
 * Bernoulli distribution. Returns true with probability n
