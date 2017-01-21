@@ -1,8 +1,28 @@
 
+// Because the Seventh circle of hell is a frozen lake of Raytracer Errors.
+function debugBall(x,y,z){
+    var geometry = new THREE.SphereGeometry( 1, 4, 4 );
+    var material = new THREE.MeshBasicMaterial( {color: 0xff0000} );
+    geometry.translate(x,y,z)
+    var sphere = new THREE.Mesh( geometry, material );
+    scene.add( sphere );
+}
+function debugFeature(x,y,z,i){
+    var ball = new THREE.Object3D();
+    var geometry = new THREE.SphereGeometry( 1, 4, 4 );
+    var material = new THREE.MeshBasicMaterial( {color: 0xffffff} );
+    ball.addFeatureGeometries("ball", geometry);
+    ball.addFeatureMaterialP("ball", material);
+    ball.generateFeatures();
+    console.log(ball);
+    ball.addToObject( i, x, y,z)
+}
+
 /**
 * Placement engine using tile system to place features in a scene.
 * Requires environment and scene
 *
+* WARNING. MUST HAVE USERDATA CURVES INITIALIZED.
 * @param {object} env Environment object containing a description of the scene
 *        use:
 *        placer = new PlacementEngine(environment, scene);
@@ -10,24 +30,16 @@
 **/
 function PlacementEngine(env, scene){
 
-    // TODO Fix this;
-    // This is a hardcoded parametric ellipse bounds checker.
-    // Eventually this needs to be passed in.
-    var islandCurve = function(x,y){
-        var dim = environment.island.userData;
-        var xr = dim.width;
-        var yr = dim.height;
 
-        if (((x*x)/(xr*xr))+((y*y)/(yr*yr))<1){
-            return true
-        }else{
-            return false;
-        }
-    }
+
+
+
+    var islandCurve = environment.island.userData.curves.island.islandCurve;
+
 
     // Member Variables
     var biomeConfig = createBiomeMatrix();
-    this.numTiles = 4;
+    this.numTiles = 10;
     this.biomeProbabilities = biomeConfig.biomeProbabilities;
     this.probabilityMatrix = biomeConfig.matrix;
     this.tileMap = biomeConfig.tileMap;
@@ -44,22 +56,39 @@ function PlacementEngine(env, scene){
         var tileProbabilities = this.probabilityMatrix[bid];
         // Make the allocation grid;
         var grid = new Grid(
-            -1*(environment.width - 5)/2,
-            (environment.width - 5)/2,
-            -1*(environment.height - 5)/2,
-            (environment.height - 5)/2,
-            islandCurve
+            -1*(environment.width - 5),
+            (environment.width - 5),
+            -1*(environment.height - 5),
+            (environment.height - 5),
+            environment.island.userData.curves
         );
-
+        console.log(environment.width);
+        console.log(environment.height);
         // If there are any no-go regions, mark them.
+        // Edit: There arent anymore.
 
-        var ngrCenter = environment.island.userData.mountain.center;
-        var ngrRadius = environment.island.userData.mountain.radius;
 
-        grid.markUnavailable(ngrCenter.x - ngrRadius,
-                            ngrRadius * 2,
-                            ngrCenter.y - ngrRadius,
-                            ngrRadius * 2);
+
+        // for (var q = 0; q<100; q++){
+        //     var xa = uniform(environment.width*-1, environment.width);
+        //     var ya = uniform(environment.height*-1,environment.height);
+        //     if (environment.island.userData.curves.sand(xa,ya)){
+        //         debugBall(xa,ya,10);
+        //
+        //     }
+        //
+        // }
+
+        // debugBall(0,0,10);
+        //
+
+        var e = environment;
+        // debugBall(e.width*-1,e.height,10);
+        // debugBall(e.width,e.height*-1,10);
+        // debugBall(e.width*-1,e.height*-1,10);
+        // debugBall(e.width,e.height,10);
+        //
+        // debugBall(0,0,10);
 
 
         for (var i = 0; i < this.numTiles; i++){
@@ -70,8 +99,8 @@ function PlacementEngine(env, scene){
             // Look up the tile's configs
             var tile = tiles[tileName];
             // Find the location of bottom left corner of the tile
-            var position = grid.allocate(tile.size.x, tile.size.y);
-
+            var position = grid.allocate(tile.size.x, tile.size.y, tile.terrain);
+;
 
             // If we were able to allocate it.
             if(!(position === null)){
@@ -80,9 +109,11 @@ function PlacementEngine(env, scene){
                     var feature = tile.features[f];
                     // Put the feature down.
                     feature.constructor(
-                        position.x + feature.x,
-                        position.y + feature.y
+                        (position.x + feature.x),
+                        (position.y + feature.y)
                     );
+                    // debugBall((position.x + feature.x),
+                    // (position.y + feature.y),10)
                 }
             }
         }

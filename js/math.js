@@ -10,7 +10,12 @@ sqrt = Math.sqrt;
 pow = Math.pow;
 max = Math.max;
 floor = Math.floor;
+arctan = Math.atan;
 
+
+
+
+function pow2(x){return Math.pow(x,2);}
 /**
 * Bernoulli distribution. Returns true with probability n
 * @param {number} n The probability true is returned

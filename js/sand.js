@@ -32,6 +32,7 @@ function createSand( width, height ) {
 }
 
 function rippleSand( diameter, object ) {
+    return
     var bound = object.boundingCircle();
     var center = object.localToWorld( bound.center );
 
@@ -46,4 +47,3 @@ function rippleSand( diameter, object ) {
         }
     } );
 }
-

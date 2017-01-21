@@ -360,7 +360,7 @@ function branchGenerator(origin, vector, radius, numSegments){
 **/
 function treeFactory(x,y){
     // Where does the tree start
-    var origin = new THREE.Vector3(x,y,-2);
+    var origin = new THREE.Vector3(0,0,-2);
 
     // Trees grow upwards.
     var vector = new THREE.Vector3(0,0,1);
@@ -390,7 +390,9 @@ function treeFactory(x,y){
 
     // Starts the cascade.
     // Create a mesh for the branch and add it to list of branches.
-    var branch = branchGenerator(origin, vector,4, 4);
+    var startRadius = 4;
+
+    var branch = branchGenerator(origin, vector, startRadius, 4);
     buffer.push(branch);
     allBranches.push(branch["geometry"]);
     // var branchMesh = new THREE.Mesh( branch["geometry"], treeMat)
@@ -435,7 +437,7 @@ function treeFactory(x,y){
     var tree = new THREE.Object3D();
     tree.addFeatureGeometries("branches", allBranches);
     tree.addFeatureMaterialP("branches", treeMat);
-
+    tree.startRadius = startRadius;
     var blossoms = new THREE.Object3D();
 
     //tree.add(new THREE.Mesh( treeMeshGeo, treeMat));
@@ -463,11 +465,11 @@ function treeFactory(x,y){
 }
 
 function generateCherryTree(x,y){
-    var tree = treeFactory(0, 0);
-    try {
-        tree.addToObjectProject( environment.island, x, y );
-    } catch ( e ) {
-        console.log( e );
+    var tree = treeFactory(x,y);
+    tree.addToObject( environment.island, x, y , -1 * (tree.startRadius * 2) * sin(40 / (Math.PI * 2)) )
+    if ( rand() < 0.5 ) {
+        // tree.addAudio( 'audio/cicada.ogg', 0.5, true, 20 );
+        // tree.playAudio();
     }
 
     return tree;

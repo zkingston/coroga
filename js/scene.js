@@ -1,4 +1,4 @@
-var camera, controls, scene, renderer, clock, stats;
+var camera, controls, scene, renderer, clock, stats, listener, audioLoader;
 var garbage = [];
 var lock = false;
 
@@ -49,9 +49,30 @@ function createUI() {
         }
     }));
 
+    tools.addElement( new CRGDropdownButton( 'Stop Audio', function( btn ) {
+        if ( listener.getMasterVolume() > 0 ) {
+            listener.setMasterVolume( 0 );
+            btn.setTextNode( 'Play Audio' );
+        } else {
+            listener.setMasterVolume( 1 );
+            btn.setTextNode( 'Stop Audio' );
+        }
+    }));
+
+
     UIaddElement( tools );
 
     UIgenerate();
+}
+
+function videoKilledTheRadioStar() {
+    environment.sand.traverse( function ( obj ) {
+        var sound = obj.userData.sound;
+        if ( typeof sound !== 'undefined' ) {
+            sound.disconnect();
+            delete sound;
+        }
+    } );
 }
 
 function init() {
@@ -68,12 +89,17 @@ function init() {
     camera.position.set( 0, -200, 50 );
     camera.lookAt( 0, 0, 0 );
 
+    listener = new THREE.AudioListener();
+    camera.add( listener );
+
+    audioLoader = new THREE.AudioLoader();
+
     renderer = new THREE.WebGLRenderer( { alpha: true,
                                           antialias: false } );
  	renderer.setPixelRatio( window.devicePixelRatio );
 
     renderer.setSize( window.innerWidth, window.innerHeight );
-	renderer.sortObjects = false;
+    renderer.sortObjects = false;
 
     controls = new THREE.OrbitControls( camera );
     var angleOffset = Math.PI / 32;
@@ -138,13 +164,19 @@ function initializeLights() {
     environment.lamp = lamp;
 }
 
-
 function createBase( width, height, depth ) {
-
     scene = new THREE.Scene();
     initializeLights();
 
-    // createWalls( width, height, 15 );
+
+    // scene.addAudio( 'audio/ambiance.ogg', 0.1, true );
+    // scene.playAudio();
+
+    environment.width = width;
+    environment.height = height;
+    environment.depth = depth;
+    environment.radius = Math.sqrt( height * height / 4 + width * width / 4 );
+
 
     // var lanterns = [ { x : width / 2 - 2, y : -height / 2 + 2 },
     //                  { x : -width / 2 + 2, y : height / 2 - 2 } ];
@@ -157,10 +189,28 @@ function createBase( width, height, depth ) {
     // }
 }
 
-function createEnvironment() {
+// function createEnvironment() {
+//     if ( lock )
+//         return;
+
+//     if ( typeof environment.island !== 'undefined' )
+//         islandSwitch();
+//     else {
+//         var cfg = features.island;
+//         var islandWidth = discreteUniform( cfg.width.min, cfg.width.max );
+//         var islandHeight = discreteUniform( cfg.height.min, cfg.height.max );
+//         var island = islandCreate( islandWidth, islandHeight );
+
+//         island.addToObject( scene );
+//         environment.island = island;
+//         environment.width =  islandWidth * 2;
+//         environment.height = islandHeight * 2;
+//     }
+// }
+
+function createEnvironment( width, height, depth ) {
     if ( lock )
         return;
-
     if ( typeof environment.island !== 'undefined' )
         islandSwitch();
     else {
@@ -168,13 +218,19 @@ function createEnvironment() {
         var islandWidth = discreteUniform( cfg.width.min, cfg.width.max );
         var islandHeight = discreteUniform( cfg.height.min, cfg.height.max );
         var island = islandCreate( islandWidth, islandHeight );
+        var terraformer = new TerraformerEngine(environment);
+        island = terraformer.terraform(island);
 
         island.addToObject( scene );
         environment.island = island;
-        environment.width =  islandWidth * 2;
-        environment.height = islandHeight * 2;
+        environment.width =  islandWidth;
+        environment.height = islandHeight;
     }
 
+    if ( typeof environment.sand !== 'undefined' ) {
+        videoKilledTheRadioStar();
+        scene.remove( environment.sand );
+    }
     if ( typeof environment.stars !== 'undefined' && !nightMode )
         scene.remove( environment.stars );
 
@@ -199,4 +255,7 @@ function createEnvironment() {
 
     var placer = new PlacementEngine(environment, scene);
     placer.runRandomTileEngine();
+
+
+    console.log(island)
 }

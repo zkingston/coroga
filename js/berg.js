@@ -15,7 +15,7 @@ function islandCreate ( width, height ) {
     island.userData.height = height;
 
     islandAddBase( island );
-    islandAddSand( island );
+    //islandAddSand( island );
 
     // Bowl out the island's shape
     island.traverseGeometry( function ( vertex ) {
@@ -89,6 +89,7 @@ function islandSwitch() {
 }
 
 function rippleSand( diameter, object ) {
+    return
     var island = environment.island;
     var cfg = features.island.sand;
 
@@ -152,18 +153,22 @@ function islandAddBase( island ) {
 
         // Use top noies generator, we don't care if it's noisier as it will be squashed later
         } else {
-            vertex.z *= cfg.noise.spike *
-                Math.exp( topNoise.turbulence( vertex.x + width,
-                                               vertex.y + height,
-                                               cfg.noise.top ) );
+            //Proposed Ush Change
+            vertex.z = continuousUniform(0.1,1);
 
-            // Keep track of max value
-            if( massCenter( vertex.x, vertex.y, 0.99 ) == false ) {
-                // But only if it is sufficiently far from the center of mass.
-                if ( vertex.z > max.z) {
-                    max = vertex;
-                }
-            }
+            //Original Zak Code
+            // vertex.z *= cfg.noise.spike *
+            //     Math.exp( topNoise.turbulence( vertex.x + width,
+            //                                    vertex.y + height,
+            //                                    cfg.noise.top ) );
+
+            // // Keep track of max value
+            // if( massCenter( vertex.x, vertex.y, 0.99 ) == false ) {
+            //     // But only if it is sufficiently far from the center of mass.
+            //     if ( vertex.z > max.z) {
+            //         max = vertex;
+            //     }
+            // }
         }
     } );
 

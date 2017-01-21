@@ -97,7 +97,7 @@ var features = {
                       yWobble   : { scale : 0.005, // y rotation wobble
                                     mult  : 0.03 } },
 
-        bowl   : 0.003,      // How much does the island bend
+        bowl   : 0.000,      // How much does the island bend
         width  : { min : 30, // Width range
                    max : 70 },
         height : { min : 30, // Height range

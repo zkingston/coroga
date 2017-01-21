@@ -15,15 +15,16 @@
 * @param {number} yhigh The upperbound of the garden's bounding box y
 **/
 
-function Grid(xlow, xhigh, ylow, yhigh, curve) {
+function Grid(xlow, xhigh, ylow, yhigh, curves) {
 
     this.xlow = xlow;
     this.xhigh = xhigh;
     this.ylow =  ylow;
     this.yhigh = yhigh;
-    this.curve = curve;
+    this.curves = curves;
     this.tiles = [];
 
+    console.log("Dimensions", this.xlow, this.xhigh, this.ylow, this.yhigh)
 
     if(xhigh < xlow || yhigh < ylow){
         console.log("Error in environment dimensions. Grid.js");
@@ -37,9 +38,9 @@ function Grid(xlow, xhigh, ylow, yhigh, curve) {
     **/
     this.mapping = function (x,y) {
         return {
-            "x" : x + xlow,
-            "y" : y + ylow
-        }
+            "x" : x -xhigh,
+            "y" : y -yhigh
+                }
     }
 
     // Backup Plan
@@ -58,10 +59,10 @@ function Grid(xlow, xhigh, ylow, yhigh, curve) {
     **/
 
     this.checkIntersection = function(t1,t2){
-        if( ((t1.yPos + t1.ySize) <= t2.yPos) ||
-            (t1.yPos >= (t2.yPos + t2.ySize)) ||
-            ((t1.xPos + t1.xSize) <= t2.xPos) ||
-            (t1.xPos >= (t2.xPos + t2.xSize)) )
+        if( ((t1.y2) <= t2.y1) ||
+            (t1.y1 >= (t2.y2)) ||
+            ((t1.x2) <= t2.x1) ||
+            (t1.x1 >= (t2.x2)) )
         {
             return false;
         }
@@ -89,43 +90,98 @@ function Grid(xlow, xhigh, ylow, yhigh, curve) {
     * @param {number} ySizeIn The length of the region to be allocated
     * @return {object} The position of the bottom left corner of the region
     **/
-    this.allocate = function(xSizeIn, ySizeIn){
+    this.allocate = function(xSizeIn, ySizeIn, terrain){
         // Try 10 times to find a good spot for it.
         // Obviously there is a complete and exact solution
         // But this should prove concept.
+        //var curve = this.curve;
+
+        // TODO: Efficiently generate candidates
+
+    //     a1 = {"x1" : 3,"x2":5, "y1":0, "y2":4}
+    //     a2 = {"x1" : 2,"x2":4, "y1":0, "y2":4}
+    //     console.log("CHECK THIS SHIT")
+    //     console.log(
+    //     this.checkIntersection(a1,a2)
+    // );
+
+
+
+        function candidate()  {
+            // this.x1 = uniform(0, xhigh - xlow - xSizeIn);
+            // this.y1 = uniform(0, yhigh - ylow - ySizeIn);
+            this.x1 = uniform(0, xhigh-xlow);
+            this.y1 = uniform(0, yhigh-ylow );
+            this.x2 = this.x1 + xSizeIn;
+            this.y2 = this.y1 + ySizeIn;
+
+            return this;
+        };
+
+        var checkCurve = function (curve, c){
+            ca = {
+                x1 : c.x1 + xlow,
+                x2 : c.x2 + xlow,
+                y1 : c.y1 + ylow,
+                y2 : c.y2 + ylow,
+            };
+            return (curve(ca.x1,ca.y1) &&
+            curve(ca.x2, ca.y1) &&
+            curve(ca.x1, ca.y2) &&
+            curve(ca.x2, ca.y2));
+        }
+
+        // for(var test = 0; test<100; test++){
+        //     var c = new candidate();
+        //     if(checkCurve(this.curves.sand, c)){
+        //         debugBall(this.mapping(c.x1, c.y1).x,this.mapping(c.x1, c.y1).y,10);
+        //     }
+        // }
+
         for(var tries = 0; tries < 20; tries++){
 
-            var candidate = {
-                "xPos" : uniform(0, xhigh - xlow - xSizeIn),
-                "xSize" : xSizeIn,
-                "yPos" : uniform(0, yhigh - ylow - ySizeIn),
-                "ySize" : ySizeIn
-            };
-
+            var c = new candidate();
+            // debugBall(this.mapping(c.x1, c.y1).x,this.mapping(c.x1, c.y1).y,10);
             // Check if this is even on solid land
             // See if all verteces are in the map.
-            var c = candidate;
-            if(
-                (curve(c.xPos,c.yPos) &&
-                curve(c.xPos + c.xSize, c.yPos) &&
-                curve(c.xPos, c.yPos + c.ySize) &&
-                curve(c.xPos + c.xSize, c.yPos + c.ySize)) == false
-            ){
+
+            if(checkCurve(this.curves.island, c) == false){
                 continue;
             }
 
+            var valid = false;
+            for (var t = 0; t < terrain.length; t++){
+                curve =  curves[terrain[t]];
+                if(checkCurve(curve, c) == true){
+                    valid = true;
+                    break;
+                }
+            }
+            if (valid == false){continue;}
+
+            // TODO CHECK TERRAIN CONFLICTS
+
+            console.log(this.tiles.length)
             // If there is nothing allocated yet, there is no conflict
             if (this.tiles.length == 0){
-                return this.mapping(candidate.xPos,candidate.yPos);
+                console.log("a")
+                this.tiles.push(c);
+                return this.mapping(c.x1,c.y1);
             }
 
             // If there is stuff allocated, Find a free tile.
+
             for(var tile = 0; tile < this.tiles.length; tile++){
-                if(this.checkIntersection(candidate, this.tiles[tile]) == false){
-                    this.tiles.push(candidate);
-                    return this.mapping(candidate.xPos,candidate.yPos);
-                }
+                if(this.checkIntersection(c, this.tiles[tile]) == true){
+                    valid = false;
+                    break;
+                }   
             }
+            if (valid == true){
+                this.tiles.push(c);
+                return this.mapping(c.x1,c.y1);
+            }
+
         }
         // Tried and failed.
         return null;
