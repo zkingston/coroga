@@ -26,7 +26,7 @@ var rock_cfg = {
             },
     "arched" : {
                 "height" : {    min : 3,
-                                max : 0.5 },
+                                max : 5 },
                 "diameter" : {  min : 5,
                                 max : 6 }
             }

@@ -161,10 +161,10 @@ function Grid(xlow, xhigh, ylow, yhigh, curves) {
 
             // TODO CHECK TERRAIN CONFLICTS
 
-            console.log(this.tiles.length)
+
             // If there is nothing allocated yet, there is no conflict
             if (this.tiles.length == 0){
-                console.log("a")
+                
                 this.tiles.push(c);
                 return this.mapping(c.x1,c.y1);
             }
@@ -175,7 +175,7 @@ function Grid(xlow, xhigh, ylow, yhigh, curves) {
                 if(this.checkIntersection(c, this.tiles[tile]) == true){
                     valid = false;
                     break;
-                }   
+                }
             }
             if (valid == true){
                 this.tiles.push(c);

@@ -1,32 +1,32 @@
 var biomes = {
-    "riverLand": {
-        probability: 0,
+    "spring": {
+        probability: 0.25,
         tiles: {
-          "bambooBush": 0,
-          "rockClusterSmall": 0.2
+          "loneCherryTree": 0.4,
+          "rockClusterLarge": 0.6
         }
     },
-    "forest": {
-        probability: 0,
+    "summer": {
+        probability: 0.25,
         tiles: {
-          "loneTree": 0.25,
-          "rockClusterSmall": 0.75
+          "loneWillowTree": 0.4,
+          "rockClusterLarge": 0.6
         }
     },
-    "desert": {
-        probability: 0.99,
+    "fall": {
+        probability: 0.25,
         tiles: {
-          "loneTree": 0.25,
-          "rockClusterSmall": 0.25,
-          "rockClusterMedium": 0.25,
+          "loneCherryTree": 0.50,
+          "rockClusterSmall": 0.13,
+          "rockClusterMedium": 0.12,
           "rockClusterLarge": 0.25
         }
     },
-    "debug":{
-        probability: 0.01,
+    "winter":{
+        probability: 0.25,
         tiles: {
-            "loneTree": 0.99,
-            "bambooBush": 0.01
+            "loneDeadTree": 0.50,
+             "rockClusterLarge": 0.50
         }
     }
 }
