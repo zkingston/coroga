@@ -7,7 +7,7 @@
 // Terrain is a list of all viable terrain.
 
 var tiles = {
-    "loneTree" : {
+    "loneCherryTree" : {
         size : {
             x : 16,
             y : 16
@@ -15,6 +15,34 @@ var tiles = {
         features : [
             {
                 constructor : generateCherryTree,
+                x : 8,
+                y : 8
+            }
+        ],
+        terrain : ["grass"]
+    },
+    "loneWillowTree" : {
+        size : {
+            x : 16,
+            y : 16
+        },
+        features : [
+            {
+                constructor : generateWillowTree,
+                x : 8,
+                y : 8
+            }
+        ],
+        terrain : ["grass"]
+    },
+    "loneDeadTree" : {
+        size : {
+            x : 16,
+            y : 16
+        },
+        features : [
+            {
+                constructor : generateDeadTree,
                 x : 8,
                 y : 8
             }

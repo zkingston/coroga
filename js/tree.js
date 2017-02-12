@@ -358,7 +358,7 @@ function branchGenerator(origin, vector, radius, numSegments){
 * @param { number} y The y coordinate the tree should spawn
 * @return { THREE.Group } The tree object
 **/
-function treeFactory(x,y){
+function treeFactory(x,y,colors){
     // Where does the tree start
     var origin = new THREE.Vector3(0,0,-2);
 
@@ -456,21 +456,32 @@ function treeFactory(x,y){
         var locus = new THREE.Vector3().addVectors(pushup,cur.bVec[cur.bVec.length - 2])
         locus.add(cur.offset);
 
-        tree.add( cascadeGenerator(locus, 0xff69b4));
-        tree.add( cascadeGenerator(locus, 0xcd6889));
-        tree.add( cascadeGenerator(locus, 0xcd3278));
+        for(var c = 0; c<colors.length; c++){
+            tree.add( cascadeGenerator(locus, colors[c]));
+        }
+        // tree.add( cascadeGenerator(locus, 0xff69b4));
+        // tree.add( cascadeGenerator(locus, 0xcd6889));
+        // tree.add( cascadeGenerator(locus, 0xcd3278));
     }
     tree.generateFeatures();
     return tree;
 }
 
 function generateCherryTree(x,y){
-    var tree = treeFactory(x,y);
+    var colors = [0xff69b4,0xcd6889,0xcd3278];
+    var tree = treeFactory(x,y,colors);
     tree.addToObject( environment.island, x, y , -1 * (tree.startRadius * 2) * sin(40 / (Math.PI * 2)) )
-    if ( rand() < 0.5 ) {
-        // tree.addAudio( 'audio/cicada.ogg', 0.5, true, 20 );
-        // tree.playAudio();
-    }
-
+    return tree;
+}
+function generateWillowTree(x,y){
+    var colors = [0x518d07,0x105204,0x748807];
+    var tree = treeFactory(x,y,colors);
+    tree.addToObject( environment.island, x, y , -1 * (tree.startRadius * 2) * sin(40 / (Math.PI * 2)) )
+    return tree;
+}
+function generateDeadTree(x,y){
+    var colors = [];
+    var tree = treeFactory(x,y,colors);
+    tree.addToObject( environment.island, x, y , -1 * (tree.startRadius * 2) * sin(40 / (Math.PI * 2)) )
     return tree;
 }
