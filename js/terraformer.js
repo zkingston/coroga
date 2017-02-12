@@ -14,35 +14,67 @@ function TerraformerEngine(input)
 
         // Mathematical Representation used for transferability and bounds
 
-        var border = 10;
+        var border = 8;
+
+
+        // ONLY WORKS WITHIN X< 10000;
+        // It's the most efficent polygon bounding test, I swear.
 
         var sandInequality = (function(){
-            var a = (width - border);
-            var b = (height - border);
-            var t = continuousUniform(0, 2 * pi)
-            var h = width * cos(t);
-            var k = height * sin(t);
-            var radius = (sqrt(pow2(h) + pow2(k)));
+          var a = (width - border);
+          var b = (height - border);
+          // selects consecutive points on curve. turns them into line segments.
+          var numEdges = 15;
+          var arc = pi * 2 / numEdges;
+          var orderedPoints = [];
+          var lineSegs = [];
+          //generate ordered points of perimeter
+          for (var e = 0; e < numEdges; e++){
+                var t = e * arc;
+                var p =  new THREE.Vector3(a * cos(t), b * sin(t), 0);
+                orderedPoints.push(p);
+          }
+          //generate line segments from points
+          for (var e = 0; e < orderedPoints.length; e++){
+              var ip = e;
+              var iq = (e+1)% orderedPoints.length;
 
-
-
-            return function (x, y){
-                if( //inclusion
-                    (pow2(x)/pow2(a)+ pow2(y)/(pow2(b)) < 1) &&
-                    //exclusion
-                    (pow2(x-h)/pow2(radius)+ pow2(y-k)/(pow2(radius)) > 1)
-                ){
-                    return true;
+              lineSegs.push(
+                {
+                    "p" : orderedPoints[ip],
+                    "q" : orderedPoints[iq]
                 }
-                return false;
-            };
+              );
+          }
+
+          // Membership function.
+          // If a ray originating from the test point, extending to infinity
+          // collides with the linesegments an odd number of times, it lies
+          // within the polygon. infinity is approximately equal to 10000
+
+          return function (x, y){
+              // Check all line segs
+              var counter = 0;
+
+              for(var i = 0; i < lineSegs.length; i++){
+                  var p1 = lineSegs[i].p;
+                  var p2 = lineSegs[i].q;
+                  var q1 = new THREE.Vector3(x,y,0);
+                  var q2 = new THREE.Vector3(x,10000,0);
+
+                  if (intersects(p1,p2,q1,q2)){counter +=1;}
+              }
+              return((counter % 2) == 1);
+          };
+
         })();
+
 
 
 
         // TODO Fix this;
         // This is a hardcoded parametric ellipse bounds checker.
-        // Eventually this needs to be passed in.
+        // Do the same line segment bounds checker as above.
 
         var islandCurve = function(x,y){
 
@@ -74,15 +106,17 @@ function TerraformerEngine(input)
 
 
 
+        // Make the sand
+
         var rakeModifier = 6;
         var rakeHeight = 0.125;
         var sandRandom = 0.08;
         var sideRakeBuffer = 5;
 
+
         var sand = new THREE.Object3D();
         var sandGeometry = new THREE.PlaneGeometry( width*2, height*2,
-                                            width*2, height*2 );
-
+                                            width*4, height*4 );
 
         //Cut out all face not inside the bounding ellipse
         sandGeometry.cut( function ( face ) {
@@ -90,10 +124,55 @@ function TerraformerEngine(input)
             return sandInequality (centroid.x/3, centroid.y/3);
         } );
 
-        // Rake the sand
+        // CYLINDRICAL COORDINATES BITCHES
+        // Randomly generate sand rake spiral centers.
+        var spiralCenters = [];
+        while (spiralCenters.length <6){
+            var x = continuousUniform(-1*width, width);
+            var y = continuousUniform(-1*height, height);
+            if (sandInequality(x,y)){
+                spiralCenters.push(new THREE.Vector3(x,y,0));
+            }
+        }
+        var d2 =  function(a,b){
+          return pow2(a.x-b.x) + pow2(a.y-b.y)
+        }
         sandGeometry.vertices.map( function ( vertex ) {
-            vertex.z = Math.sin( vertex.x * cfg.modifier ) * cfg.height + 2;
+
+
+            // find closest spiral center
+            var o = spiralCenters.reduce(function(prev,cur){
+                if (prev === null){return cur;}
+                return (d2(prev,vertex)<d2(cur,vertex)) ? prev : cur;
+            }, null)
+
+            // rake your vertex accordingly.
+            vertex.z = 1;
+
+            var dx = vertex.x - o.x;
+            var dy = vertex.y - o.y
+            var r = sqrt ( pow2(dx) + pow2(dy))
+            var theta = atan2(dy,dx);
+
+            var s = 1 // Sand base height
+            var a = .5; // amplitude of rake;
+            var k = 1/3; // number of spiral arms divided bydensity (3 for triskele)
+            var f = 3; // sprial density.
+            //For the love of god, please use integers, unless you set the sprical
+            // arm number to a multiple of the reciprocal of the density.
+
+            // Basically if the trig function below has f*k*theta not
+            // be a multiple of theta, you will get join artifacts at theta = 0;
+            // That multiple is how many arms you will have.
+
+            // Please math responsibly
+
+            // every radial cross section represents a sin wave. the wave is phase shifted
+            // by a linear function proportional to theta. resulting in a spiral.
+
+            vertex.z = s + a* sin(f*(r + k*theta));
         } );
+
 
         sand.addFeatureGeometry( 'sand', sandGeometry ) ;
         sand.addFeatureMaterialP( 'sand', { color : 0xfcfbdf,
@@ -116,7 +195,7 @@ function TerraformerEngine(input)
         return island;
     };
 
-    this.rakeSand = function (sand)
+    this.rakeSand = function ()
     {
 
     }

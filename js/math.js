@@ -11,11 +11,22 @@ pow = Math.pow;
 max = Math.max;
 floor = Math.floor;
 arctan = Math.atan;
+atan2 = Math.atan2;
 
 
+// Efficient algorithm to see if 2 line segs intersect in the general case.
+// Cannot detect overlaid lines.
 
+function ccw(a,b,c){
+    return ((c.y - a.y) * (b.x - a.x)) > ((b.y - a.y)*(c.x - a.x));
+}
+function intersects(p1, p2, q1, q2){
+    return (ccw(p1,q1,q2) != ccw(p2,q1,q2))&&(ccw(p1,p2,q1)!=ccw(p1,p2,q2));
+}
 
+// I'm lazy af.
 function pow2(x){return Math.pow(x,2);}
+
 /**
 * Bernoulli distribution. Returns true with probability n
 * @param {number} n The probability true is returned
