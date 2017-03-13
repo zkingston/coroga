@@ -1,34 +1,34 @@
 // Rock Geometry Components -----------------------------------------------------------------
 var rock_cfg = {
     "flat" : {
-                "height" : {    min : 2,
-                                max : 3 },
-                "diameter" : {  min : 6,
-                                max : 8 }
-            },
-    "tall" : {
-                "height" : {    min : 6,
-                                max : 8 },
-                "diameter" : {  min : 3,
-                                max : 4 }
-            },
-    "short" : {
-                "height" : {    min : 2,
-                                max : 3 },
-                "diameter" : {  min : 3,
-                                max : 4 }
-            },
-    "reclining" : {
-                "height" : {    min : 3,
-                                max : 4 },
-                "diameter" : {  min : 6,
-                                max : 7 }
-            },
-    "arched" : {
                 "height" : {    min : 3,
                                 max : 5 },
-                "diameter" : {  min : 5,
-                                max : 6 }
+                "diameter" : {  min : 12,
+                                max : 15 }
+            },
+    "tall" : {
+                "height" : {    min : 15,
+                                max : 21 },
+                "diameter" : {  min : 9,
+                                max : 11 }
+            },
+    "short" : {
+                "height" : {    min : 6,
+                                max : 9 },
+                "diameter" : {  min : 9,
+                                max : 11 }
+            },
+    "reclining" : {
+                "height" : {    min : 10,
+                                max : 12 },
+                "diameter" : {  min : 18,
+                                max : 21 }
+            },
+    "arched" : {
+                "height" : {    min : 9,
+                                max : 15 },
+                "diameter" : {  min : 15,
+                                max : 18 }
             }
 }
 
