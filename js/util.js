@@ -312,12 +312,69 @@ Array.prototype.normalize = function() {
     }
 };
 
+
+function CLL ()
+{
+    this.data = [];
+
+    this.get = function(x){
+        var len = this.data.length;
+        while(x < 0){
+          x = x + len
+        }
+        x = x % len;
+        return this.data[x];
+    }
+
+    this.set = function(x,v){
+        var len = this.data.length;
+        while(x < 0){
+          x = x + len
+        }
+        x = x % len;
+        this.data[x] = v;
+    }
+
+    this.push = function(x)
+    {
+      this.data.push(x);
+    }
+
+    this.getLength = function()
+    {
+      return this.data.length;
+    }
+
+    this.iterate = function(start, end, f){
+        start = start % this.data.length;
+        end = end % this.data.length;
+
+        var i = start;
+        while(i!=end){
+
+            f(this.get(i));
+            i++;
+            i=i % this.data.length
+        }
+
+    }
+
+
+
+}
+
+
+
+
+
+
+
 /**
  * Creates an instance of a turbulent noise generator.
  *
  * @constructor
  * @this { Noise }
- * 
+ *
  * @param { number } width  Width of noise grid. Must be integer
  * @param { number } height Height of noise grid. Must be integer
  */

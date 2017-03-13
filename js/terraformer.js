@@ -24,9 +24,9 @@ function TerraformerEngine(input)
           var a = (width - border);
           var b = (height - border);
           // selects consecutive points on curve. turns them into line segments.
-          var numEdges = 15;
+          var numEdges = 40;
           var arc = pi * 2 / numEdges;
-          var orderedPoints = [];
+          var orderedPoints = new CLL();
           var lineSegs = [];
           //generate ordered points of perimeter
           for (var e = 0; e < numEdges; e++){
@@ -34,15 +34,58 @@ function TerraformerEngine(input)
                 var p =  new THREE.Vector3(a * cos(t), b * sin(t), 0);
                 orderedPoints.push(p);
           }
+          //transform the ellipse
+
+          //pick random point
+          var start = discreteUniform(0,numEdges-1);
+          var spliceLength = floor(numEdges/2);
+          var end = (start + spliceLength)%numEdges;
+
+
+
+
+          var currentOrigin = orderedPoints.get(start);
+          var currentVector = (new THREE.Vector3(0,0,0)).subVectors(orderedPoints.get(end), orderedPoints.get(start))
+          var step = 5;
+
+
+
+          // Random walk across the sand.
+          for(var i = start; i != end; i = (i + 1)%numEdges){
+              orderedPoints.set(i, coneSample2D(currentOrigin, currentVector,step,30));
+              //currentVector.subVectors(orderedPoints.get(i), currentOrigin);
+              currentOrigin = orderedPoints.get(i);
+
+
+          }
+
+
+          console.log(orderedPoints)
+
+
+          //pick point across ellipse from point.
+          //Splice that section of the ellipse using points generated from random walk
+          //smooth that curve using sliding window smoothing
+
+
+
+
+
+
+
+
+
+
+
           //generate line segments from points
-          for (var e = 0; e < orderedPoints.length; e++){
+          for (var e = 0; e < orderedPoints.getLength(); e++){
               var ip = e;
-              var iq = (e+1)% orderedPoints.length;
+              var iq = (e+1)% orderedPoints.getLength();
 
               lineSegs.push(
                 {
-                    "p" : orderedPoints[ip],
-                    "q" : orderedPoints[iq]
+                    "p" : orderedPoints.get(ip),
+                    "q" : orderedPoints.get(iq)
                 }
               );
           }
@@ -155,7 +198,7 @@ function TerraformerEngine(input)
             var theta = atan2(dy,dx);
 
             var s = 1 // Sand base height
-            var a = .5; // amplitude of rake;
+            var a = .25; // amplitude of rake;
             var k = 1/3; // number of spiral arms divided bydensity (3 for triskele)
             var f = 3; // sprial density.
             //For the love of god, please use integers, unless you set the sprical
@@ -191,6 +234,21 @@ function TerraformerEngine(input)
 
 
 
+
+
+        //TODO Make this a closure
+        var windMagnitude = function(t){
+          var windDirection= new THREE.Vector3(3,2,0);
+          var magnitude = function(t){
+             return bound( .25+sin(t/100)*.5,-0.25,1);
+          }
+          // why? so that it reaches max power, and then recoils slightly below 0
+          // so that things look elastic.
+          return windDirection.setLength(magnitude(t))
+
+        };
+
+        environment.wind = windMagnitude;
 
         return island;
     };

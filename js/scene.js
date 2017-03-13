@@ -1,11 +1,11 @@
 var camera, controls, scene, renderer, clock, stats, listener, audioLoader;
 var garbage = [];
 var lock = false;
-
+var speedMode = false;
 var environment = {};
 var tick = 0;
 
-var nightMode = false;
+var nightMode = true;
 
 function nightModeSet(value) {
     nightMode = value;
@@ -130,12 +130,15 @@ function onWindowResize() {
 
 }
 
+function block(){}
 function animate() {
     stats.begin();
 
     render();
 
     tick++;
+
+    setTimeout(block,17);
 
     scene.update();
     controls.update();
@@ -211,8 +214,11 @@ function createBase( width, height, depth ) {
 function createEnvironment( width, height, depth ) {
     if ( lock )
         return;
-    if ( typeof environment.island !== 'undefined' )
+    if ( typeof environment.island !== 'undefined' ){
         islandSwitch();
+        var terraformer = new TerraformerEngine(environment);
+        terraformer.terraform(environment.island);
+    }
     else {
         var cfg = features.island;
         var islandWidth = discreteUniform( cfg.width.min, cfg.width.max );

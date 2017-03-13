@@ -138,6 +138,7 @@ function islandAddBase( island ) {
     var base = new THREE.IcosahedronGeometry( radius, cfg.detail );
     base.scale( width / radius, height / radius, 1 );
 
+
     // Find the highest point on the island while we are doing the noising pass
     var max = new THREE.Vector3();
     base.vertices.map( function ( vertex ) {

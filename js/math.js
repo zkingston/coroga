@@ -12,6 +12,7 @@ max = Math.max;
 floor = Math.floor;
 arctan = Math.atan;
 atan2 = Math.atan2;
+abs = Math.abs;
 
 
 // Efficient algorithm to see if 2 line segs intersect in the general case.
@@ -27,6 +28,12 @@ function intersects(p1, p2, q1, q2){
 // I'm lazy af.
 function pow2(x){return Math.pow(x,2);}
 
+
+function bound(x, xmin, xmax){
+  if (x < xmin){return xmin;}
+  if (x > xmax){return xmax;}
+  return x;
+}
 /**
 * Bernoulli distribution. Returns true with probability n
 * @param {number} n The probability true is returned
@@ -87,6 +94,155 @@ function dirichletSample(x) {
 
     return  x[x.length - 1];
 }
+
+
+function coneSample3D(origin, vector, length, degreeLow, degreeHigh){
+    // Default value for degree high
+    degreeHigh = (!degreeHigh) ? 1 : degreeHigh;
+
+    // Normalize the start vector.
+    vector.normalize()
+
+    var rl = (Math.PI/180) * degreeLow
+    var rh = (Math.PI/180) * degreeHigh
+
+    // Pick some vectors that will help you come up with a basis.
+    // Use Cross Products to construct the basis. (a,u,v) are the vectors.
+    var a = vector;
+    var temp = (a.y != 0 || a.z !=0) ?
+      new THREE.Vector3(1,0,0) : new THREE.Vector3(0,1,0);
+
+    var u = new THREE.Vector3();
+    u.crossVectors(a, temp).normalize()
+
+    var v = new THREE.Vector3();
+    v.crossVectors(a,u).normalize()
+    //axis, u, v basis constructed
+
+    // Randomly generate the angles of the new point for conic form.
+    var theta = acos(uniform(cos(rl), cos(rh)));
+    var phi = uniform(0, 2*Math.PI);
+
+    // Produce the resulting unit vector using the randomly generated angles.
+    var x = new THREE.Vector3(
+      sin(theta)*(cos(phi) * u.x + sin(phi)* v.x) + cos(theta) *a.x,
+      sin(theta)*(cos(phi) * u.y + sin(phi)* v.y) + cos(theta) *a.y,
+      sin(theta)*(cos(phi) * u.z + sin(phi)* v.z) + cos(theta) *a.z)
+    x.normalize()
+
+    // Stretch the Unit Vector into the size required.
+    return new THREE.Vector3(
+      origin.x + x.x * length,
+      origin.y + x.y * length,
+      origin.z + x.z * length)
+}
+
+function coneSample2D(origin, vector, length, degreeLow, degreeHigh){
+    // Default value for degree high
+    degreeHigh = (!degreeHigh) ? 1 : degreeHigh;
+
+    // Normalize the start vector.
+    vector.normalize()
+
+    var rl = (Math.PI/180) * degreeLow
+    var rh = (Math.PI/180) * degreeHigh
+
+    // Pick some vectors that will help you come up with a basis.
+    // Use Cross Products to construct the basis. (a,u,v) are the vectors.
+    var a = vector;
+    var temp = (a.y != 0 || a.z !=0) ?
+      new THREE.Vector3(1,0,0) : new THREE.Vector3(0,1,0);
+
+    var u = new THREE.Vector3();
+    u.crossVectors(a, temp).normalize()
+
+    var v = new THREE.Vector3();
+    v.crossVectors(a,u).normalize()
+    //axis, u, v basis constructed
+
+    // Randomly generate the angles of the new point for conic form.
+    var theta = acos(uniform(cos(rl), cos(rh)));
+    var phi = uniform(0, 2*Math.PI);
+
+    // Produce the resulting unit vector using the randomly generated angles.
+    var x = new THREE.Vector3(
+      sin(theta)*(cos(phi) * u.x + sin(phi)* v.x) + cos(theta) *a.x,
+      sin(theta)*(cos(phi) * u.y + sin(phi)* v.y) + cos(theta) *a.y,
+      sin(theta)*(cos(phi) * u.z + sin(phi)* v.z) + cos(theta) *a.z)
+    x.normalize()
+
+    // Stretch the Unit Vector into the size required.
+    return new THREE.Vector3(
+      origin.x + x.x * length,
+      origin.y + x.y * length,
+      0);
+}
+
+
+function findClosestAndPop(v, pool)
+{
+    var closest = null;
+    var distance = null;
+    var index = null
+    var temp = null;
+    var p=null;
+    for (var iter = 0; iter < pool.length; iter ++){
+        p = pool[iter];
+        if(closest === null){
+          closest = p;
+          distance = v.distanceTo(p);
+          index = iter;
+        }
+        else{
+          temp = v.distanceTo(p);
+          if(temp < distance){
+            closest = p;
+            distance = temp;
+            index = iter;
+          }
+        }
+    }
+    pool.splice(index,1);
+    return closest;
+}
+
+
+//nondeterministic icosahedral approximation of a point cloud with no
+// guarantee of concavity or convexity.
+//
+function icosahedralApproximation(ps,origin){
+
+
+
+
+
+    var shell = new THREE.IcosahedronGeometry(100,2);
+
+    var p = new THREE.Vector3();
+
+    shell.vertices.map(function(v)
+      {
+        p.set(v.x,v.y,v.z);
+        var closest = findClosestAndPop(p,ps);
+
+        if (closest){
+          v.x = closest.x;
+          v.y = closest.y;
+          v.z = closest.z;
+
+        }
+      }
+    );
+
+
+    return shell;
+
+}
+
+
+
+
+
 
 
 
