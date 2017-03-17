@@ -178,6 +178,8 @@ function coneSample2D(origin, vector, length, degreeLow, degreeHigh){
       0);
 }
 
+//BRUTE FORCE
+//can make faster through divide and conquer.... but nah.
 
 function findClosestAndPop(v, pool)
 {
@@ -212,10 +214,6 @@ function findClosestAndPop(v, pool)
 //
 function icosahedralApproximation(ps,origin){
 
-
-
-
-
     var shell = new THREE.IcosahedronGeometry(100,2);
 
     var p = new THREE.Vector3();
@@ -238,6 +236,32 @@ function icosahedralApproximation(ps,origin){
     return shell;
 
 }
+
+
+//finds a point between contextB and target such that all 4 fall in a circle
+function smoothInterpolate(contextA, contextB, target ){
+  var center = new THREE.Vector3(0,0,0);
+  var ma = (p2.y - p1.y) / (p2.x - p1.x);
+  var mb = (p3.y - p2.y) / (p3.x - p2.x);
+  center.x = (ma * mb * (p1.y - p3.y) + mb * (p1.x + p2.x) - ma * (p2.x + p3.x)) / (2 * (mb - ma));
+  center.y = (-1 / ma) * (center.x - (p1.x + p2.x) / 2) + (p1.y + p2.y) / 2;
+
+  var radius = center.distanceTo(contextB);
+
+  //find the angular bisector between radius c,b and c,target
+  // I can cheat and optimize by just adding the vectors, since they are equal magnitude
+  var va = new THREE.Vector3().subVectors(contextB, center);
+  var vb = new THREE.Vector3().subVectors(contextA, center);
+
+  var v = new THREE.Vector3().addVectors(va,vb).setLength(radius);
+
+
+  return v;
+
+
+}
+
+
 
 
 

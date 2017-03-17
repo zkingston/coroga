@@ -37,39 +37,29 @@ function TerraformerEngine(input)
           //transform the ellipse
 
           //pick random point
-          var start = discreteUniform(0,numEdges-1);
+          var startIndex = discreteUniform(0,numEdges-1);
           var spliceLength = floor(numEdges/2);
-          var end = (start + spliceLength)%numEdges;
+          var endIndex = (startIndex + spliceLength)%numEdges;
+
+          var start = orderedPoints.get(startIndex);
+          var end = orderedPoints.get(endIndex);
+          //Push everything towards roughly center
+          var centerOffset = new THREE.Vector3().subVectors(end, start);
+          centerOffset.setLength(continuousUniform(.4,.6)* centerOffset.length());
 
 
 
+          var center = new THREE.Vector3().addVectors(start, centerOffset);
+          var offset = new THREE.Vector3();
 
-          var currentOrigin = orderedPoints.get(start);
-          var currentVector = (new THREE.Vector3(0,0,0)).subVectors(orderedPoints.get(end), orderedPoints.get(start))
-          var step = 5;
+          orderedPoints.iterate(startIndex, endIndex, function(point){
+              point.addVectors(start, centerOffset);
 
+              // offset.subVectors(center, point);
+              // offset.setLength(continuousUniform(0.5,0.6)* offset.length());
+              // point.add(offset);
 
-
-          // Random walk across the sand.
-          for(var i = start; i != end; i = (i + 1)%numEdges){
-              orderedPoints.set(i, coneSample2D(currentOrigin, currentVector,step,30));
-              //currentVector.subVectors(orderedPoints.get(i), currentOrigin);
-              currentOrigin = orderedPoints.get(i);
-
-
-          }
-
-
-          console.log(orderedPoints)
-
-
-          //pick point across ellipse from point.
-          //Splice that section of the ellipse using points generated from random walk
-          //smooth that curve using sliding window smoothing
-
-
-
-
+          });
 
 
 
