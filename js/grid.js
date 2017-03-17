@@ -90,7 +90,7 @@ function Grid(xlow, xhigh, ylow, yhigh, curves) {
     * @param {number} ySizeIn The length of the region to be allocated
     * @return {object} The position of the bottom left corner of the region
     **/
-    this.allocate = function(xSizeIn, ySizeIn, terrain){
+    this.allocate = function(xSizeIn, ySizeIn, buffer, terrain){
         // Try 10 times to find a good spot for it.
         // Obviously there is a complete and exact solution
         // But this should prove concept.
@@ -98,12 +98,6 @@ function Grid(xlow, xhigh, ylow, yhigh, curves) {
 
         // TODO: Efficiently generate candidates
 
-    //     a1 = {"x1" : 3,"x2":5, "y1":0, "y2":4}
-    //     a2 = {"x1" : 2,"x2":4, "y1":0, "y2":4}
-    //     console.log("CHECK THIS SHIT")
-    //     console.log(
-    //     this.checkIntersection(a1,a2)
-    // );
 
 
 
@@ -119,7 +113,7 @@ function Grid(xlow, xhigh, ylow, yhigh, curves) {
         };
 
         var checkCurve = function (curve, c){
-            ca = {
+            var ca = {
                 x1 : c.x1 + xlow,
                 x2 : c.x2 + xlow,
                 y1 : c.y1 + ylow,
@@ -159,13 +153,17 @@ function Grid(xlow, xhigh, ylow, yhigh, curves) {
             }
             if (valid == false){continue;}
 
-            // TODO CHECK TERRAIN CONFLICTS
-
+            var cbuffered = {
+              x1 : c.x1 - buffer,
+              y1 : c.y1 - buffer,
+              x2 : c.x2 + buffer,
+              y2 : c.y2 + buffer,
+            }
 
             // If there is nothing allocated yet, there is no conflict
             if (this.tiles.length == 0){
-                
-                this.tiles.push(c);
+
+                this.tiles.push(cbuffered);
                 return this.mapping(c.x1,c.y1);
             }
 
@@ -178,7 +176,7 @@ function Grid(xlow, xhigh, ylow, yhigh, curves) {
                 }
             }
             if (valid == true){
-                this.tiles.push(c);
+                this.tiles.push(cbuffered);
                 return this.mapping(c.x1,c.y1);
             }
 

@@ -10,7 +10,8 @@ var tiles = {
     "loneCherryTree" : {
         size : {
             x : 16,
-            y : 16
+            y : 16,
+            buffer : 4
         },
         features : [
             {
@@ -24,7 +25,8 @@ var tiles = {
     "loneWillowTree" : {
         size : {
             x : 16,
-            y : 16
+            y : 16,
+            buffer : 4
         },
         features : [
             {
@@ -38,7 +40,8 @@ var tiles = {
     "loneDeadTree" : {
         size : {
             x : 16,
-            y : 16
+            y : 16,
+            buffer : 4
         },
         features : [
             {
@@ -52,7 +55,8 @@ var tiles = {
     "bambooBush" : {
         size : {
             x : 4,
-            y : 4
+            y : 4,
+            buffer : 2
         },
         features : [
             {
@@ -66,7 +70,8 @@ var tiles = {
     "rockClusterSmall" : {
         size : {
             x : 16,
-            y : 16
+            y : 16,
+            buffer : 3
         },
         features : [
             {
@@ -80,7 +85,8 @@ var tiles = {
     "rockClusterMedium" : {
         size : {
             x : 16,
-            y : 16
+            y : 16,
+            buffer : 4
         },
         features : [
             {
@@ -94,7 +100,8 @@ var tiles = {
     "rockClusterLarge" : {
         size : {
             x : 16,
-            y : 16
+            y : 16,
+            buffer : 4
         },
         features : [
             {
