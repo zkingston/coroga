@@ -4,6 +4,7 @@ var lock = false;
 var speedMode = false;
 var environment = {};
 var tick = 0;
+var weathermode = true;
 
 var nightMode = true;
 
@@ -14,6 +15,8 @@ function nightModeSet(value) {
 init();
 render();
 animate();
+
+// Shove everything into uber environment object.
 
 function createUI() {
     stats = new Stats();
@@ -130,7 +133,7 @@ function onWindowResize() {
 
 }
 
-function block(){}
+function block(){}//SICK HACKS, DONT REMOVE
 function animate() {
     stats.begin();
 
@@ -180,40 +183,14 @@ function createBase( width, height, depth ) {
     environment.depth = depth;
     environment.radius = Math.sqrt( height * height / 4 + width * width / 4 );
 
-
-    // var lanterns = [ { x : width / 2 - 2, y : -height / 2 + 2 },
-    //                  { x : -width / 2 + 2, y : height / 2 - 2 } ];
-    // for ( var i = 0; i < lanterns.length; i++ ) {
-    //     var dim = 3;
-    //     var lantern = lanternFactory( dim, dim, 3 );
-    //     var moth = mothFactory( lantern );
-
-    //     lantern.addToObject( scene, lanterns[i].x, lanterns[i].y, depth * 2 );
-    // }
 }
 
-// function createEnvironment() {
-//     if ( lock )
-//         return;
 
-//     if ( typeof environment.island !== 'undefined' )
-//         islandSwitch();
-//     else {
-//         var cfg = features.island;
-//         var islandWidth = discreteUniform( cfg.width.min, cfg.width.max );
-//         var islandHeight = discreteUniform( cfg.height.min, cfg.height.max );
-//         var island = islandCreate( islandWidth, islandHeight );
-
-//         island.addToObject( scene );
-//         environment.island = island;
-//         environment.width =  islandWidth * 2;
-//         environment.height = islandHeight * 2;
-//     }
-// }
 
 function createEnvironment( width, height, depth ) {
-    if ( lock )
-        return;
+    if ( lock ){
+      return;
+    }
     if ( typeof environment.island !== 'undefined' ){
         islandSwitch();
         var terraformer = new TerraformerEngine(environment);
@@ -224,8 +201,12 @@ function createEnvironment( width, height, depth ) {
         var islandWidth = discreteUniform( cfg.width.min, cfg.width.max );
         var islandHeight = discreteUniform( cfg.height.min, cfg.height.max );
         var island = islandCreate( islandWidth, islandHeight );
+
         var terraformer = new TerraformerEngine(environment);
         island = terraformer.terraform(island);
+
+        var weather = new WeatherEngine();
+        weather.thundergodsOracle();
 
         island.addToObject( scene );
         environment.island = island;
@@ -237,31 +218,32 @@ function createEnvironment( width, height, depth ) {
         videoKilledTheRadioStar();
         scene.remove( environment.sand );
     }
-    if ( typeof environment.stars !== 'undefined' && !nightMode )
-        scene.remove( environment.stars );
+    // if ( typeof environment.stars !== 'undefined' )
+    // {
+    //   scene.remove( environment.stars );
+    // }
 
-    if (nightMode) {
-        scene.fog = new THREE.FogExp2( 0x001331, 0.0025 );
-        renderer.setClearColor( 0x001331, 1 );
-        environment.lamp = new THREE.DirectionalLight( 0x292929, 0.5 );
-        if (typeof environment.stars === 'undefined') {
-            stars = createStars();
-            environment.stars = stars;
-            scene.add(stars);
-        }
-        else {
-            scene.add(environment.stars);
-        }
-    }
-    else {
-        scene.fog = new THREE.FogExp2( 0xaaccff, 0.005 );
-        renderer.setClearColor( 0xaaccff, 1 );
-        environment.lamp = new THREE.DirectionalLight( 0xdddddd, 0.5 );
-    }
+    //
+    //
+    // if (nightMode) {
+    //     scene.fog = new THREE.FogExp2( 0x001331, 0.0025 );
+    //     renderer.setClearColor( 0x001331, 1 );
+    //     environment.lamp = new THREE.DirectionalLight( 0x292929, 0.5 );
+    //     if (typeof environment.stars === 'undefined') {
+    //         stars = createStars();
+    //         environment.stars = stars;
+    //         scene.add(stars);
+    //     }
+    //     else {
+    //         scene.add(environment.stars);
+    //     }
+    // }
+    // else {
+    //     scene.fog = new THREE.FogExp2( 0xaaccff, 0.005 );
+    //     renderer.setClearColor( 0xaaccff, 1 );
+    //     environment.lamp = new THREE.DirectionalLight( 0xdddddd, 0.5 );
+    // }
 
     var placer = new PlacementEngine(environment, scene);
     placer.runRandomTileEngine();
-
-
-    console.log(island)
-}
+  }

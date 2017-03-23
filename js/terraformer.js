@@ -49,21 +49,21 @@ function TerraformerEngine(input)
 
 
 
-          var center = new THREE.Vector3().addVectors(start, centerOffset);
-          var offset = new THREE.Vector3();
+          if(startIndex < endIndex){
+            orderedPoints.data = orderedPoints.data.splice(startIndex, endIndex-startIndex);
+          }
+          if(startIndex > endIndex){
+            orderedPoints.data.splice(endIndex, startIndex-endIndex);
+          }
 
-          orderedPoints.iterate(startIndex, endIndex, function(point){
-              point.addVectors(start, centerOffset);
-
-              // offset.subVectors(center, point);
-              // offset.setLength(continuousUniform(0.5,0.6)* offset.length());
-              // point.add(offset);
-
-          });
-
-
-
-
+          for(var iter = 0; iter< orderedPoints.getLength()*2; iter++){
+            var newPoint = smoothenCurve(
+              orderedPoints.get(iter-1),
+              orderedPoints.get(iter),
+              orderedPoints.get(iter+1)
+            );
+            orderedPoints.set(iter, newPoint);
+          }
 
 
 
