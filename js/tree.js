@@ -589,6 +589,7 @@ function treeFactory(x,y,colors){
     }
 
     tree.addUpdateCallback( function( obj ){
+        if (!windmode){return;}
 
         var wind = environment.wind(tick);
         var windmag = wind.length();
@@ -606,6 +607,7 @@ function treeFactory(x,y,colors){
              var adwind = new THREE.Vector3();
              var offset = new THREE.Vector3();
 
+            // artificially added geometry to the particle system earlier
              tree.cascades[c].geometry.vertices.map (
                 function(v)
                 {

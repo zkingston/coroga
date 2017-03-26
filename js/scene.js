@@ -4,9 +4,11 @@ var lock = false;
 var speedMode = false;
 var environment = {};
 var tick = 0;
-var weathermode = true;
 
+
+var weathermode = true;
 var nightMode = true;
+var windmode = false;
 
 function nightModeSet(value) {
     nightMode = value;
