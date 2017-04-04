@@ -1,11 +1,15 @@
 function WeatherEngine()
 {
+
+
     this.atmoData = {
       season : 0, // 0-3 TODO: perhaps make this location based. for our southern hemisphere clientele
       time : 2, // 0-24
       weather : "rain", //[clear, rain, clouds, ice]
       temp : 69  // Murica units
     }; //Random or weather based.
+
+
 
     this.clearSkyColors = [
       0xaaccff, //light
@@ -37,27 +41,46 @@ function WeatherEngine()
         this.atmoData.dateObject = date;
         this.atmoData.time = date.getHours();
         //TODO LITERALLY EVERTHING ELSE
+        var weatherJSON = this.getWeather();
+
+        var forecast = weatherJSON.weather[0].main;
+        if (forecast == "Clear"){this.atmoData.weather = "clear";}
+        // SUPPORT MORE WEATHER TYPES
+        return weatherJSON;
       }
     }
 
 
+    this.getWeather = function(){
+      var request = "http://api.openweathermap.org/data/2.5/weather?zip=98052,us&appid=036592c74e70321ef3e9cec4e694915a"
+      var weather = JSON.parse(this.httpGet(request));
+      return weather;
+    }
+
+    // TODO PUT THIS ON TIMEOUT
+    this.httpGet = function(uri)
+    {
+      var xmlHttp = new XMLHttpRequest();
+      xmlHttp.open( "GET", uri, false ); // false for synchronous request
+      xmlHttp.send( null );
+      return xmlHttp.responseText;
+    }
+
 
     this.thundergodsOracle = function(){
 
-        this.setAtmoData();
+
+        console.log("WEATHER")
+        console.log(this.setAtmoData());
+
         var hour = this.atmoData.time
-
-
         var atmo = this.atmoData;
-
-
 
         if(atmo.weather == "clear"){
           var color = this.skyColor(hour,this.clearSkyColors)
           renderer.setClearColor( color, 1 );
           scene.fog = new THREE.FogExp2( color, 0.0025 );
           environment.lamp = new THREE.DirectionalLight( 0xdddddd, 0.5 );
-
         }
 
         if(atmo.weather == "rain"){
