@@ -6,7 +6,8 @@ function WeatherEngine()
       season : 0, // 0-3 TODO: perhaps make this location based. for our southern hemisphere clientele
       time : 2, // 0-24
       weather : "rain", //[clear, rain, clouds, ice]
-      temp : 69  // Murica units
+      temp : 69, // Murica units
+      zipcode: 98052
     }; //Random or weather based.
 
 
@@ -41,8 +42,8 @@ function WeatherEngine()
         this.atmoData.dateObject = date;
         this.atmoData.time = date.getHours();
         //TODO LITERALLY EVERTHING ELSE
-        var weatherJSON = this.getWeather();
-
+        var weatherJSON = this.getWeather(this.atmoData.zipcode);
+      //  console.log(this.getZipcode());
         var forecast = weatherJSON.weather[0].main;
         if (forecast == "Clear"){this.atmoData.weather = "clear";}
         // SUPPORT MORE WEATHER TYPES
@@ -50,9 +51,26 @@ function WeatherEngine()
       }
     }
 
+    //
+    // this.getZipcode = function(){
+    //     var lat = 0;
+    //     var long = 0;
+    //     navigator.getlocation.getCurrentPosition(
+    //     function(pos) {
+    //        lat = pos.coords.latitude;
+    //        long = pos.coords.longitude;
+    //     });
+    //
+    //     var point = new google.maps.LatLng(lat, long);
+    //     new google.maps.Geocoder().geocode({'latLng': point}, function (res, status) {
+    //             var zip = res[0].formatted_address.match(/,\s\w{2}\s(\d{5})/);
+    //             return zip[1]
+    //     });
+    // }
 
-    this.getWeather = function(){
-      var request = "http://api.openweathermap.org/data/2.5/weather?zip=98052,us&appid=036592c74e70321ef3e9cec4e694915a"
+
+    this.getWeather = function(zipcode){
+      var request = "http://api.openweathermap.org/data/2.5/weather?zip=" + zipcode + ",us&appid=036592c74e70321ef3e9cec4e694915a"
       var weather = JSON.parse(this.httpGet(request));
       return weather;
     }
