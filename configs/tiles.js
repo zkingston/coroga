@@ -11,7 +11,7 @@ var tiles = {
         size : {
             x : 16,
             y : 16,
-            buffer : 4
+            buffer : 8
         },
         features : [
             {
@@ -26,7 +26,7 @@ var tiles = {
         size : {
             x : 16,
             y : 16,
-            buffer : 4
+            buffer : 8
         },
         features : [
             {
@@ -41,7 +41,7 @@ var tiles = {
         size : {
             x : 16,
             y : 16,
-            buffer : 4
+            buffer : 8
         },
         features : [
             {

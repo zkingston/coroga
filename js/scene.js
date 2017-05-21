@@ -1,11 +1,11 @@
 var camera, controls, scene, renderer, clock, stats, listener, audioLoader;
 var garbage = [];
 var lock = false;
-var speedMode = false;
 var environment = {};
 var tick = 0;
+var kernel = new CommandLine(environment);
 
-
+var speedMode = false;
 var weathermode = true;
 var nightMode = true;
 var windmode = false;
@@ -28,20 +28,29 @@ function createUI() {
     stats.domElement.style.margin = '10px 15px auto';
     document.body.appendChild( stats.domElement );
 
+
+
+
+    var commandLine = new CRGTextInput("Zip", function(btn){})
+    UIaddElement (commandLine);
+
+
     var generate = new CRGButton( 'Regenerate', function ( btn ) {
+        kernel.parse(commandLine.getText());
         createEnvironment( 70, 50, 2 );
     });
 
-    generate.addElement( new CRGDropdownButton( 'Night Mode', function( btn ) {
-        if (nightMode == true) {
-            nightModeSet(false);
-            btn.setTextNode( 'Night Mode' );
-        } else {
-            nightModeSet(true);
-            btn.setTextNode( 'Day Mode' );
-        }
-    }));
+    // generate.addElement( new CRGDropdownButton( 'Night Mode', function( btn ) {
+    //     if (nightMode == true) {
+    //         nightModeSet(false);
+    //         btn.setTextNode( 'Night Mode' );
+    //     } else {
+    //         nightModeSet(true);
+    //         btn.setTextNode( 'Day Mode' );
+    //     }
+    // }));
     UIaddElement( generate );
+
 
     var tools = new CRGDropdown( 'Tools' );
     tools.addElement( new CRGDropdownButton( 'Show FPS', function( btn ) {
@@ -66,6 +75,7 @@ function createUI() {
 
 
     UIaddElement( tools );
+
 
     UIgenerate();
 }
