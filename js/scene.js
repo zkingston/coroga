@@ -27,7 +27,7 @@ function createUI() {
         createEnvironment( 70, 50, 2 );
     });
 
-    generate.addElement( new CRGDropdownButton( 'Night Mode', function( btn ) {
+    generate.addElement( new CRGDropdownButton( nightMode ? 'Day Mode' : 'Night Mode', function( btn ) {
         if (nightMode == true) {
             nightModeSet(false);
             btn.setTextNode( 'Night Mode' );
