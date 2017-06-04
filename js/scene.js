@@ -80,20 +80,26 @@ function createUI() {
       "border-radius" : "50%"
     })
     $("#help").click(function(){
-          document.getElementById("mySidenav").style.width = "100%";
+          document.getElementById("mySidenav").style.width = "50%";
     })
 
     $("#help-text").css({
         "text-align": "left"
     })
 
+
+
+
     $.get("https://raw.githubusercontent.com/zkingston/coroga/arpha/README.md", function(response) {
-        document.getElementById("help-text").text = response;
+      // response = response.replace(/\s/g, '&nbsp;')
+      //   response = response.replace(/(?:\r\n|\r|\n)/g, '<br />');
+        document.getElementById("help-text").innerHTML = "<pre>"  + response + "</pre>";
+        // document.getElementById("help-text").value = response;
+        // $("#help-text").attr("text",response);
+        // $("#help-text").attr("value",response);
+        // $("#help-text").val(response);
     });
 
- // $("help-text").attr("text","TEST");
- //  // $("help-text").text(response);
- //    //
 
         // Need to learn JQuery for a programming interview.
         // Here goes nothing.
