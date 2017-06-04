@@ -1,18 +1,21 @@
+// Application Globals
 var camera, controls, scene, renderer, clock, stats, listener, audioLoader;
 var garbage = [];
 var lock = false;
 var environment = {};
 var tick = 0;
-var kernel = new CommandLine(environment);
 
+// Command Line Globals - Command line sees all.
+var kernel = new CommandLine(environment);
+var userData = {"location" : 98052}
+
+// "Mode" variables
 var speedMode = false;
 var weathermode = true;
 var nightMode = true;
 var windmode = false;
 
-function nightModeSet(value) {
-    nightMode = value;
-}
+
 
 init();
 render();
@@ -28,56 +31,74 @@ function createUI() {
     stats.domElement.style.margin = '10px 15px auto';
     document.body.appendChild( stats.domElement );
 
-
-
-
-    var commandLine = new CRGTextInput("Zip", function(btn){})
-    UIaddElement (commandLine);
-
-
-    var generate = new CRGButton( 'Regenerate', function ( btn ) {
-        kernel.parse(commandLine.getText());
-        createEnvironment( 70, 50, 2 );
+    $("#command-line")
+      //.attr("placeholder", ">")
+      .attr("value", "")
+      .attr("type","text")
+      .attr("enable",true);
+    $("#command-line")
+      .css({
+          "visibility": "visible",
+          "height":"30px",
+          "text-align": "left"
+        })
+    $("#command-line")
+    .click(function(){
+      $("#command-line").focus()
+    })
+    $("#command-line")
+    .keypress(function(e) {
+        if(e.which == 13) {
+            $("#regenerator").click();
+        }
     });
 
-    // generate.addElement( new CRGDropdownButton( 'Night Mode', function( btn ) {
-    //     if (nightMode == true) {
-    //         nightModeSet(false);
-    //         btn.setTextNode( 'Night Mode' );
-    //     } else {
-    //         nightModeSet(true);
-    //         btn.setTextNode( 'Day Mode' );
-    //     }
-    // }));
-    UIaddElement( generate );
 
 
-    var tools = new CRGDropdown( 'Tools' );
-    tools.addElement( new CRGDropdownButton( 'Show FPS', function( btn ) {
-        if (stats.domElement.style.display === 'none') {
-            stats.domElement.style.display = 'block';
-            btn.setTextNode( 'Hide FPS' );
-        } else {
-            stats.domElement.style.display = 'none';
-            btn.setTextNode( 'Show FPS' );
-        }
-    }));
+    $("#regenerator")
+        .attr("text", "Regenerate")
+        .attr("enable", true);
 
-    tools.addElement( new CRGDropdownButton( 'Stop Audio', function( btn ) {
-        if ( listener.getMasterVolume() > 0 ) {
-            listener.setMasterVolume( 0 );
-            btn.setTextNode( 'Play Audio' );
-        } else {
-            listener.setMasterVolume( 1 );
-            btn.setTextNode( 'Stop Audio' );
-        }
-    }));
+    $("#regenerator").click(function(){
+      var rval = $("#command-line").val();
+      console.log(rval)
+      $("#command-line").val("")
+      kernel.parse(rval);
+      createEnvironment( 70, 50, 2 );
+    })
+    $("#regenerator")
+      .css({
+        "text-align": "center",
+        "height": "30px"
+      })
 
 
-    UIaddElement( tools );
+    $("#help").css({
+      "padding-left": "2px",
+      "height":"30px",
+      "text-align": "center",
+      "border-radius" : "50%"
+    })
+    $("#help").click(function(){
+          document.getElementById("mySidenav").style.width = "100%";
+    })
+
+    $("#help-text").css({
+        "text-align": "left"
+    })
+
+    $.get("https://raw.githubusercontent.com/zkingston/coroga/master/README.md", function(response) {
+        document.getElementById("help-text").text = response;
+    });
+
+ // $("help-text").attr("text","TEST");
+ //  // $("help-text").text(response);
+ //    //
+
+        // Need to learn JQuery for a programming interview.
+        // Here goes nothing.
 
 
-    UIgenerate();
 }
 
 function videoKilledTheRadioStar() {
@@ -219,6 +240,8 @@ function createEnvironment( width, height, depth ) {
 
         var weather = new WeatherEngine();
         weather.thundergodsOracle();
+
+
 
         island.addToObject( scene );
         environment.island = island;

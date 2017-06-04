@@ -365,26 +365,9 @@ CRGTextInput = function( text, callback ) {
         this.cl = document.createElement( 'input' );
         this.cl.setAttribute("placeholder", text)
         this.cl.setAttribute("type","text")
-
         this.cl.onclick = this.cl.focus;
-
-        this.cl.className = "input-field-cl"
-
-
-
-        // this.cl.addEventListener( 'onkeydown', function(){
-        //   if (this.cl.style.visibility == "hidden"){
-        //     this.cl.style.visibility == "visible"
-        //   }
-        //   else if (this.cl.style.visibility == "visible"){
-        //      this.cl.style.visibility == "hidden"
-        //   }
-        //
-        //   this.cl.select();
-        //
-        // },true);
+      //  this.cl.className = "input-field-cl"
         this.cl.style.visibility = "visible"
-
         var div = document.createElement( 'span' );
         div.className = 'command_line';
         div.appendChild( this.cl );
@@ -397,7 +380,7 @@ CRGTextInput = function( text, callback ) {
     {
       var rval = this.cl.value;
       this.cl.value = "";
-      return rval; 
+      return rval;
     }
 };
 

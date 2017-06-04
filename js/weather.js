@@ -3,6 +3,7 @@ function WeatherEngine()
 
 
     this.atmoData = {
+      // Default Values, just in case.
       season : 0, // 0-3 TODO: perhaps make this location based. for our southern hemisphere clientele
       time : 2, // 0-24
       weather : "rain", //[clear, rain, clouds, ice]
@@ -38,35 +39,28 @@ function WeatherEngine()
 
     this.setAtmoData = function(){
       if (weathermode == true){
+        this.atmoData.zipcode = userData.location;
         var date = new Date();
         this.atmoData.dateObject = date;
         this.atmoData.time = date.getHours();
         //TODO LITERALLY EVERTHING ELSE
+
+
         var weatherJSON = this.getWeather(this.atmoData.zipcode);
-      //  console.log(this.getZipcode());
-        var forecast = weatherJSON.weather[0].main;
-        if (forecast == "Clear"){this.atmoData.weather = "clear";}
-        // SUPPORT MORE WEATHER TYPES
+        console.log(weatherJSON);
+        if (weatherJSON.cod == "200"){
+          //  console.log(this.getZipcode());
+          var forecast = weatherJSON.weather[0].main;
+          if (forecast == "Clear"){this.atmoData.weather = "clear";}
+          // SUPPORT MORE WEATHER TYPES
+
+        }else
+        {
+          console.log("Weather Engine Error : Zip Code Not Recognized");
+        }
         return weatherJSON;
       }
     }
-
-    //
-    // this.getZipcode = function(){
-    //     var lat = 0;
-    //     var long = 0;
-    //     navigator.getlocation.getCurrentPosition(
-    //     function(pos) {
-    //        lat = pos.coords.latitude;
-    //        long = pos.coords.longitude;
-    //     });
-    //
-    //     var point = new google.maps.LatLng(lat, long);
-    //     new google.maps.Geocoder().geocode({'latLng': point}, function (res, status) {
-    //             var zip = res[0].formatted_address.match(/,\s\w{2}\s(\d{5})/);
-    //             return zip[1]
-    //     });
-    // }
 
 
     this.getWeather = function(zipcode){
@@ -86,6 +80,7 @@ function WeatherEngine()
 
 
     this.thundergodsOracle = function(){
+
 
 
         console.log("WEATHER")
