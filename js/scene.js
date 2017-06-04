@@ -87,7 +87,7 @@ function createUI() {
         "text-align": "left"
     })
 
-    $.get("https://raw.githubusercontent.com/zkingston/coroga/master/README.md", function(response) {
+    $.get("https://raw.githubusercontent.com/zkingston/coroga/arpha/README.md", function(response) {
         document.getElementById("help-text").text = response;
     });
 
