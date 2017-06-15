@@ -299,7 +299,10 @@ function leafCloudGenerator(origin, color){
                        shininess : 5,
                        refractionRatio : 0.2 }
       var cascade = new THREE.Object3D();
-      var cascadeGeometry = icosahedralApproximation(flowers,origin);
+      var cascadeGeometry = new THREE.SphereGeometry(5,12,12);
+      console.log(cascadeGeometry);
+
+      //icosahedralApproximation(flowers,origin);
 
 
       cascade.addFeatureGeometry("flowers", cascadeGeometry);
@@ -612,7 +615,7 @@ function treeFactory(x,y,colors){
                 function(v)
                 {
                     p.set(v.x,v.y,v.z);
-;
+
                     var o = v.original
 
                     //distance to locus

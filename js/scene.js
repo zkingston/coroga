@@ -2,12 +2,22 @@
 var camera, controls, scene, renderer, clock, stats, listener, audioLoader;
 var garbage = [];
 var lock = false;
-var environment = {};
+var environment = {}; // Uber Env Object
 var tick = 0;
 
 // Command Line Globals - Command line sees all.
 var kernel = new CommandLine(environment);
-var userData = {"location" : 98052}
+
+
+// Configurable Variables
+var userData = {
+  // Default Values, just in case.
+  season : 0, // 0-3 TODO: perhaps make this location based. for our southern hemisphere clientele
+  time : 2, // 0-24
+  weather : "rain", //[clear, rain, clouds, ice]
+  temp : 69, // Murica units
+  location : null
+}
 
 // "Mode" variables
 var speedMode = false;
@@ -52,8 +62,6 @@ function createUI() {
             $("#regenerator").click();
         }
     });
-
-
 
     $("#regenerator")
         .attr("text", "Regenerate")
@@ -231,9 +239,16 @@ function createEnvironment( width, height, depth ) {
       return;
     }
     if ( typeof environment.island !== 'undefined' ){
+
+        var destructor = new DestructorEngine()
+
+        destructor.predestruct()
         islandSwitch();
+        destructor.postdestruct()
+
         var terraformer = new TerraformerEngine(environment);
         terraformer.terraform(environment.island);
+
     }
     else {
         var cfg = features.island;
@@ -244,28 +259,17 @@ function createEnvironment( width, height, depth ) {
         var terraformer = new TerraformerEngine(environment);
         island = terraformer.terraform(island);
 
-        var weather = new WeatherEngine();
-        weather.thundergodsOracle();
-
-
-
         island.addToObject( scene );
         environment.island = island;
         environment.width =  islandWidth;
         environment.height = islandHeight;
     }
 
-    if ( typeof environment.sand !== 'undefined' ) {
-        videoKilledTheRadioStar();
-        scene.remove( environment.sand );
-    }
-    // if ( typeof environment.stars !== 'undefined' )
-    // {
-    //   scene.remove( environment.stars );
+    // if ( typeof environment.sand !== 'undefined' ) {
+    //     videoKilledTheRadioStar();
+    //     scene.remove( environment.sand );
     // }
 
-    //
-    //
     // if (nightMode) {
     //     scene.fog = new THREE.FogExp2( 0x001331, 0.0025 );
     //     renderer.setClearColor( 0x001331, 1 );
@@ -284,6 +288,13 @@ function createEnvironment( width, height, depth ) {
     //     renderer.setClearColor( 0xaaccff, 1 );
     //     environment.lamp = new THREE.DirectionalLight( 0xdddddd, 0.5 );
     // }
+
+
+    var weather = new WeatherEngine();
+    weather.thundergodsOracle();
+
+
+
 
     var placer = new PlacementEngine(environment, scene);
     placer.runRandomTileEngine();

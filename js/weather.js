@@ -2,14 +2,14 @@ function WeatherEngine()
 {
 
 
-    this.atmoData = {
-      // Default Values, just in case.
-      season : 0, // 0-3 TODO: perhaps make this location based. for our southern hemisphere clientele
-      time : 2, // 0-24
-      weather : "rain", //[clear, rain, clouds, ice]
-      temp : 69, // Murica units
-      zipcode: 98052
-    }; //Random or weather based.
+    // userData = {
+    //   // Default Values, just in case.
+    //   season : 0, // 0-3 TODO: perhaps make this location based. for our southern hemisphere clientele
+    //   time : 2, // 0-24
+    //   weather : "rain", //[clear, rain, clouds, ice]
+    //   temp : 69, // Murica units
+    //   zipcode: 98052
+    // }; //Random or weather based.
 
 
 
@@ -39,25 +39,27 @@ function WeatherEngine()
 
     this.setAtmoData = function(){
       if (weathermode == true){
-        this.atmoData.zipcode = userData.location;
+        userData.location = userData.location;
         var date = new Date();
-        this.atmoData.dateObject = date;
-        this.atmoData.time = date.getHours();
-        //TODO LITERALLY EVERTHING ELSE
+        userData.dateObject = date;
+        userData.time = date.getHours();
 
+        var weatherJSON;
+        if (!(userData.location === null)){
 
-        var weatherJSON = this.getWeather(this.atmoData.zipcode);
-        console.log(weatherJSON);
-        if (weatherJSON.cod == "200"){
-          //  console.log(this.getZipcode());
-          var forecast = weatherJSON.weather[0].main;
-          if (forecast == "Clear"){this.atmoData.weather = "clear";}
-          // SUPPORT MORE WEATHER TYPES
-
-        }else
-        {
-          console.log("Weather Engine Error : Zip Code Not Recognized");
+          weatherJSON = this.getWeather(userData.location);
+          console.log(weatherJSON);
+          if (weatherJSON.cod == "200"){
+            //  console.log(this.getZipcode());
+            var forecast = weatherJSON.weather[0].main;
+            if (forecast == "Clear")
+            {
+              userData.weather = "clear";
+            }
+            // SUPPORT MORE WEATHER TYPES
+          }
         }
+
         return weatherJSON;
       }
     }
@@ -86,8 +88,8 @@ function WeatherEngine()
         console.log("WEATHER")
         console.log(this.setAtmoData());
 
-        var hour = this.atmoData.time
-        var atmo = this.atmoData;
+        var hour = userData.time
+        var atmo = userData;
 
         if(atmo.weather == "clear"){
           var color = this.skyColor(hour,this.clearSkyColors)

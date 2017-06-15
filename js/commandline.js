@@ -5,6 +5,7 @@ function CommandLine(env)
 
 
     this.parse = function(text){
+
       if (text == ""){
         return
       }
@@ -20,6 +21,8 @@ function CommandLine(env)
       else{
         console.log(text + " was not recognized as a command")
       }
+
+
     }
 
 }
