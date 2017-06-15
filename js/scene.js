@@ -20,7 +20,7 @@ var userData = {
 }
 
 // "Mode" variables
-var speedMode = false;
+var speedMode = true;
 var weathermode = true;
 var nightMode = true;
 var windmode = false;
