@@ -99,7 +99,7 @@ function PlacementEngine(env, scene){
             // Look up the tile's configs
             var tile = tiles[tileName];
             // Find the location of bottom left corner of the tile
-            var position = grid.allocate(tile.size.x, tile.size.y, tile.terrain);
+            var position = grid.allocate(tile.size.x, tile.size.y, tile.size.buffer, tile.terrain);
 ;
 
             // If we were able to allocate it.

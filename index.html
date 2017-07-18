@@ -11,17 +11,41 @@
 
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.2/jquery.min.js"></script>
     <script src="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"></script>
-
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
     <script>
     </script>
   </head>
 
   <body>
+      <div id="mySidenav" class="sidenav">
+        <a href="javascript:void(0)" class="closebtn" onclick="closeNav()">&times;</a>
+        <p id="help-text">default</p>
+      </div>
+      <script>
+          function closeNav() {
+              document.getElementById("mySidenav").style.width = "0";
+          }
+      </script>
     <div id="alerts"> </div>
     <div class="container-fluid">
       <div class="row" id="toolbar">
         <div class="col-xs-12 col-md-12" id="buttons">
           <div id="overlay" class="btn-group btn-block" role="group" aria-label="...">
+            <span id=command-line-span>
+              <input id="command-line" class="ui-element">
+              </input>
+            </span>
+            <span id=regenerator-span>
+              <button id="regenerator" class="ui-element">
+                <p>REGENERATE</p>
+              </button>
+            </span>
+            <span id=help-span>
+              <button id="help" class="ui-element">
+                <p>?</p>
+              </button>
+            </span>
+
           </div>
         </div>
       </div>
@@ -51,8 +75,11 @@
     <script src="js/stars.js"></script>
     <script src="configs/tiles.js"></script>
     <script src="js/terraformer.js"></script>
+    <script src="js/weather.js"></script>
     <script src="js/grid.js"></script>
     <script src="js/placement.js"></script>
+    <script src="js/commandline.js"></script>
+    <script src="js/destructor.js"></script>
     <script src="js/scene.js"></script>
   </body>
 </html>

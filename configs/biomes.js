@@ -17,9 +17,7 @@ var biomes = {
         probability: 0.25,
         tiles: {
           "loneCherryTree": 0.50,
-          "rockClusterSmall": 0.13,
-          "rockClusterMedium": 0.12,
-          "rockClusterLarge": 0.25
+          "rockClusterLarge": 0.50
         }
     },
     "winter":{

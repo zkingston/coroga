@@ -13,7 +13,7 @@ floor = Math.floor;
 arctan = Math.atan;
 atan2 = Math.atan2;
 abs = Math.abs;
-
+round = Math.round;
 
 // Efficient algorithm to see if 2 line segs intersect in the general case.
 // Cannot detect overlaid lines.
@@ -261,7 +261,23 @@ function smoothInterpolate(contextA, contextB, target ){
 
 }
 
+function smoothenCurve(contextA, target, contextB){
+    var a = new THREE.Vector3(target.x - contextA.x, target.y - contextA.y, 0);
+    var b = new THREE.Vector3(target.x - contextB.x, target.y - contextB.y, 0);
 
+    var theta = acos(a.dot(b)/(a.length()* b.length()))
+
+    if (theta < pi/2){
+        var aoffset = new THREE.Vector3().subVectors(contextA,target);
+        aoffset.setLength(aoffset.length() /2);
+        var boffset = new THREE.Vector3().subVectors(contextB,target);
+        boffset.setLength(boffset.length() /2);
+        target.add(aoffset);
+        target.add(boffset);
+  }
+  return target;
+
+}
 
 
 
