@@ -217,9 +217,9 @@ function cascadeGenerator(origin, color){
 }
 
 
-function squash (ball,r){
+function squash (ball){
     var r = uniform(2,6)
-    ball.scale(r,r,uniform(1,3))
+    ball.scale(r,r,uniform(1,2))
 
     var origin  = new THREE.Vector3(0,0,0)
     var offset= new THREE.Vector3(0,0,0)
@@ -244,8 +244,6 @@ function squash (ball,r){
         // offset.setLength(uniform(-.5,0))
         // v.add(offset)
       }
-
-
     )
 
 }
@@ -254,20 +252,6 @@ function leafCloudGenerator(origin, color){
 
     // flowers are the geometric object
     // nodes are their positional data.
-// TODO:
-/*
-More GLobular bunches
-More cascading
-Smaller units
-Not circular
-
-Bonus points. All lean the same way.
-
-
-
-
-
-*/
 
     flowerVector = new THREE.Vector3(0,0,-1)
 
@@ -277,16 +261,16 @@ Bonus points. All lean the same way.
                            refractionRatio : 0.2 }
           var cascade = new THREE.Object3D();
 
-          var positions = [];
+          var positions = [origin];
 
 
-    for(var i = 0; i < 5; i++){
+    for(var i = 0; i < 8; i++){
 
 
       // We have to start the cascade. This is the first flower.
         var position = conePoint(origin,
                                   flowerVector,
-                                  4,
+                                  uniform(1,5),
                                   150);
 
           positions.push(position);
@@ -301,28 +285,19 @@ Bonus points. All lean the same way.
             cascadeGeometry.rotateX(Math.PI/2)
             cascadeGeometry.rotateZ(Math.PI/2)
 
-            squash(cascadeGeometry,uniform(2,6))
+            squash(cascadeGeometry)
 
             cascadeGeometry.translate(position.x, position.y, position.z)
 
             cascade.addFeatureGeometry("flowers", cascadeGeometry);
     }
-
-
-
-
-
-
       cascade.addFeatureGeometry("flowers", cascadeGeometry);
       cascade.addFeatureMaterialP("flowers", cascadeMaterial);
       cascade.generateFeatures();
 
-      //HACK
       cascade.geometry = cascadeGeometry;
 
-
       return cascade
-
 
 }
 
