@@ -179,7 +179,7 @@ CRGDropdownSeparator = function() {
  * @constructor
  * @this { CRGDropdownButton }
  * @param { string }                        text     Initial display text
- * @param { function( CRGDropdownButton ) } callback Callback function 
+ * @param { function( CRGDropdownButton ) } callback Callback function
  */
 CRGDropdownButton = function( text, callback ) {
     this.type = 'DropdownButton';
@@ -291,7 +291,7 @@ CRGDropdown = function( text ) {
      * Generates and returns the document element corresponding to the
      * constructed dropdown list.
      *
-     * @return { Element } Document element for this dropdown 
+     * @return { Element } Document element for this dropdown
      */
     this.dom = function() {
         this.div = document.createElement( 'div' );
@@ -339,6 +339,63 @@ CRGDropdown.prototype.clone = function () {
     return d;
 };
 
+CRGTextInput = function( text, callback ) {
+    this.type = 'text';
+    this.text = text;
+    this.enable = true;
+
+    var that = this;
+
+    this.callback = function() {
+        if ( that.enable )
+            callback( that );
+    };
+
+    this.setEnable = function( enable ) {
+        this.enable = enable;
+    }
+        /**
+     * Generates and returns the document element corresponding to the
+     * constructed button.
+     *
+     * @return { Element } Document element for this button
+     */
+    this.dom = function() {
+
+        this.cl = document.createElement( 'input' );
+        this.cl.setAttribute("placeholder", text)
+        this.cl.setAttribute("type","text")
+        this.cl.onclick = this.cl.focus;
+      //  this.cl.className = "input-field-cl"
+        this.cl.style.visibility = "visible"
+        var div = document.createElement( 'span' );
+        div.className = 'command_line';
+        div.appendChild( this.cl );
+
+        return div
+
+    };
+
+    this.getText = function()
+    {
+      var rval = this.cl.value;
+      this.cl.value = "";
+      return rval;
+    }
+};
+
+CRGTextInput.prototype = Object.create( CRGTextInput.prototype );
+CRGTextInput.prototype.constructor = CRGTextInput;
+CRGTextInput.prototype.clone = function () {
+    return new CRGTextInput( this.text, this.callback );
+};
+
+
+
+
+
+
+
 /**
  * Adds an element to the global UI.
  *
@@ -360,7 +417,11 @@ function UIgenerate() {
         s.innerHTML = '&nbsp&nbsp'
         o.appendChild( s );
     }
+
+
 }
+
+
 
 /**
  * Displays a success message at the top of the screen.

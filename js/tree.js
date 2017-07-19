@@ -217,101 +217,87 @@ function cascadeGenerator(origin, color){
 }
 
 
+function squash (ball){
+    var r = uniform(2,6)
+    ball.scale(r,r,uniform(1,2))
+
+    var origin  = new THREE.Vector3(0,0,0)
+    var offset= new THREE.Vector3(0,0,0)
+    ball.vertices.map(function(v)
+    {
+        if (v.z < 0){
+
+          offset.subVectors(origin, v)
+
+
+           offset.setLength(pow2(v.z*-1.0) /pow2(offset.length()) )
+        //   Math.pow(v.z,2) / Math.pow(offset.length,2)
+        // )
+          v.add(offset) ;
+
+          v.z = 0
+        }
+      offset.subVectors(origin, v)
+      offset.setLength(offset.length() * uniform(-0.1,0.1))
+      v.add(offset)
+        // var offset =  (new THREE.Vector3(0,0,0)).subVectors(v,origin)
+        // offset.setLength(uniform(-.5,0))
+        // v.add(offset)
+      }
+    )
+
+}
 
 function leafCloudGenerator(origin, color){
 
     // flowers are the geometric object
     // nodes are their positional data.
 
+    flowerVector = new THREE.Vector3(0,0,-1)
+
+          var cascadeMaterial = { color : color,
+                           shading : THREE.FlatShading,
+                           shininess : 5,
+                           refractionRatio : 0.2 }
+          var cascade = new THREE.Object3D();
+
+          var positions = [origin];
 
 
-
-    // Array of all flower points.
-    var flowers = []; //new THREE.Geometry();
-
-    // We perform an iterative algorithm for the cascade. This is the buffer.
-    // Holds statistics of a parent node (flower) until the node has children.
-    var buffer = [];
-
-    // The direction of the cascade. We want it to cascade straight down.
-    var flowerVector = new THREE.Vector3(0,0,-1);
+    for(var i = 0; i < 8; i++){
 
 
-    // We have to start the cascade. This is the first flower.
-    var position = conePoint(origin,
-                              flowerVector,
-                              flowerDist(),
-                              spreadAngle);
+      // We have to start the cascade. This is the first flower.
+        var position = conePoint(origin,
+                                  flowerVector,
+                                  uniform(1,5),
+                                  150);
 
-    var flower =  new THREE.Vector3(
-            position.x,
-            position.y,
-            position.z);
+          positions.push(position);
+
+        }
 
 
-    flowers.push(flower);
+        for (var i = 0; i < positions.length; i++){
+          position = positions[i]
+            var cascadeGeometry = new THREE.SphereGeometry(1,12,12);
 
-    // Node keeps track of the statistics of a parent like position and spread.
-    var node ={
-        position : position,
-        angle : spreadAngle
+            cascadeGeometry.rotateX(Math.PI/2)
+            cascadeGeometry.rotateZ(Math.PI/2)
+
+            squash(cascadeGeometry)
+
+            cascadeGeometry.translate(position.x, position.y, position.z)
+
+            cascade.addFeatureGeometry("flowers", cascadeGeometry);
     }
-    buffer.push(node);
-
-
-
-    // While there are parents still eligible to have children.
-    while (buffer.length >= 1){
-          var parent = buffer.pop()
-          var location = parent.position
-          var numChildren = childPerDegree(parent.angle)
-          var childAngle = Math.max(0,parent.angle - degradation());
-
-          for (var i = 0; i < numChildren; i++){
-
-                var position = conePoint(location,
-                                        flowerVector,
-                                        flowerDist(),
-                                         childAngle)
-                // construct the flower.
-                var flower = new THREE.Vector3(
-                        position.x,
-                        position.y,
-                        position.z
-                );
-
-                  flowers.push(flower);
-
-
-
-                // Give it a node.
-                var node ={}
-                node.position = position;
-                node.angle = childAngle;
-                buffer.push(node);
-          }
-    }
-
-
-
-      var cascadeMaterial = { color : color,
-                       shading : THREE.FlatShading,
-                       shininess : 5,
-                       refractionRatio : 0.2 }
-      var cascade = new THREE.Object3D();
-      var cascadeGeometry = icosahedralApproximation(flowers,origin);
-
-
       cascade.addFeatureGeometry("flowers", cascadeGeometry);
       cascade.addFeatureMaterialP("flowers", cascadeMaterial);
       cascade.generateFeatures();
 
-      //HACK
       cascade.geometry = cascadeGeometry;
 
-
       return cascade
-
 
 }
 
@@ -542,6 +528,7 @@ function treeFactory(x,y,colors){
 
     // Used for bugfixing.
     var pushup = new THREE.Vector3(0,0,3);
+    if (speedMode){pushup = new THREE.Vector3(0,0,0)}
 
     for (var iter = 0; iter < tips.length; iter++){
         var cur = tips[iter];
@@ -589,6 +576,7 @@ function treeFactory(x,y,colors){
     }
 
     tree.addUpdateCallback( function( obj ){
+        if (!windmode){return;}
 
         var wind = environment.wind(tick);
         var windmag = wind.length();
@@ -606,11 +594,12 @@ function treeFactory(x,y,colors){
              var adwind = new THREE.Vector3();
              var offset = new THREE.Vector3();
 
+            // artificially added geometry to the particle system earlier
              tree.cascades[c].geometry.vertices.map (
                 function(v)
                 {
                     p.set(v.x,v.y,v.z);
-;
+
                     var o = v.original
 
                     //distance to locus

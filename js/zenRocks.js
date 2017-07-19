@@ -248,8 +248,20 @@ function RockGeometryAggregator(geometries, positions, material)
 
         var p = positions[i];
         var geometry = geometries[i];
-        geometry.translate( p.x, p.y, p.z );
+        var lowest = null;
+        geometry.vertices.map(function(v){
+            if(lowest == null){
+              lowest = v;
+            }else{
+              if (v.z < lowest.z){
+                lowest = v;
+              }
+            }
+        })
+        var displacement = lowest.z * .75;
 
+
+        geometry.translate( p.x, p.y, p.z - displacement );
         geometry.rotateZ( Math.random() * Math.PI );
         rocks.addFeatureGeometry( 'rocks', geometry );
     }
@@ -436,7 +448,7 @@ function generateCluster8x8(x,y)
                         generateRock_Metal
                     ];
     var rock = clusterList[discreteUniform(0,clusterList.length-1)](x,y);
-    rock.addToObjectProject( environment.island, x, y);
+    rock.addToObject( environment.island, x, y, 0);
     return rock;
 }
 
@@ -453,7 +465,7 @@ function generateCluster10x10(x,y)
                         generateCluster_WoodEarthMetal
                     ];
     var rock = clusterList[discreteUniform(0,clusterList.length-1)](x,y);
-    rock.addToObjectProject( environment.island, x, y);
+    rock.addToObject( environment.island, x, y, 0);
     return rock;
 }
 
@@ -468,6 +480,6 @@ function generateCluster16x16(x,y)
                         generateCluster_WoodEarthMetal
                     ];
     var rock = clusterList[discreteUniform(0,clusterList.length-1)](x,y);
-    rock.addToObjectProject( environment.island, x, y);
+    rock.addToObject( environment.island, x, y, 0);
     return rock;
 }
