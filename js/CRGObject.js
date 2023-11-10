@@ -25,7 +25,6 @@
  * before generateFeatures() to transform the existing geometry into a
  * THREE.BufferGeometry().
  */
-
 /**
  * Retrieves a feature object. Features are an object with a pair of keys
  * 'geometry' and 'material'. By default these are 'undefined'.
@@ -34,21 +33,18 @@
  * 
  * @return { Object } The feature under 'feature'
  */
-THREE.Object3D.prototype.getFeature = function( feature ) {
+THREE.Object3D.prototype.getFeature = function(feature) {
     // Check if we have already made the features container
-    if ( typeof this.userData.features === 'undefined' )
+    if (typeof this.userData.features === 'undefined')
         this.userData.features = {};
- 
     // Check if we have not already made this feature
-    if ( !( feature in this.userData.features ) )
-        this.userData.features[ feature ] = {
-            geometry : undefined,
-            material : undefined
+    if (!(feature in this.userData.features))
+        this.userData.features[feature] = {
+            geometry: undefined,
+            material: undefined
         };
-
-    return this.userData.features[ feature ];
+    return this.userData.features[feature];
 };
-
 /**
  * Adds a geometry object to a feature. If the feature has preexisting geometry,
  * the union of the existing geometry and the new is taken and added to the
@@ -59,37 +55,30 @@ THREE.Object3D.prototype.getFeature = function( feature ) {
  * 
  * @return { THREE.Object3D } This
  */
-THREE.Object3D.prototype.addFeatureGeometry = function( feature, geometry ) {
-    var f = this.getFeature( feature );
-
-    if ( typeof f.geometry === 'undefined' )
+THREE.Object3D.prototype.addFeatureGeometry = function(feature, geometry) {
+    var f = this.getFeature(feature);
+    if (typeof f.geometry === 'undefined')
         f.geometry = geometry;
     else
-        f.geometry = f.geometry.mergeGeometry( [ geometry ] );
-
+        f.geometry = f.geometry.mergeGeometry([geometry]);
     return this;
 }
-
 /**
-* Takes the union of an array of geometries with the existing geometry of the
-* feature.
-*
-* @param { string }           feature    Feature to add geometries to
-* @param { THREE.Geometry[] } geometries An array of geometries to add
-* 
-* @return { THREE.Object3D } This
-*/
-THREE.Object3D.prototype.addFeatureGeometries = function( feature, geometries ) {
-    var f = this.getFeature( feature );
-
-    if ( typeof f.geometry === 'undefined' )
+ * Takes the union of an array of geometries with the existing geometry of the
+ * feature.
+ *
+ * @param { string }           feature    Feature to add geometries to
+ * @param { THREE.Geometry[] } geometries An array of geometries to add
+ * 
+ * @return { THREE.Object3D } This
+ */
+THREE.Object3D.prototype.addFeatureGeometries = function(feature, geometries) {
+    var f = this.getFeature(feature);
+    if (typeof f.geometry === 'undefined')
         f.geometry = new THREE.Geometry();
-
-    f.geometry = f.geometry.mergeGeometry( geometries );
-
+    f.geometry = f.geometry.mergeGeometry(geometries);
     return this;
 }
-
 /**
  * Transforms existing geometry of a feature into THREE.BufferGeometry for
  * optimization purposes.
@@ -98,13 +87,12 @@ THREE.Object3D.prototype.addFeatureGeometries = function( feature, geometries ) 
  *
  * @return { THREE.Object3D } This
  */
-THREE.Object3D.prototype.bufferizeFeature = function( feature ) {
-    var f = this.getFeature( feature );
-    f.geometry = new THREE.BufferGeometry().fromGeometry( f.geometry );
-
+THREE.Object3D.prototype.bufferizeFeature = function(feature) {
+    var f = this.getFeature(feature);
+    f.geometry = new THREE.BufferGeometry()
+        .fromGeometry(f.geometry);
     return this;
 }
-
 /**
  * Updates the geometry of the features contained recursively in the object.
  *
@@ -112,27 +100,23 @@ THREE.Object3D.prototype.bufferizeFeature = function( feature ) {
  */
 THREE.Object3D.prototype.updateFeatures = function() {
     // Recursively traverse the object
-    this.traverse( function ( o ) {
+    this.traverse(function(o) {
         // Skip simple meshes - we have the reference already in the feature
-        if ( o.type === 'mesh' )
+        if (o.type === 'mesh')
             return;
-
         // Iterate through features
-        for ( var f in o.userData.features ) {
-            g = o.userData.features[ f ].geometry;
-
+        for (var f in o.userData.features) {
+            g = o.userData.features[f].geometry;
             // BufferGeometry is practically immutable - don't worry about it
-            if ( g.type !== 'BufferGeometry' ) {
+            if (g.type !== 'BufferGeometry') {
                 g.verticesNeedUpdate = true;
                 g.computeFaceNormals();
                 g.computeVertexNormals();
             }
         }
     });
-
     return this;
 }
-
 /**
  * Adds a Lambert material to a feature with specified attributes.
  *
@@ -141,13 +125,11 @@ THREE.Object3D.prototype.updateFeatures = function() {
  *
  * @return { THREE.Object3D } This
  */
-THREE.Object3D.prototype.addFeatureMaterialL = function( feature, attributes ) {
-    var f = this.getFeature( feature );
-    f.material = new THREE.MeshLambertMaterial( attributes );
-
+THREE.Object3D.prototype.addFeatureMaterialL = function(feature, attributes) {
+    var f = this.getFeature(feature);
+    f.material = new THREE.MeshLambertMaterial(attributes);
     return this;
 }
-
 /**
  * Adds a Phonic material to a feature with specified attributes.
  *
@@ -156,12 +138,11 @@ THREE.Object3D.prototype.addFeatureMaterialL = function( feature, attributes ) {
  *
  * @return { THREE.Object3D } This
  */
-THREE.Object3D.prototype.addFeatureMaterialP = function( feature, attributes ) {
-    var f = this.getFeature( feature );
-    f.material = new THREE.MeshPhongMaterial( attributes );
+THREE.Object3D.prototype.addFeatureMaterialP = function(feature, attributes) {
+    var f = this.getFeature(feature);
+    f.material = new THREE.MeshPhongMaterial(attributes);
     return this;
 }
-
 /**
  * Generate the meshes for the features held by this object. Must be called
  * or nothing will be displayed in the scene.
@@ -169,26 +150,21 @@ THREE.Object3D.prototype.addFeatureMaterialP = function( feature, attributes ) {
  * @return { THREE.Object3D } This
  */
 THREE.Object3D.prototype.generateFeatures = function() {
-    for ( var c in this.children ) {
-        if ( c.type == 'mesh' )
-            this.remove( c );
+    for (var c in this.children) {
+        if (c.type == 'mesh')
+            this.remove(c);
     }
-
     this.updateFeatures();
-    for ( var f in this.userData.features ) {
-        f = this.userData.features[ f ];
-        var mesh = new THREE.Mesh( f.geometry, f.material );
+    for (var f in this.userData.features) {
+        f = this.userData.features[f];
+        var mesh = new THREE.Mesh(f.geometry, f.material);
         mesh.receiveShadow = true;
         mesh.castShadow = true;
-
         mesh.type = 'mesh';
-
-        this.add( mesh );
+        this.add(mesh);
     }
-
     return this;
 }
-
 /**
  * Adds an update callback function that is called on every refresh of the scene,
  * allowing for animation or updates on events.
@@ -197,14 +173,12 @@ THREE.Object3D.prototype.generateFeatures = function() {
  *
  * @return { THREE.Object3D } This
  */
-THREE.Object3D.prototype.addUpdateCallback = function( callback ) {
-    if ( typeof this.userData.update === 'undefined' )
+THREE.Object3D.prototype.addUpdateCallback = function(callback) {
+    if (typeof this.userData.update === 'undefined')
         this.userData.update = [];
-
-    this.userData.update.push( callback );
+    this.userData.update.push(callback);
     return this;
 }
-
 /**
  * Clears the update callback list of an object.
  *
@@ -214,18 +188,16 @@ THREE.Object3D.prototype.clearUpdateCallbacks = function() {
     this.userData.update = [];
     return this;
 }
-
 /**
  * Recursively calls the update callbacks added to an Object3D.
  */
 THREE.Object3D.prototype.update = function() {
-    this.traverse( function ( obj ) {
-        if ( typeof obj.userData.update !== 'undefined' )
-            for ( var i = 0; i < obj.userData.update.length; ++i )
-                obj.userData.update[ i ]( obj );
+    this.traverse(function(obj) {
+        if (typeof obj.userData.update !== 'undefined')
+            for (var i = 0; i < obj.userData.update.length; ++i)
+                obj.userData.update[i](obj);
     });
 }
-
 /**
  * Adds this object to another object at a specified location.
  *
@@ -236,23 +208,17 @@ THREE.Object3D.prototype.update = function() {
  *
  * @return { THREE.Object3D } This
  */
-THREE.Object3D.prototype.addToObject = function( object, x, y, z ) {
-    if ( typeof x !== 'undefined' )
+THREE.Object3D.prototype.addToObject = function(object, x, y, z) {
+    if (typeof x !== 'undefined')
         this.position.x = x;
-
-    if ( typeof y !== 'undefined' )
+    if (typeof y !== 'undefined')
         this.position.y = y;
-
-    if ( typeof z !== 'undefined' )
+    if (typeof z !== 'undefined')
         this.position.z = z;
-
-
-    object.add( this );
+    object.add(this);
     this.updateMatrixWorld();
-
     return this;
 }
-
 /**
  * Traverses overall all vertices contained inside an object's feature.
  *
@@ -261,17 +227,14 @@ THREE.Object3D.prototype.addToObject = function( object, x, y, z ) {
  *
  * @return { THREE.Object3D } This
  */
-THREE.Object3D.prototype.traverseFeatureGeometry = function( feature, callback ) {
-    var f = this.getFeature( feature );
-    if ( f.geometry.type !== 'BufferGeometry' )
-        for ( var i = 0, l = f.geometry.vertices.length; i < l; i++ )
-            callback( f.geometry.vertices[ i ] );
-
+THREE.Object3D.prototype.traverseFeatureGeometry = function(feature, callback) {
+    var f = this.getFeature(feature);
+    if (f.geometry.type !== 'BufferGeometry')
+        for (var i = 0, l = f.geometry.vertices.length; i < l; i++)
+            callback(f.geometry.vertices[i]);
     this.updateFeatures();
-
     return this;
 }
-
 /**
  * Traverses overall all vertices contained inside an object.
  *
@@ -279,17 +242,14 @@ THREE.Object3D.prototype.traverseFeatureGeometry = function( feature, callback )
  *
  * @return { THREE.Object3D } This
  */
-THREE.Object3D.prototype.traverseGeometry = function( callback ) {
-    this.traverseVisible( function ( obj ) {
-        for ( var f in obj.userData.features )
-            obj.traverseFeatureGeometry( f, callback );
+THREE.Object3D.prototype.traverseGeometry = function(callback) {
+    this.traverseVisible(function(obj) {
+        for (var f in obj.userData.features)
+            obj.traverseFeatureGeometry(f, callback);
     });
-
     this.updateFeatures();
-
     return this;
 }
-
 /**
  * Calculate the bounding circle for an Object3D at its greatest extent. Returns
  * an object containing the center coordinate and radius of the bounding circle.
@@ -302,36 +262,33 @@ THREE.Object3D.prototype.boundingCircle = function() {
     var center = new THREE.Vector3();
     var outer = new THREE.Vector3();
     var n = 0;
-
     // Calculate centroid of object (average of all vertices)
-    this.traverseGeometry( function ( v ) {
-        center.add( v );
+    this.traverseGeometry(function(v) {
+        center.add(v);
         n++;
     });
-
-    center.divideScalar( n );
+    center.divideScalar(n);
     center.z = 0;
     var ca = center.abs();
-
     // Find the point farthest from the centroid to determine radius
     var m = 0;
-    this.traverseGeometry( function ( v ) {
+    this.traverseGeometry(function(v) {
         var t = v.clone();
         t.z = 0;
-
-        var d = t.sub( ca ).l2();
-        if ( d > m ) {
+        var d = t.sub(ca)
+            .l2();
+        if (d > m) {
             m = d;
-            outer.copy( t );
+            outer.copy(t);
         }
     });
-
-    var r = outer.abs().sub( center.abs() );
-
-    return { center : center,
-             radius :r.l2() };
+    var r = outer.abs()
+        .sub(center.abs());
+    return {
+        center: center,
+        radius: r.l2()
+    };
 }
-
 /**
  * Creates a floating text label above the object.
  * Adapted from https://bocoup.com/weblog/learning-three-js-with-real-world-challenges-that-have-already-been-solved
@@ -340,43 +297,34 @@ THREE.Object3D.prototype.boundingCircle = function() {
  * 
  * @return { THREE.Object3D } This
  */
-THREE.Object3D.prototype.setText = function ( text ) {
-    if ( typeof this.userData.text !== 'undefined' )
-        this.remove( this.userData.text );
-
+THREE.Object3D.prototype.setText = function(text) {
+    if (typeof this.userData.text !== 'undefined')
+        this.remove(this.userData.text);
     var fontface = 'Helvetica';
     var fontsize = 20;
     var canvas = document.createElement('canvas');
     var context = canvas.getContext('2d');
     context.font = fontsize + "px " + fontface;
-
     // get size data (height depends only on font size)
     var metrics = context.measureText(text);
     var textWidth = metrics.width;
-
     // text color
     context.fillStyle = 'rgba(0, 0, 0, 1.0)';
     context.fillText(text, 0, fontsize);
-
     // canvas contents will be used for a texture
     var texture = new THREE.Texture(canvas)
     texture.minFilter = THREE.LinearFilter;
     texture.needsUpdate = true;
-
     var spriteMaterial = new THREE.SpriteMaterial({
         map: texture,
         useScreenCoordinates: false
     });
-
     var sprite = new THREE.Sprite(spriteMaterial);
     sprite.scale.set(0.5 * fontsize, 0.25 * fontsize, 0.75 * fontsize);
-
-    this.add( sprite );
+    this.add(sprite);
     this.userData.text = sprite;
-
     return this;
 }
-
 /**
  * Adds this object to another object at a specified location, projected onto
  * the other object's surface.
@@ -390,27 +338,20 @@ THREE.Object3D.prototype.setText = function ( text ) {
  *
  * @return { THREE.Object3D } This
  */
-THREE.Object3D.prototype.addToObjectProject = function ( object, x, y, vector ) {
-    if ( typeof vector === 'undefined' )
-        vector = new THREE.Vector3( 0, 0, -1 );
-
+THREE.Object3D.prototype.addToObjectProject = function(object, x, y, vector) {
+    if (typeof vector === 'undefined')
+        vector = new THREE.Vector3(0, 0, -1);
     var raycaster = new THREE.Raycaster();
-
     // Total hack with the Z value. Should really try to see maximum extent from bounding box.
-    raycaster.set( object.localToWorld( new THREE.Vector3( x, y, 100 ) ),
-                   vector );
-
-    var intersects = raycaster.intersectObject( object, true );
-
-    if ( intersects.length ) {
-        var position = object.worldToLocal( intersects[ 0 ].point );
-        var orientation = intersects[ 0 ].face.normal;
-
-        this.addToObject( object, x, y, position.z );
-
+    raycaster.set(object.localToWorld(new THREE.Vector3(x, y, 100)),
+        vector);
+    var intersects = raycaster.intersectObject(object, true);
+    if (intersects.length) {
+        var position = object.worldToLocal(intersects[0].point);
+        var orientation = intersects[0].face.normal;
+        this.addToObject(object, x, y, position.z);
         return this;
     }
-
     throw "Projection error: No intersection";
 }
 /*
@@ -427,61 +368,57 @@ THREE.Object3D.prototype.addToObjectProject = function ( object, x, y, vector ) 
  *
  * @return { THREE.Object3D } This
  */
-THREE.Object3D.prototype.addAudio = function ( source, volume, loop, distance ) {
+THREE.Object3D.prototype.addAudio = function(source, volume, loop, distance) {
     var sound;
-    if ( typeof distance === 'undefined' ) {
-        sound = new THREE.Audio( listener );
+    if (typeof distance === 'undefined') {
+        sound = new THREE.Audio(listener);
     } else {
-        sound = new THREE.PositionalAudio( listener );
+        sound = new THREE.PositionalAudio(listener);
     }
-
     try {
         audioLoader.load(
             source,
-            function( buffer ) {  // On Load
-                sound.setBuffer( buffer );
-                sound.setLoop( loop );
-                sound.setVolume( volume );
-
-                if ( typeof distance !== 'undefined' )
-                    sound.setRefDistance( distance );
-
-                if ( sound.playOnLoad )
+            function(buffer) { // On Load
+                sound.setBuffer(buffer);
+                sound.setLoop(loop);
+                sound.setVolume(volume);
+                if (typeof distance !== 'undefined')
+                    sound.setRefDistance(distance);
+                if (sound.playOnLoad)
                     sound.play();
             },
-            function ( xhr ) {   // In Progress
-                console.log( "Audio file {0} {1}% loaded.".format( source, xhr.loaded / xhr.total * 100 ) );
+            function(xhr) { // In Progress
+                console.log("Audio file {0} {1}% loaded.".format(source,
+                    xhr.loaded / xhr.total * 100));
             },
-            function ( xhr ) {   // On Error (I.E. CORS is borked)
-                alertWarning( "Failed to load audio file {0}. CORS is probably broken.".format( source ) );
-            } );
-
+            function(xhr) { // On Error (I.E. CORS is borked)
+                alertWarning(
+                    "Failed to load audio file {0}. CORS is probably broken."
+                    .format(source));
+            });
         this.userData.sound = sound;
-        sound.addToObject( this );
-
-    } catch ( e ) {
-        alertWarning( e );
+        sound.addToObject(this);
+    } catch (e) {
+        alertWarning(e);
     }
 }
-
 /**
  * Plays attached audio source.
  */
-THREE.Object3D.prototype.playAudio = function () {
+THREE.Object3D.prototype.playAudio = function() {
     var sound = this.userData.sound;
-    if ( typeof sound !== 'undefined' ) {
-        if ( sound.sourceType === 'empty' )
+    if (typeof sound !== 'undefined') {
+        if (sound.sourceType === 'empty')
             sound.playOnLoad = true;
         else
             this.userData.sound.play();
     }
 }
-
 /**
  * Pauses attached audio source.
  */
-THREE.Object3D.prototype.pauseAudio = function () {
+THREE.Object3D.prototype.pauseAudio = function() {
     var sound = this.userData.sound;
-    if ( typeof sound !== 'undefined' )
+    if (typeof sound !== 'undefined')
         this.userData.sound.pause();
 }
